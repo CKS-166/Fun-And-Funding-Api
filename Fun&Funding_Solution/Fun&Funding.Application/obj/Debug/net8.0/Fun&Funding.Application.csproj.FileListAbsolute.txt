@@ -1,0 +1,11 @@
+C:\Users\Admin\Desktop\Fun & Funding\Fun-And-Funding-Api\Fun&Funding_Solution\Fun&Funding.Application\bin\Debug\net8.0\Fun&Funding.Application.deps.json
+C:\Users\Admin\Desktop\Fun & Funding\Fun-And-Funding-Api\Fun&Funding_Solution\Fun&Funding.Application\bin\Debug\net8.0\Fun&Funding.Application.dll
+C:\Users\Admin\Desktop\Fun & Funding\Fun-And-Funding-Api\Fun&Funding_Solution\Fun&Funding.Application\bin\Debug\net8.0\Fun&Funding.Application.pdb
+C:\Users\Admin\Desktop\Fun & Funding\Fun-And-Funding-Api\Fun&Funding_Solution\Fun&Funding.Application\obj\Debug\net8.0\Fun&Funding.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Admin\Desktop\Fun & Funding\Fun-And-Funding-Api\Fun&Funding_Solution\Fun&Funding.Application\obj\Debug\net8.0\Fun&Funding.Application.AssemblyInfoInputs.cache
+C:\Users\Admin\Desktop\Fun & Funding\Fun-And-Funding-Api\Fun&Funding_Solution\Fun&Funding.Application\obj\Debug\net8.0\Fun&Funding.Application.AssemblyInfo.cs
+C:\Users\Admin\Desktop\Fun & Funding\Fun-And-Funding-Api\Fun&Funding_Solution\Fun&Funding.Application\obj\Debug\net8.0\Fun&Funding.Application.csproj.CoreCompileInputs.cache
+C:\Users\Admin\Desktop\Fun & Funding\Fun-And-Funding-Api\Fun&Funding_Solution\Fun&Funding.Application\obj\Debug\net8.0\Fun&Funding.Application.dll
+C:\Users\Admin\Desktop\Fun & Funding\Fun-And-Funding-Api\Fun&Funding_Solution\Fun&Funding.Application\obj\Debug\net8.0\refint\Fun&Funding.Application.dll
+C:\Users\Admin\Desktop\Fun & Funding\Fun-And-Funding-Api\Fun&Funding_Solution\Fun&Funding.Application\obj\Debug\net8.0\Fun&Funding.Application.pdb
+C:\Users\Admin\Desktop\Fun & Funding\Fun-And-Funding-Api\Fun&Funding_Solution\Fun&Funding.Application\obj\Debug\net8.0\ref\Fun&Funding.Application.dll

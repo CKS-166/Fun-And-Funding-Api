@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\Fun&amp;Funding.Api.props" />
+</Project>

@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>Fun_Funding.Application</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="IRepository\" />
+    <Folder Include="ITokenService\" />
+    <Folder Include="IEmailService\" />
+    <Folder Include="ViewModel\" />
+  </ItemGroup>
+
+</Project>

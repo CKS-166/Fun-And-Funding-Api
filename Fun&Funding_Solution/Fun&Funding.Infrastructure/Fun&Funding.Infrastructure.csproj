@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RootNamespace>Fun_Funding.Infrastructure</RootNamespace>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Mapper\" />
+    <Folder Include="EmailService\" />
+    <Folder Include="Dependecy Injection\" />
+    <Folder Include="Database\" />
+    <Folder Include="Authentication\" />
+    <Folder Include="Repository\" />
+  </ItemGroup>
+
+</Project>

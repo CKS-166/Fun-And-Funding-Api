@@ -1,0 +1,155 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\Admin\\Desktop\\Fun \u0026 Funding\\Fun-And-Funding-Api\\Fun\u0026Funding_Solution\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{1EDF3682-C15D-4EFE-ADD2-63797EF007CC}|Fun\u0026Funding.Domain\\Fun\u0026Funding.Domain.csproj|c:\\users\\admin\\desktop\\fun \u0026 funding\\fun-and-funding-api\\fun\u0026funding_solution\\fun\u0026funding.domain\\fun\u0026funding.domain.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{1EDF3682-C15D-4EFE-ADD2-63797EF007CC}|Fun\u0026Funding.Domain\\Fun\u0026Funding.Domain.csproj|solutionrelative:fun\u0026funding.domain\\fun\u0026funding.domain.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AB6CB9F9-5899-415C-A049-AFA73C312565}|Fun\u0026Funding.Infrastructure\\Fun\u0026Funding.Infrastructure.csproj|c:\\users\\admin\\desktop\\fun \u0026 funding\\fun-and-funding-api\\fun\u0026funding_solution\\fun\u0026funding.infrastructure\\unitofwork.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{AB6CB9F9-5899-415C-A049-AFA73C312565}|Fun\u0026Funding.Infrastructure\\Fun\u0026Funding.Infrastructure.csproj|solutionrelative:fun\u0026funding.infrastructure\\unitofwork.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{AB6CB9F9-5899-415C-A049-AFA73C312565}|Fun\u0026Funding.Infrastructure\\Fun\u0026Funding.Infrastructure.csproj|c:\\users\\admin\\desktop\\fun \u0026 funding\\fun-and-funding-api\\fun\u0026funding_solution\\fun\u0026funding.infrastructure\\fun\u0026funding.infrastructure.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{AB6CB9F9-5899-415C-A049-AFA73C312565}|Fun\u0026Funding.Infrastructure\\Fun\u0026Funding.Infrastructure.csproj|solutionrelative:fun\u0026funding.infrastructure\\fun\u0026funding.infrastructure.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8B2D1CDB-BF3F-42E1-924F-5D86722E5D29}|Fun\u0026Funding.Application\\Fun\u0026Funding.Application.csproj|c:\\users\\admin\\desktop\\fun \u0026 funding\\fun-and-funding-api\\fun\u0026funding_solution\\fun\u0026funding.application\\iunitofwork.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{8B2D1CDB-BF3F-42E1-924F-5D86722E5D29}|Fun\u0026Funding.Application\\Fun\u0026Funding.Application.csproj|solutionrelative:fun\u0026funding.application\\iunitofwork.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{8B2D1CDB-BF3F-42E1-924F-5D86722E5D29}|Fun\u0026Funding.Application\\Fun\u0026Funding.Application.csproj|c:\\users\\admin\\desktop\\fun \u0026 funding\\fun-and-funding-api\\fun\u0026funding_solution\\fun\u0026funding.application\\fun\u0026funding.application.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{8B2D1CDB-BF3F-42E1-924F-5D86722E5D29}|Fun\u0026Funding.Application\\Fun\u0026Funding.Application.csproj|solutionrelative:fun\u0026funding.application\\fun\u0026funding.application.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 2,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "UnitOfWork.cs",
+              "DocumentMoniker": "C:\\Users\\Admin\\Desktop\\Fun \u0026 Funding\\Fun-And-Funding-Api\\Fun\u0026Funding_Solution\\Fun\u0026Funding.Infrastructure\\UnitOfWork.cs",
+              "RelativeDocumentMoniker": "Fun\u0026Funding.Infrastructure\\UnitOfWork.cs",
+              "ToolTip": "C:\\Users\\Admin\\Desktop\\Fun \u0026 Funding\\Fun-And-Funding-Api\\Fun\u0026Funding_Solution\\Fun\u0026Funding.Infrastructure\\UnitOfWork.cs",
+              "RelativeToolTip": "Fun\u0026Funding.Infrastructure\\UnitOfWork.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-07T13:53:58.423Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Fun\u0026Funding.Infrastructure",
+              "DocumentMoniker": "C:\\Users\\Admin\\Desktop\\Fun \u0026 Funding\\Fun-And-Funding-Api\\Fun\u0026Funding_Solution\\Fun\u0026Funding.Infrastructure\\Fun\u0026Funding.Infrastructure.csproj",
+              "RelativeDocumentMoniker": "Fun\u0026Funding.Infrastructure\\Fun\u0026Funding.Infrastructure.csproj",
+              "ToolTip": "C:\\Users\\Admin\\Desktop\\Fun \u0026 Funding\\Fun-And-Funding-Api\\Fun\u0026Funding_Solution\\Fun\u0026Funding.Infrastructure\\Fun\u0026Funding.Infrastructure.csproj",
+              "RelativeToolTip": "Fun\u0026Funding.Infrastructure\\Fun\u0026Funding.Infrastructure.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2024-09-07T13:52:12.766Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Fun\u0026Funding.Domain",
+              "DocumentMoniker": "C:\\Users\\Admin\\Desktop\\Fun \u0026 Funding\\Fun-And-Funding-Api\\Fun\u0026Funding_Solution\\Fun\u0026Funding.Domain\\Fun\u0026Funding.Domain.csproj",
+              "RelativeDocumentMoniker": "Fun\u0026Funding.Domain\\Fun\u0026Funding.Domain.csproj",
+              "ToolTip": "C:\\Users\\Admin\\Desktop\\Fun \u0026 Funding\\Fun-And-Funding-Api\\Fun\u0026Funding_Solution\\Fun\u0026Funding.Domain\\Fun\u0026Funding.Domain.csproj",
+              "RelativeToolTip": "Fun\u0026Funding.Domain\\Fun\u0026Funding.Domain.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2024-09-07T13:50:47.739Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "IUnitOfWork.cs",
+              "DocumentMoniker": "C:\\Users\\Admin\\Desktop\\Fun \u0026 Funding\\Fun-And-Funding-Api\\Fun\u0026Funding_Solution\\Fun\u0026Funding.Application\\IUnitOfWork.cs",
+              "RelativeDocumentMoniker": "Fun\u0026Funding.Application\\IUnitOfWork.cs",
+              "ToolTip": "C:\\Users\\Admin\\Desktop\\Fun \u0026 Funding\\Fun-And-Funding-Api\\Fun\u0026Funding_Solution\\Fun\u0026Funding.Application\\IUnitOfWork.cs",
+              "RelativeToolTip": "Fun\u0026Funding.Application\\IUnitOfWork.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-09-07T13:50:38.549Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Fun\u0026Funding.Application",
+              "DocumentMoniker": "C:\\Users\\Admin\\Desktop\\Fun \u0026 Funding\\Fun-And-Funding-Api\\Fun\u0026Funding_Solution\\Fun\u0026Funding.Application\\Fun\u0026Funding.Application.csproj",
+              "RelativeDocumentMoniker": "Fun\u0026Funding.Application\\Fun\u0026Funding.Application.csproj",
+              "ToolTip": "C:\\Users\\Admin\\Desktop\\Fun \u0026 Funding\\Fun-And-Funding-Api\\Fun\u0026Funding_Solution\\Fun\u0026Funding.Application\\Fun\u0026Funding.Application.csproj",
+              "RelativeToolTip": "Fun\u0026Funding.Application\\Fun\u0026Funding.Application.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2024-09-07T13:49:27.209Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:4:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:16:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:13:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:129:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{0174dea2-fdbe-4ef1-8f99-c0beae78880f}"
+            }
+          ]
+        },
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{0ad07096-bba9-4900-a651-0598d26f6d24}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:3:0:{e8034f19-ab72-4f06-83fd-f6832b41aa63}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
