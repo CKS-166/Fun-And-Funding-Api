@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="..\buildMultiTargeting\Fun&amp;Funding.Api.props" />
-</Project>
