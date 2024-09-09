@@ -10,7 +10,7 @@
   <ItemGroup>
     <Folder Include="Mapper\" />
     <Folder Include="EmailService\" />
-    <Folder Include="Dependecy Injection\" />
+    <Folder Include="Dependency Injection\" />
     <Folder Include="Database\" />
     <Folder Include="Authentication\" />
     <Folder Include="Repository\" />
