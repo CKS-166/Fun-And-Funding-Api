@@ -9,10 +9,12 @@
 
   <ItemGroup>
     <Folder Include="Constrain\" />
-    <Folder Include="Enum\" />
     <Folder Include="EmailModel\" />
-    <Folder Include="Entity\" />
     <Folder Include="Service\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.8" />
   </ItemGroup>
 
 </Project>

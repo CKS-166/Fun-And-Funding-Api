@@ -8,10 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="IRepository\" />
     <Folder Include="ITokenService\" />
     <Folder Include="IEmailService\" />
     <Folder Include="ViewModel\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Fun&amp;Funding.Domain\Fun&amp;Funding.Domain.csproj" />
   </ItemGroup>
 
 </Project>
