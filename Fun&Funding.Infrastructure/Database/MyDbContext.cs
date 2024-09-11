@@ -1,4 +1,5 @@
 ﻿using Fun_Funding.Domain.Entity;
+using Fun_Funding.Infrastructure.SoftDeleteService;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -19,6 +20,7 @@ namespace Fun_Funding.Infrastructure.Database
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+
             base.OnModelCreating(modelBuilder);
 
             // Configure Identity to use Guid for keys
@@ -62,7 +64,8 @@ namespace Fun_Funding.Infrastructure.Database
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer(GetConnectionString());
+                optionsBuilder.UseSqlServer(GetConnectionString())
+                    .AddInterceptors(new SoftDeleteInterceptor());
             }
         }
 

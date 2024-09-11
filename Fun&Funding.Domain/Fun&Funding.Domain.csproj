@@ -8,7 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Constrain\" />
     <Folder Include="EmailModel\" />
     <Folder Include="Service\" />
   </ItemGroup>
