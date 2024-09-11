@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Fun_Funding.Application
 {
-    internal class IUnitOfWork
+    public class IUnitOfWork
     {
     }
 }
