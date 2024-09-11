@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Fun_Funding.Domain.Entity
 {
-    public class BaseEntity : ISoftDelete
+    public class BaseEntity
     {
         [Key]
         public Guid Id { get; set; }
