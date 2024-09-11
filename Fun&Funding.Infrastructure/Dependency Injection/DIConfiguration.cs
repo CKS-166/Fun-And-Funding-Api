@@ -2,6 +2,7 @@
 using Fun_Funding.Domain.Entity;
 using Fun_Funding.Infrastructure.Database;
 using Fun_Funding.Infrastructure.Repository;
+using Fun_Funding.Infrastructure.SoftDeleteService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -21,9 +22,10 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
         public static IServiceCollection AddInfrastructure(this IServiceCollection service, IConfiguration configuration)
         {
             //DBContext
-            service.AddDbContext<MyDbContext>(option =>
-            option.UseSqlServer(configuration.GetConnectionString("DefaultConnection"),
-            b => b.MigrationsAssembly(typeof(DIConfiguration).Assembly.FullName)), ServiceLifetime.Scoped);
+            service.AddDbContext<MyDbContext>(options =>
+            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"),
+            b => b.MigrationsAssembly(typeof(DIConfiguration).Assembly.FullName))
+            .AddInterceptors(new SoftDeleteInterceptor()), ServiceLifetime.Scoped);
 
             //Identity
             service.AddIdentity<User, IdentityRole<Guid>>()
