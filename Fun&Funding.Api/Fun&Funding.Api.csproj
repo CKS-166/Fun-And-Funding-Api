@@ -21,10 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Exception\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Fun&amp;Funding.Application\Fun&amp;Funding.Application.csproj" />
     <ProjectReference Include="..\Fun&amp;Funding.Domain\Fun&amp;Funding.Domain.csproj" />
     <ProjectReference Include="..\Fun&amp;Funding.Infrastructure\Fun&amp;Funding.Infrastructure.csproj" />

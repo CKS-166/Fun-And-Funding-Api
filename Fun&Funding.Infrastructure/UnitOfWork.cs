@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Fun_Funding.Application;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Fun_Funding.Infrastructure
 {
-    internal class UnitOfWork
+    public class UnitOfWork : IUnitOfWork
     {
     }
 }

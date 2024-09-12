@@ -1,4 +1,8 @@
 
+using Fun_Funding.Api.Exception;
+using Fun_Funding.Api.Middleware;
+using Fun_Funding.Application;
+using Fun_Funding.Infrastructure;
 using Fun_Funding.Infrastructure.Dependency_Injection;
 using Microsoft.OpenApi.Models;
 
@@ -19,7 +23,16 @@ namespace Fun_Funding.Api
                 .AllowAnyMethod()
                 .AllowAnyHeader();
             }));
-            builder.Services.AddControllers();
+            builder.Services.AddControllers(options =>
+            {
+                options.Filters.Add<GlobalExceptionHandler>();
+            })
+            .AddJsonOptions(options =>
+            {
+                options.JsonSerializerOptions.PropertyNamingPolicy = new KebabCaseNamingPolicy();
+            });
+
+            builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
