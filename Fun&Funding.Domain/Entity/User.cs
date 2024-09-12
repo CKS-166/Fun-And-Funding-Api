@@ -13,7 +13,7 @@ namespace Fun_Funding.Domain.Entity
 {
     public class User : IdentityUser<Guid>
     {
-        public string? Name { get; set; }
+        public string? FullName { get; set; }
         public string? Email { get; set; }
         public SourceFile Avatar { get; set; }
         public string? Address { get; set; }

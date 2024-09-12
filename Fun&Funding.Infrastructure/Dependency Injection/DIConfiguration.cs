@@ -1,4 +1,5 @@
-﻿using Fun_Funding.Application.IRepository;
+﻿using Fun_Funding.Application;
+using Fun_Funding.Application.IRepository;
 using Fun_Funding.Domain.Entity;
 using Fun_Funding.Infrastructure.Database;
 using Fun_Funding.Infrastructure.Repository;
@@ -60,6 +61,24 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
 
             //BaseRepository          
             service.AddTransient(typeof(IBaseRepository<>), typeof(BaseRepository<>));
+            // Register the UnitOfWork
+            service.AddScoped<IUnitOfWork, UnitOfWork>();
+            #region Repository
+            service.AddScoped<IBankAccountRepository, BankAccountRepository>();
+            service.AddScoped<ICategoryRepository, CategoryRepository>();
+            service.AddScoped<IOrderDetailRepository, OrderDetailRepository>();
+            service.AddScoped<IOrderRepository, OrderRepository>();
+            service.AddScoped<IPackageBackerRepository, PackageBackerRepository>();
+            service.AddScoped<IPackageRepository, PackageRepository>();
+            service.AddScoped<IProjectRepository, ProjectRepository>();
+            service.AddScoped<IRewardItemRepository, RewardItemRepository>();
+            service.AddScoped<ISourceFileRepository, SourceFileRepository>();
+            service.AddScoped<ISystemWalletRepository, SystemWalletRepository>();
+            service.AddScoped<ITransactionRepository, TransactionRepository>();
+            service.AddScoped<IUserRepository, UserRepository>();
+            service.AddScoped<IWalletRepository, WalletRepository>();
+            service.AddScoped<IWithdrawRequestRepository, WithdrawRequestRepository>();
+            #endregion
             return service;
             
         }
