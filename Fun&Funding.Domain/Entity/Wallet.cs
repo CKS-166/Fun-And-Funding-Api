@@ -18,7 +18,7 @@ namespace Fun_Funding.Domain.Entity
         public User Backer { get; set; }
         [ForeignKey(nameof(BankAccount))]
         public Guid BankAccountId { get; set; }
-        public ICollection<Transaction> Transactions { get; set; }
-        public ICollection<WithdrawRequest> WithdrawRequests { get; set; }
+        public ICollection<Transaction>? Transactions { get; set; }
+        public ICollection<WithdrawRequest>? WithdrawRequests { get; set; }
     }
 }
