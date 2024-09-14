@@ -79,6 +79,8 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             service.AddScoped<IWalletRepository, WalletRepository>();
             service.AddScoped<IWithdrawRequestRepository, WithdrawRequestRepository>();
             #endregion
+            #region
+            #endregion
             return service;
             
         }
