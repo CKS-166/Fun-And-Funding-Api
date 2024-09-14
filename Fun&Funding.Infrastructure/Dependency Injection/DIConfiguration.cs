@@ -1,8 +1,10 @@
 ﻿using Fun_Funding.Application;
 using Fun_Funding.Application.IRepository;
+
 using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ITokenService;
 using Fun_Funding.Application.Service;
+
 using Fun_Funding.Domain.Entity;
 using Fun_Funding.Infrastructure.Database;
 using Fun_Funding.Infrastructure.Repository;
@@ -67,6 +69,7 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             service.AddTransient(typeof(IBaseRepository<>), typeof(BaseRepository<>));
             // Register the UnitOfWork
             service.AddScoped<IUnitOfWork, UnitOfWork>();
+
             #region Repositories
             service.AddScoped<IBankAccountRepository, BankAccountRepository>();
             service.AddScoped<ICategoryRepository, CategoryRepository>();
