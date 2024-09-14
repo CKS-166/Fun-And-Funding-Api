@@ -1,4 +1,4 @@
-using Fun_Funding.Application;
+﻿using Fun_Funding.Application;
 using Fun_Funding.Application.IRepository;
 using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ITokenService;
@@ -83,12 +83,12 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             service.AddScoped<IWalletRepository, WalletRepository>();
             service.AddScoped<IWithdrawRequestRepository, WithdrawRequestRepository>();
             #endregion
-            #region Services
+            #region Sevices
             service.AddScoped<IAuthenticationService, AuthenticationService>();
             service.AddScoped<ITokenGenerator, TokenGenerator>();
             #endregion
             return service;
-
+            
         }
     }
 }
