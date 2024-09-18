@@ -15,6 +15,9 @@ namespace Fun_Funding.Domain.Entity
         public Guid UserId { get; set; }
         public User User { get; set; }
 
+        public virtual ICollection<RefundRequest> RefundRequests{ get; set; }
+
+
     }
 }
 

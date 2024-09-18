@@ -7,14 +7,13 @@ using System.Threading.Tasks;
 
 namespace Fun_Funding.Domain.Entity
 {
-    public class SourceFile : BaseEntity
+    public class FundingFile : BaseEntity
     {
         public string Name { get; set; }
         public string URL { get; set; }       
         public FileType Filetype { get; set; }
 
-        public Guid? ProjectId { get; set; }
-        public Guid? UserId { get; set; }
+        public Guid? FundingProjectId { get; set; }
 
     }
 }

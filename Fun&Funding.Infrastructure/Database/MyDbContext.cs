@@ -49,16 +49,31 @@ namespace Fun_Funding.Infrastructure.Database
 
 
 
-        public DbSet<Project> Project { get; set; }
-        public DbSet<Package> Package { get; set; }
+        public DbSet<BankAccount> BankAccount { get; set; }
         public DbSet<Category> Category { get; set; }
+        public DbSet<CommissionFee> CommissionFee { get; set; }
+        public DbSet<DigitalKey> DigitalKey { get; set; }
+        public DbSet<FAQ> FAQ { get; set; }
+        public DbSet<FundingFile> FundingFile { get; set; }
+        public DbSet<FundingProject> FundingProject { get; set; }
+        public DbSet<GamePlatform> GamePlatform { get; set; }
+        public DbSet<MarketingFile> MarketingFile { get; set; }
+        public DbSet<MarketingProject> MarketingProject { get; set; }
         public DbSet<Order> Order { get; set; }
         public DbSet<OrderDetail> OrderDetail { get; set; }
+        public DbSet<Package> Package { get; set; }
         public DbSet<PackageBacker> PackageBacker { get; set; }
+        public DbSet<RefundRequest> RefundRequest { get; set; }
+        public DbSet<RewardItem> RewardItem { get; set; }
+        public DbSet<RewardTracking> RewardTracking { get; set; }
+        public DbSet<Stage> Stage { get; set; }
         public DbSet<SystemWallet> SystemWallet { get; set; }
-        public DbSet<Wallet> Wallet { get; set; }
         public DbSet<Transaction> Transaction { get; set; }
+        public DbSet<UserFile> UserFile { get; set; }
+        public DbSet<Wallet> Wallet { get; set; }
         public DbSet<WithdrawRequest> WithdrawRequest { get; set; }
+
+
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

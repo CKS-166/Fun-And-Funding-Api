@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Fun_Funding.Domain.Entity
 {
-    public class Project : BaseEntity
+    public class FundingProject : BaseEntity
     {
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
@@ -25,9 +25,11 @@ namespace Fun_Funding.Domain.Entity
         public ProjectStatus Status { get; set; }
 
         public BankAccount? BankAccount { get; set; }
-        public virtual ICollection<SourceFile> SourceFiles { get; set; }
+        public MarketingProject? MarketingProject { get; set; }
+        public virtual ICollection<FundingFile> SourceFiles { get; set; }
         public virtual ICollection<Category> Categories { get; set; }
         public virtual ICollection<Package> Packages { get; set; }
         public virtual ICollection<WithdrawRequest>? WithdrawRequests { get; set; }
+        public virtual ICollection<Stage>? Stages { get; set; }
     }
 }

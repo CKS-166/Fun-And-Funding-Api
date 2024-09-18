@@ -22,7 +22,7 @@ namespace Fun_Funding.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("CategoryProject", b =>
+            modelBuilder.Entity("CategoryFundingProject", b =>
                 {
                     b.Property<Guid>("CategoriesId")
                         .HasColumnType("uniqueidentifier");
@@ -34,7 +34,7 @@ namespace Fun_Funding.Infrastructure.Migrations
 
                     b.HasIndex("ProjectsId");
 
-                    b.ToTable("CategoryProject");
+                    b.ToTable("CategoryFundingProject");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.BankAccount", b =>
@@ -86,6 +86,292 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.ToTable("Category");
                 });
 
+            modelBuilder.Entity("Fun_Funding.Domain.Entity.CommissionFee", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("CommissionType")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal>("Rate")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.Property<DateTime>("UpdateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Version")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CommissionFee");
+                });
+
+            modelBuilder.Entity("Fun_Funding.Domain.Entity.DigitalKey", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("KeyString")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("MarketingProjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MarketingProjectId");
+
+                    b.ToTable("DigitalKey");
+                });
+
+            modelBuilder.Entity("Fun_Funding.Domain.Entity.FAQ", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid>("FundingProjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("UpdateDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FundingProjectId");
+
+                    b.ToTable("FAQ");
+                });
+
+            modelBuilder.Entity("Fun_Funding.Domain.Entity.FundingFile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("Filetype")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("FundingProjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("URL")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FundingProjectId");
+
+                    b.ToTable("FundingFile");
+                });
+
+            modelBuilder.Entity("Fun_Funding.Domain.Entity.FundingProject", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Balance")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.Property<Guid?>("BankAccountId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Introduction")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Target")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BankAccountId");
+
+                    b.ToTable("FundingProject");
+                });
+
+            modelBuilder.Entity("Fun_Funding.Domain.Entity.GamePlatform", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("PlatformName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("GamePlatform");
+                });
+
+            modelBuilder.Entity("Fun_Funding.Domain.Entity.MarketingFile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("Filetype")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid?>("MarketingProjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("URL")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MarketingProjectId");
+
+                    b.ToTable("MarketingFile");
+                });
+
+            modelBuilder.Entity("Fun_Funding.Domain.Entity.MarketingProject", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("FundingProjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Introduction")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FundingProjectId")
+                        .IsUnique();
+
+                    b.ToTable("MarketingProject");
+                });
+
             modelBuilder.Entity("Fun_Funding.Domain.Entity.Order", b =>
                 {
                     b.Property<Guid>("Id")
@@ -126,20 +412,20 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<Guid>("DigitalKeyID")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<Guid>("OrderId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ProjectId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("OrderId");
+                    b.HasIndex("DigitalKeyID");
 
-                    b.HasIndex("ProjectId");
+                    b.HasIndex("OrderId");
 
                     b.ToTable("OrderDetail");
                 });
@@ -220,17 +506,14 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.ToTable("PackageBacker");
                 });
 
-            modelBuilder.Entity("Fun_Funding.Domain.Entity.Project", b =>
+            modelBuilder.Entity("Fun_Funding.Domain.Entity.RefundRequest", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<decimal>("Balance")
+                    b.Property<decimal>("Amount")
                         .HasColumnType("decimal(18, 2)");
-
-                    b.Property<Guid?>("BankAccountId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
@@ -239,37 +522,25 @@ namespace Fun_Funding.Infrastructure.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("EndDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Introduction")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<Guid?>("OrderId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("StartDate")
-                        .HasColumnType("datetime2");
+                    b.Property<int>("RefundType")
+                        .HasColumnType("int");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("Target")
-                        .HasColumnType("decimal(18, 2)");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("BankAccountId");
+                    b.HasIndex("OrderId");
 
-                    b.ToTable("Project");
+                    b.ToTable("RefundRequest");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.RewardItem", b =>
@@ -312,10 +583,17 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.ToTable("RewardItem");
                 });
 
-            modelBuilder.Entity("Fun_Funding.Domain.Entity.SourceFile", b =>
+            modelBuilder.Entity("Fun_Funding.Domain.Entity.RewardTracking", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("BackerId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedDate")
@@ -324,35 +602,60 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<int>("Filetype")
-                        .HasColumnType("int");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid?>("ProjectId")
+                    b.Property<Guid>("PackageId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("URL")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime>("ShipDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("TrackingStatus")
+                        .HasColumnType("int");
 
                     b.Property<Guid?>("UserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProjectId");
+                    b.HasIndex("PackageId");
 
-                    b.HasIndex("UserId")
-                        .IsUnique()
-                        .HasFilter("[UserId] IS NOT NULL");
+                    b.HasIndex("UserId");
 
-                    b.ToTable("SourceFile");
+                    b.ToTable("RewardTracking");
+                });
+
+            modelBuilder.Entity("Fun_Funding.Domain.Entity.Stage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("FundingProjectId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("UpdateDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FundingProjectId");
+
+                    b.ToTable("Stage");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.SystemWallet", b =>
@@ -387,6 +690,9 @@ namespace Fun_Funding.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("CommissionFeeId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
@@ -419,6 +725,8 @@ namespace Fun_Funding.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CommissionFeeId");
 
                     b.HasIndex("SystemWalletId");
 
@@ -508,6 +816,44 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("Fun_Funding.Domain.Entity.UserFile", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<int>("Filetype")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("URL")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique()
+                        .HasFilter("[UserId] IS NOT NULL");
+
+                    b.ToTable("UserFile");
+                });
+
             modelBuilder.Entity("Fun_Funding.Domain.Entity.Wallet", b =>
                 {
                     b.Property<Guid>("Id")
@@ -586,6 +932,21 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.HasIndex("WalletId");
 
                     b.ToTable("WithdrawRequest");
+                });
+
+            modelBuilder.Entity("GamePlatformMarketingProject", b =>
+                {
+                    b.Property<Guid>("GamePlatformsId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("MarketingProjectsId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("GamePlatformsId", "MarketingProjectsId");
+
+                    b.HasIndex("MarketingProjectsId");
+
+                    b.ToTable("GamePlatformMarketingProject");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>
@@ -719,7 +1080,7 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("CategoryProject", b =>
+            modelBuilder.Entity("CategoryFundingProject", b =>
                 {
                     b.HasOne("Fun_Funding.Domain.Entity.Category", null)
                         .WithMany()
@@ -727,11 +1088,67 @@ namespace Fun_Funding.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Fun_Funding.Domain.Entity.Project", null)
+                    b.HasOne("Fun_Funding.Domain.Entity.FundingProject", null)
                         .WithMany()
                         .HasForeignKey("ProjectsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Fun_Funding.Domain.Entity.DigitalKey", b =>
+                {
+                    b.HasOne("Fun_Funding.Domain.Entity.MarketingProject", "MarketingProject")
+                        .WithMany("DigitalKeys")
+                        .HasForeignKey("MarketingProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MarketingProject");
+                });
+
+            modelBuilder.Entity("Fun_Funding.Domain.Entity.FAQ", b =>
+                {
+                    b.HasOne("Fun_Funding.Domain.Entity.FundingProject", "FundingProject")
+                        .WithMany()
+                        .HasForeignKey("FundingProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("FundingProject");
+                });
+
+            modelBuilder.Entity("Fun_Funding.Domain.Entity.FundingFile", b =>
+                {
+                    b.HasOne("Fun_Funding.Domain.Entity.FundingProject", null)
+                        .WithMany("SourceFiles")
+                        .HasForeignKey("FundingProjectId");
+                });
+
+            modelBuilder.Entity("Fun_Funding.Domain.Entity.FundingProject", b =>
+                {
+                    b.HasOne("Fun_Funding.Domain.Entity.BankAccount", "BankAccount")
+                        .WithMany()
+                        .HasForeignKey("BankAccountId");
+
+                    b.Navigation("BankAccount");
+                });
+
+            modelBuilder.Entity("Fun_Funding.Domain.Entity.MarketingFile", b =>
+                {
+                    b.HasOne("Fun_Funding.Domain.Entity.MarketingProject", null)
+                        .WithMany("MarketingFiles")
+                        .HasForeignKey("MarketingProjectId");
+                });
+
+            modelBuilder.Entity("Fun_Funding.Domain.Entity.MarketingProject", b =>
+                {
+                    b.HasOne("Fun_Funding.Domain.Entity.FundingProject", "FundingProject")
+                        .WithOne("MarketingProject")
+                        .HasForeignKey("Fun_Funding.Domain.Entity.MarketingProject", "FundingProjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("FundingProject");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.Order", b =>
@@ -747,26 +1164,26 @@ namespace Fun_Funding.Infrastructure.Migrations
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.OrderDetail", b =>
                 {
+                    b.HasOne("Fun_Funding.Domain.Entity.DigitalKey", "DigitalKey")
+                        .WithMany()
+                        .HasForeignKey("DigitalKeyID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Fun_Funding.Domain.Entity.Order", "Order")
                         .WithMany()
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Fun_Funding.Domain.Entity.Project", "Project")
-                        .WithMany()
-                        .HasForeignKey("ProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("DigitalKey");
 
                     b.Navigation("Order");
-
-                    b.Navigation("Project");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.Package", b =>
                 {
-                    b.HasOne("Fun_Funding.Domain.Entity.Project", "Project")
+                    b.HasOne("Fun_Funding.Domain.Entity.FundingProject", "Project")
                         .WithMany("Packages")
                         .HasForeignKey("ProjectId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -794,13 +1211,11 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("Fun_Funding.Domain.Entity.Project", b =>
+            modelBuilder.Entity("Fun_Funding.Domain.Entity.RefundRequest", b =>
                 {
-                    b.HasOne("Fun_Funding.Domain.Entity.BankAccount", "BankAccount")
-                        .WithMany()
-                        .HasForeignKey("BankAccountId");
-
-                    b.Navigation("BankAccount");
+                    b.HasOne("Fun_Funding.Domain.Entity.Order", null)
+                        .WithMany("RefundRequests")
+                        .HasForeignKey("OrderId");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.RewardItem", b =>
@@ -810,19 +1225,34 @@ namespace Fun_Funding.Infrastructure.Migrations
                         .HasForeignKey("PackageId");
                 });
 
-            modelBuilder.Entity("Fun_Funding.Domain.Entity.SourceFile", b =>
+            modelBuilder.Entity("Fun_Funding.Domain.Entity.RewardTracking", b =>
                 {
-                    b.HasOne("Fun_Funding.Domain.Entity.Project", null)
-                        .WithMany("SourceFiles")
-                        .HasForeignKey("ProjectId");
+                    b.HasOne("Fun_Funding.Domain.Entity.Package", null)
+                        .WithMany("RewardTrackings")
+                        .HasForeignKey("PackageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Fun_Funding.Domain.Entity.User", null)
-                        .WithOne("Avatar")
-                        .HasForeignKey("Fun_Funding.Domain.Entity.SourceFile", "UserId");
+                        .WithMany("RewardTrackings")
+                        .HasForeignKey("UserId");
+                });
+
+            modelBuilder.Entity("Fun_Funding.Domain.Entity.Stage", b =>
+                {
+                    b.HasOne("Fun_Funding.Domain.Entity.FundingProject", "FundingProject")
+                        .WithMany("Stages")
+                        .HasForeignKey("FundingProjectId");
+
+                    b.Navigation("FundingProject");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.Transaction", b =>
                 {
+                    b.HasOne("Fun_Funding.Domain.Entity.CommissionFee", "CommissionFees")
+                        .WithMany("Transactions")
+                        .HasForeignKey("CommissionFeeId");
+
                     b.HasOne("Fun_Funding.Domain.Entity.SystemWallet", "SystemWallet")
                         .WithMany("Transactions")
                         .HasForeignKey("SystemWalletId");
@@ -833,9 +1263,18 @@ namespace Fun_Funding.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.Navigation("CommissionFees");
+
                     b.Navigation("SystemWallet");
 
                     b.Navigation("Wallet");
+                });
+
+            modelBuilder.Entity("Fun_Funding.Domain.Entity.UserFile", b =>
+                {
+                    b.HasOne("Fun_Funding.Domain.Entity.User", null)
+                        .WithOne("File")
+                        .HasForeignKey("Fun_Funding.Domain.Entity.UserFile", "UserId");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.Wallet", b =>
@@ -857,7 +1296,7 @@ namespace Fun_Funding.Infrastructure.Migrations
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.WithdrawRequest", b =>
                 {
-                    b.HasOne("Fun_Funding.Domain.Entity.Project", "Project")
+                    b.HasOne("Fun_Funding.Domain.Entity.FundingProject", "Project")
                         .WithMany("WithdrawRequests")
                         .HasForeignKey("ProjectId");
 
@@ -870,6 +1309,21 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Navigation("Project");
 
                     b.Navigation("Wallet");
+                });
+
+            modelBuilder.Entity("GamePlatformMarketingProject", b =>
+                {
+                    b.HasOne("Fun_Funding.Domain.Entity.GamePlatform", null)
+                        .WithMany()
+                        .HasForeignKey("GamePlatformsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Fun_Funding.Domain.Entity.MarketingProject", null)
+                        .WithMany()
+                        .HasForeignKey("MarketingProjectsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -928,20 +1382,43 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Navigation("Wallet");
                 });
 
+            modelBuilder.Entity("Fun_Funding.Domain.Entity.CommissionFee", b =>
+                {
+                    b.Navigation("Transactions");
+                });
+
+            modelBuilder.Entity("Fun_Funding.Domain.Entity.FundingProject", b =>
+                {
+                    b.Navigation("MarketingProject");
+
+                    b.Navigation("Packages");
+
+                    b.Navigation("SourceFiles");
+
+                    b.Navigation("Stages");
+
+                    b.Navigation("WithdrawRequests");
+                });
+
+            modelBuilder.Entity("Fun_Funding.Domain.Entity.MarketingProject", b =>
+                {
+                    b.Navigation("DigitalKeys");
+
+                    b.Navigation("MarketingFiles");
+                });
+
+            modelBuilder.Entity("Fun_Funding.Domain.Entity.Order", b =>
+                {
+                    b.Navigation("RefundRequests");
+                });
+
             modelBuilder.Entity("Fun_Funding.Domain.Entity.Package", b =>
                 {
                     b.Navigation("PackageUsers");
 
                     b.Navigation("RewardItems");
-                });
 
-            modelBuilder.Entity("Fun_Funding.Domain.Entity.Project", b =>
-                {
-                    b.Navigation("Packages");
-
-                    b.Navigation("SourceFiles");
-
-                    b.Navigation("WithdrawRequests");
+                    b.Navigation("RewardTrackings");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.SystemWallet", b =>
@@ -951,12 +1428,14 @@ namespace Fun_Funding.Infrastructure.Migrations
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.User", b =>
                 {
-                    b.Navigation("Avatar")
+                    b.Navigation("File")
                         .IsRequired();
 
                     b.Navigation("Orders");
 
                     b.Navigation("PackageUsers");
+
+                    b.Navigation("RewardTrackings");
 
                     b.Navigation("Wallet");
                 });

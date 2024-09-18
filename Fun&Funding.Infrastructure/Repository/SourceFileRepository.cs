@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Fun_Funding.Infrastructure.Repository
 {
-    public class SourceFileRepository : BaseRepository<SourceFile>, ISourceFileRepository
+    public class SourceFileRepository : BaseRepository<FundingFile>, ISourceFileRepository
     {
         public SourceFileRepository(MyDbContext context) : base(context)
         {

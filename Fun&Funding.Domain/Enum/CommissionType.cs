@@ -6,12 +6,9 @@ using System.Threading.Tasks;
 
 namespace Fun_Funding.Domain.Enum
 {
-    public enum FileType
+    public enum CommissionType
     {
-        UserAvatar,
-        LiveDemo,
-        Thumbnail,
-        GameFile,
-
+        FundingCommission,
+        MarketingCommission
     }
 }

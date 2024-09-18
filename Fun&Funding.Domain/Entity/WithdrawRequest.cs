@@ -22,6 +22,6 @@ namespace Fun_Funding.Domain.Entity
         public Wallet Wallet { get; set; }
 
         public Guid? ProjectId { get; set; }
-        public Project? Project { get; set; }
+        public FundingProject? Project { get; set; }
     }
 }

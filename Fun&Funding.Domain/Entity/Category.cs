@@ -9,6 +9,6 @@ namespace Fun_Funding.Domain.Entity
     public class Category : BaseEntity
     {
         public string? Name { get; set; }
-        public virtual ICollection<Project> Projects { get; set; }
+        public virtual ICollection<FundingProject> Projects { get; set; }
     }
 }

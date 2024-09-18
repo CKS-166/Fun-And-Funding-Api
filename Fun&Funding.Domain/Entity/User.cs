@@ -15,7 +15,7 @@ namespace Fun_Funding.Domain.Entity
     {
         public string? FullName { get; set; }
         public string? Email { get; set; }
-        public SourceFile Avatar { get; set; }
+        public UserFile File { get; set; }
         public string? Address { get; set; }
         public Gender? Gender { get; set; }
         public DateTime? DayOfBirth { get; set; }
@@ -24,6 +24,7 @@ namespace Fun_Funding.Domain.Entity
         public Wallet? Wallet { get; set; }
         public virtual ICollection<PackageBacker> PackageUsers { get; set; }
         public virtual ICollection<Order>? Orders { get; set; }
+        public virtual ICollection<RewardTracking>? RewardTrackings { get; set; }
 
     }
 }

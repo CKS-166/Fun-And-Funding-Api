@@ -24,8 +24,9 @@ namespace Fun_Funding.Domain.Entity
         [Required]
         [ForeignKey(nameof(Project))]
         public Guid ProjectId { get; set; }
-        public Project? Project { get; set; }
+        public FundingProject? Project { get; set; } 
         public virtual ICollection<RewardItem> RewardItems { get; set; }
         public virtual ICollection<PackageBacker> PackageUsers { get; set; }
+        public virtual ICollection<RewardTracking>? RewardTrackings { get; set; }
     }
 }

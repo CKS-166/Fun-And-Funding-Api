@@ -6,12 +6,10 @@ using System.Threading.Tasks;
 
 namespace Fun_Funding.Domain.Enum
 {
-    public enum FileType
+    public enum TrackingStatus
     {
-        UserAvatar,
-        LiveDemo,
-        Thumbnail,
-        GameFile,
+        Preparing,
+        Pending,
 
     }
 }

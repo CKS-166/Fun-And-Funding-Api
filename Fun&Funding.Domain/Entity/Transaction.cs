@@ -23,5 +23,7 @@ namespace Fun_Funding.Domain.Entity
         public Wallet Wallet { get; set; }
         public Guid? SystemWalletId { get; set; }
         public SystemWallet? SystemWallet { get; set; }
+        public Guid? CommissionFeeId { get; set; }
+        public CommissionFee? CommissionFees { get; set; }
     }
 }
