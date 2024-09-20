@@ -30,6 +30,7 @@ namespace Fun_Funding.Domain.Entity
         public virtual ICollection<Category> Categories { get; set; }
         public virtual ICollection<Package> Packages { get; set; }
         public virtual ICollection<WithdrawRequest>? WithdrawRequests { get; set; }
+        public virtual ICollection<FAQ>? FAQs { get; set; }
         public virtual ICollection<Stage>? Stages { get; set; }
     }
 }

@@ -1,6 +1,5 @@
 
 using Fun_Funding.Api.Exception;
-using Fun_Funding.Api.Middleware;
 using Fun_Funding.Application;
 using Fun_Funding.Infrastructure;
 using Fun_Funding.Infrastructure.Dependency_Injection;
@@ -26,10 +25,6 @@ namespace Fun_Funding.Api
             builder.Services.AddControllers(options =>
             {
                 options.Filters.Add<GlobalExceptionHandler>();
-            })
-            .AddJsonOptions(options =>
-            {
-                options.JsonSerializerOptions.PropertyNamingPolicy = new KebabCaseNamingPolicy();
             });
 
             builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
