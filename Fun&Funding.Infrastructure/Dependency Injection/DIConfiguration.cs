@@ -2,6 +2,7 @@
 using Fun_Funding.Application.IRepository;
 
 using Fun_Funding.Application.IService;
+using Fun_Funding.Application.IStorageService;
 using Fun_Funding.Application.ITokenService;
 using Fun_Funding.Application.Service;
 
@@ -9,6 +10,7 @@ using Fun_Funding.Domain.Entity;
 using Fun_Funding.Infrastructure.Database;
 using Fun_Funding.Infrastructure.Repository;
 using Fun_Funding.Infrastructure.SoftDeleteService;
+using Fun_Funding.Infrastructure.StorageService;
 using Fun_Funding.Infrastructure.TokenGeneratorService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -69,7 +71,8 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             service.AddTransient(typeof(IBaseRepository<>), typeof(BaseRepository<>));
             // Register the UnitOfWork
             service.AddScoped<IUnitOfWork, UnitOfWork>();
-
+            service.AddScoped<IAzureService, AzureService>();
+            
             #region Repositories
             service.AddScoped<IBankAccountRepository, BankAccountRepository>();
             service.AddScoped<ICategoryRepository, CategoryRepository>();
@@ -89,6 +92,7 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             #region Sevices
             service.AddScoped<IAuthenticationService, AuthenticationService>();
             service.AddScoped<ITokenGenerator, TokenGenerator>();
+            service.AddScoped<IFundingProjectService, FundingProjectManagementService>();
             #endregion
             return service;
             
