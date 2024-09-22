@@ -1,8 +1,10 @@
 
 using Fun_Funding.Api.Exception;
 using Fun_Funding.Application;
+using Fun_Funding.Application.IStorageService;
 using Fun_Funding.Infrastructure;
 using Fun_Funding.Infrastructure.Dependency_Injection;
+using Fun_Funding.Infrastructure.StorageService;
 using Microsoft.OpenApi.Models;
 
 namespace Fun_Funding.Api
@@ -70,6 +72,8 @@ namespace Fun_Funding.Api
                     }
                 });
             });
+            //Add scope
+           
 
             var app = builder.Build();
 
