@@ -264,9 +264,14 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Property<decimal>("Target")
                         .HasColumnType("decimal(18, 2)");
 
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
                     b.HasIndex("BankAccountId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("FundingProject");
                 });
@@ -1130,7 +1135,15 @@ namespace Fun_Funding.Infrastructure.Migrations
                         .WithMany()
                         .HasForeignKey("BankAccountId");
 
+                    b.HasOne("Fun_Funding.Domain.Entity.User", "User")
+                        .WithMany("FundingProjects")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("BankAccount");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.MarketingFile", b =>
@@ -1432,6 +1445,8 @@ namespace Fun_Funding.Infrastructure.Migrations
                 {
                     b.Navigation("File")
                         .IsRequired();
+
+                    b.Navigation("FundingProjects");
 
                     b.Navigation("Orders");
 

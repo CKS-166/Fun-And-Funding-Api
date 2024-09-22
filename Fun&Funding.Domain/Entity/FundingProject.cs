@@ -26,6 +26,9 @@ namespace Fun_Funding.Domain.Entity
 
         public BankAccount? BankAccount { get; set; }
         public MarketingProject? MarketingProject { get; set; }
+        public User User { get; set; }
+        public Guid UserId { get; set; }
+
         public virtual ICollection<FundingFile> SourceFiles { get; set; }
         public virtual ICollection<Category> Categories { get; set; }
         public virtual ICollection<Package> Packages { get; set; }

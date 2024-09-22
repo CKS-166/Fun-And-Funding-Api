@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Fun_Funding.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class initialcreate : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -300,6 +300,7 @@ namespace Fun_Funding.Infrastructure.Migrations
                     Balance = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
                     BankAccountId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
@@ -307,6 +308,12 @@ namespace Fun_Funding.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_FundingProject", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_FundingProject_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_FundingProject_BankAccount_BankAccountId",
                         column: x => x.BankAccountId,
@@ -828,6 +835,11 @@ namespace Fun_Funding.Infrastructure.Migrations
                 column: "BankAccountId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_FundingProject_UserId",
+                table: "FundingProject",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_GamePlatformMarketingProject_MarketingProjectsId",
                 table: "GamePlatformMarketingProject",
                 column: "MarketingProjectsId");
@@ -1034,10 +1046,10 @@ namespace Fun_Funding.Infrastructure.Migrations
                 name: "MarketingProject");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                name: "FundingProject");
 
             migrationBuilder.DropTable(
-                name: "FundingProject");
+                name: "AspNetUsers");
 
             migrationBuilder.DropTable(
                 name: "BankAccount");
