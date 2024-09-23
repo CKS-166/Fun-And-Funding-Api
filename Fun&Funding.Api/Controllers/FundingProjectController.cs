@@ -39,7 +39,7 @@ namespace Fun_Funding.Api.Controllers
             return Ok(response);
         }
 
-        [HttpPost]
+        [HttpPost("project-add")]
         public async Task<IActionResult> CreateProject([FromBody] FundingProjectAddRequest req)
         {
             var response = await _fundingProjectService.CreateFundingProject(req);

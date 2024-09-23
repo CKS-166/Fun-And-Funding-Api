@@ -8,6 +8,7 @@ using Fun_Funding.Application.Service;
 
 using Fun_Funding.Domain.Entity;
 using Fun_Funding.Infrastructure.Database;
+using Fun_Funding.Infrastructure.Mapper;
 using Fun_Funding.Infrastructure.Repository;
 using Fun_Funding.Infrastructure.SoftDeleteService;
 using Fun_Funding.Infrastructure.StorageService;
@@ -72,7 +73,7 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             // Register the UnitOfWork
             service.AddScoped<IUnitOfWork, UnitOfWork>();
             service.AddScoped<IAzureService, AzureService>();
-            
+            service.AddAutoMapper(typeof(MapperConfig).Assembly);
             #region Repositories
             service.AddScoped<IBankAccountRepository, BankAccountRepository>();
             service.AddScoped<ICategoryRepository, CategoryRepository>();
