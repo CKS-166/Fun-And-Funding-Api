@@ -23,10 +23,6 @@ namespace Fun_Funding.Application.ViewModel.PackageDTO
         public decimal LimitQuantity { get; set; }
         public PackageType PackageTypes { get; set; }
 
-        [Required]
-        [ForeignKey(nameof(Project))]
-        public Guid ProjectId { get; set; }
-        public FundingProject? Project { get; set; }
         public virtual ICollection<ItemAddRequest> RewardItems { get; set; }
     }
 }

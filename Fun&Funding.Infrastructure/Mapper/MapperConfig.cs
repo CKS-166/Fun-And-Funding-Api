@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Azure.Storage.Blobs.Models;
+using Fun_Funding.Application.ViewModel.BankAccountDTO;
 using Fun_Funding.Application.ViewModel.FundingFileDTO;
 using Fun_Funding.Application.ViewModel.FundingProjectDTO;
 using Fun_Funding.Application.ViewModel.PackageDTO;
@@ -22,11 +23,14 @@ namespace Fun_Funding.Infrastructure.Mapper
         }
         public void MappingFunfingProject()
         {
-            
             CreateMap<FundingFileRequest, FundingFile>().ReverseMap();
-            CreateMap<PackageAddRequest, Package>().ReverseMap();
             CreateMap<ItemAddRequest, RewardItem>().ReverseMap();
-            CreateMap<FundingProjectAddRequest, FundingProject>().ReverseMap();
+            CreateMap<PackageAddRequest, Package>()
+                .ForMember(des => des.RewardItems , src => src.MapFrom(x => x.RewardItems)).ReverseMap();
+            CreateMap<BankAccountRequest, BankAccount>();   
+            CreateMap<FundingProjectAddRequest, FundingProject>()
+                .ForMember(des => des.BankAccount, src => src.MapFrom(x => x.BankAccount))
+                .ForMember(des => des.Packages , src => src.MapFrom(x => x.Packages)).ReverseMap();
 
         }
     }
