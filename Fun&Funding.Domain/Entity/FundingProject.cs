@@ -35,5 +35,6 @@ namespace Fun_Funding.Domain.Entity
         public virtual ICollection<WithdrawRequest>? WithdrawRequests { get; set; }
         public virtual ICollection<FAQ>? FAQs { get; set; }
         public virtual ICollection<Stage>? Stages { get; set; }
+        //public virtual User? GameOwner { get; set; }
     }
 }
