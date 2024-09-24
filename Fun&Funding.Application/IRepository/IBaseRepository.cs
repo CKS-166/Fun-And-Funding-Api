@@ -17,6 +17,7 @@ namespace Fun_Funding.Application.IRepository
         void RemoveRange(IEnumerable<T> entities);
         Task<T> GetAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default);
         Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken = default);
+        Task<IEnumerable<T>> GetAllAsync();
         Task<IEnumerable<T>> GetAllAsync(
             Expression<Func<T, bool>> filter = null,
             Expression<Func<T, object>> orderBy = null,
