@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Fun_Funding.Application.ViewModel
+﻿namespace Fun_Funding.Application.ViewModel
 {
     public class ResultDTO<T>
     {
@@ -14,7 +8,7 @@ namespace Fun_Funding.Application.ViewModel
 
         public int _statusCode { get; private set; }
 
-        private ResultDTO(bool isSuccess, string message, T data, int statusCode)
+        public ResultDTO(bool isSuccess, string message, T data, int statusCode)
         {
             _isSuccess = isSuccess;
             _message = new List<string>() { message };
@@ -22,7 +16,7 @@ namespace Fun_Funding.Application.ViewModel
             _statusCode = statusCode;
         }
 
-        private ResultDTO(bool isSuccess, IEnumerable<string> message, T data, int statusCode)
+        public ResultDTO(bool isSuccess, IEnumerable<string> message, T data, int statusCode)
         {
             _isSuccess = isSuccess;
             _message = message.ToList();
@@ -54,7 +48,7 @@ namespace Fun_Funding.Application.ViewModel
 
         public int StatusCode { get; private set; }
 
-        private ResultDTO(bool isSuccess, IEnumerable<string> message, object data, int statusCode)
+        public ResultDTO(bool isSuccess, IEnumerable<string> message, object data, int statusCode)
         {
             IsSuccess = isSuccess;
             Messages = message is null ? new List<string>() : message.ToList();

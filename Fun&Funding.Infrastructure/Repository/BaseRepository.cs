@@ -1,12 +1,7 @@
 ﻿using Fun_Funding.Application.IRepository;
 using Fun_Funding.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fun_Funding.Infrastructure.Repository
 {
@@ -41,8 +36,9 @@ namespace Fun_Funding.Infrastructure.Repository
             await _context.AddRangeAsync(entities, cancellationToken);
         }
 
-        public virtual IEnumerable<T> GetAll(Expression<Func<T, bool>> predicate)
+        public virtual IEnumerable<T> GetAll(Expression<Func<T, bool>> predicate = null)
         {
+            if (predicate == null) return _entitySet.ToList();
             return _entitySet.Where(predicate).ToList();
         }
 
@@ -61,9 +57,39 @@ namespace Fun_Funding.Infrastructure.Repository
             return await _entitySet.ToListAsync(cancellationToken);
         }
 
-        public virtual async Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
+        public virtual async Task<IEnumerable<T>> GetAllAsync(
+            Expression<Func<T, bool>> filter = null,
+            Expression<Func<T, object>> orderBy = null,
+            bool isAscending = false,
+            string includeProperties = "",
+            int? pageIndex = 1,
+            int? pageSize = 10,
+            CancellationToken cancellationToken = default)
         {
-            return await _entitySet.Where(predicate).ToListAsync(cancellationToken);
+            IQueryable<T> query = _entitySet;
+
+            if (filter != null) { query = query.Where(filter); }
+
+            if (orderBy != null)
+            {
+                query = isAscending ? query.OrderBy(orderBy) : query.OrderByDescending(orderBy);
+            }
+
+            if (includeProperties != "")
+            {
+                foreach (var includeProperty in includeProperties.Split
+                    (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query = query.Include(includeProperty);
+                }
+            }
+
+            if (pageIndex.HasValue && pageSize.HasValue)
+            {
+                query = query.Skip((pageIndex.Value - 1) * pageSize.Value).Take(pageSize.Value);
+            }
+
+            return await query.ToListAsync();
         }
 
         public virtual async Task<T> GetAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)

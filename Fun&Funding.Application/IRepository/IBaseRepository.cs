@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq.Expressions;
 
 namespace Fun_Funding.Application.IRepository
 {
@@ -13,7 +8,7 @@ namespace Fun_Funding.Application.IRepository
         T GetById(object id);
         Task<T> GetByIdAsync(object id, CancellationToken cancellationToken = default);
         IEnumerable<T> GetAll();
-        IEnumerable<T> GetAll(Expression<Func<T, bool>> predicate);
+        IEnumerable<T> GetAll(Expression<Func<T, bool>> predicate = null);
         void Add(T entity);
         void AddRange(IEnumerable<T> entities);
         void Update(T entity);
@@ -22,7 +17,14 @@ namespace Fun_Funding.Application.IRepository
         void RemoveRange(IEnumerable<T> entities);
         Task<T> GetAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default);
         Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken = default);
-        Task<IEnumerable<T>> GetAllAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default);
+        Task<IEnumerable<T>> GetAllAsync(
+            Expression<Func<T, bool>> filter = null,
+            Expression<Func<T, object>> orderBy = null,
+            bool isAscending = false,
+            string includeProperties = "",
+            int? pageIndex = null,
+            int? pageSize = null,
+            CancellationToken cancellationToken = default);
         Task AddAsync(T entity, CancellationToken cancellationToken = default);
         Task AddRangeAsync(IEnumerable<T> entities, CancellationToken cancellationToken = default);
 
