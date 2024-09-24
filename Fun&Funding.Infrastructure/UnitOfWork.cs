@@ -21,7 +21,7 @@ namespace Fun_Funding.Infrastructure
         private IOrderRepository _orderRepository;
         private IPackageBackerRepository _packageBackerRepository;
         private IPackageRepository _packageRepository;
-        private IProjectRepository _projectRepository;
+        private IFundingProjectRepository _fundingProjectRepository;
         private IRewardItemRepository _rewardItemRepository;
         private ISourceFileRepository _sourceFileRepository;
         private ISystemWalletRepository _systemWalletRepository;
@@ -84,11 +84,11 @@ namespace Fun_Funding.Infrastructure
             }
         }
 
-        public IProjectRepository ProjectRepository
+        public IFundingProjectRepository FundingProjectRepository
         {
             get
             {
-                return _projectRepository = _projectRepository ?? new ProjectRepository(_dbContext);
+                return _fundingProjectRepository = _fundingProjectRepository ?? new FundingProjectRepository(_dbContext);
             }
         }
 
