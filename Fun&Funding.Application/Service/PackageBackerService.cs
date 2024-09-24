@@ -1,0 +1,92 @@
+﻿using AutoMapper;
+using Fun_Funding.Application.IService;
+using Fun_Funding.Application.ViewModel;
+using Fun_Funding.Application.ViewModel.PackageBackerDTO;
+using Fun_Funding.Domain.Entity;
+using Fun_Funding.Domain.Enum;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Fun_Funding.Application.Service
+{
+    public class PackageBackerService : IPackageBackerService
+    {
+        private IUnitOfWork _unitOfWork;
+        private readonly ITransactionService _transactionService;
+        private IMapper _mapper;
+
+        public PackageBackerService(IUnitOfWork unitOfWork, ITransactionService transactionService)
+        {
+            _unitOfWork = unitOfWork;
+            _transactionService = transactionService;
+        }
+        public async Task<ResultDTO<PackageBackerResponse>> DonateFundingProject(PackageBackerRequest packageBackerRequest)
+        {
+            if (packageBackerRequest == null)
+                return ResultDTO<PackageBackerResponse>.Fail("Invalid request data");
+
+            try
+            {
+                // Validations
+                var user = await _unitOfWork.UserRepository.GetByIdAsync(packageBackerRequest.UserId);
+                if (user == null)
+                    return ResultDTO<PackageBackerResponse>.Fail("User not found!");
+
+                var package = await _unitOfWork.PackageRepository.GetByIdAsync(packageBackerRequest.PackageId);
+                if (package == null)
+                    return ResultDTO<PackageBackerResponse>.Fail("Package not found!");
+
+                var wallet = await _unitOfWork.WalletRepository.GetAsync(w => w.Backer.Id == packageBackerRequest.UserId);
+                if (wallet == null)
+                    return ResultDTO<PackageBackerResponse>.Fail("Wallet not found");
+
+                if (package.LimitQuantity == 0)
+                    return ResultDTO<PackageBackerResponse>.Fail("Package is currently out of quantity!");
+
+                if (packageBackerRequest.DonateAmount <= 0)
+                    return ResultDTO<PackageBackerResponse>.Fail("Invalid donate amount");
+
+                // add donation
+                var packageBacker = new PackageBacker
+                {
+                    UserId = packageBackerRequest.UserId,
+                    PackageId = packageBackerRequest.PackageId,
+                    User = user,
+                    Package = package,
+                    DonateAmount = packageBackerRequest.DonateAmount,
+                    IsHidden = false
+                };
+
+                await _unitOfWork.PackageBackerRepository.AddAsync(packageBacker);
+
+                // add transaction
+                var description = $"Donation to package: {package.Name}";
+                await _transactionService.CreateTransactionAsync(
+                    totalAmount: packageBackerRequest.DonateAmount,
+                    description: description,
+                    transactionType: TransactionTypes.PackageDonation,
+                    packageId: packageBackerRequest.PackageId,
+                    walletId: user.Wallet.Id
+                );
+
+                await _unitOfWork.CommitAsync();
+
+                //var response = new PackageBackerResponse
+                //{
+
+                //};
+
+                return ResultDTO<PackageBackerResponse>.Success(null, "Donation successfully added!");
+            }
+            catch (Exception ex)
+            {
+                await _unitOfWork.RollbackAsync();
+                return ResultDTO<PackageBackerResponse>.Fail($"An error occurred: {ex.Message}");
+            }
+        }
+
+    }
+}
