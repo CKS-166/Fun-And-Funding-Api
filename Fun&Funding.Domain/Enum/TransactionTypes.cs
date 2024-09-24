@@ -8,5 +8,12 @@ namespace Fun_Funding.Domain.Enum
 {
     public enum TransactionTypes
     {
+        PackageDonation,
+        AddWalletMoney,
+        WithdrawWalletMoney,
+        FundingWithdraw, // or cashout
+        CommissionFee,
+        FundingRefund, // case funding project fails
+        FundingPurchase,
     }
 }

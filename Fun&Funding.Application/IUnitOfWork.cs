@@ -16,7 +16,7 @@ namespace Fun_Funding.Application
         IOrderRepository OrderRepository { get; }
         IPackageBackerRepository PackageBackerRepository { get; }
         IPackageRepository PackageRepository { get; }
-        IProjectRepository ProjectRepository { get; }
+        IFundingProjectRepository FundingProjectRepository { get; }
         IRewardItemRepository RewardItemRepository { get; }
         ISourceFileRepository SourceFileRepository { get; }
         ISystemWalletRepository SystemWalletRepository { get; }

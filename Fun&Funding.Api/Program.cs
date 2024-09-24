@@ -25,7 +25,10 @@ namespace Fun_Funding.Api
             builder.Services.AddControllers(options =>
             {
                 options.Filters.Add<GlobalExceptionHandler>();
-            });
+            })   
+            .AddNewtonsoftJson(options =>
+                options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+            );
 
             builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

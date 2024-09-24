@@ -1,0 +1,23 @@
+﻿using Fun_Funding.Domain.Enum;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Fun_Funding.Application.IService
+{
+    public interface ITransactionService
+    {
+        Task CreateTransactionAsync(
+            decimal totalAmount,
+            string description,
+            TransactionTypes transactionType,
+            Guid packageId,
+            Guid walletId,
+            Guid? systemWalletId = null,
+            Guid? commissionFeeId = null,
+            Guid? orderId = null
+        );
+    }
+}

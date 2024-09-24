@@ -15,7 +15,8 @@ namespace Fun_Funding.Infrastructure.StorageService
         BlobServiceClient _blobServiceClient;
         BlobContainerClient _blobContainerClient;
         private string cnContainer = "DefaultEndpointsProtocol=https;AccountName=funfundingmediafiles;AccountKey=Qr/V2+T1qTPRU85rvsQecbfIXCN9k9rPieCb0nK5R8SZvi1bqGAv85kp5IaFlAFjDhNHUB7WxOh++ASt9KE9LQ==;EndpointSuffix=core.windows.net";
-        public AzureService() {
+        public AzureService()
+        {
             _blobServiceClient = new BlobServiceClient(cnContainer);
             _blobContainerClient = _blobServiceClient.GetBlobContainerClient("fundingprojectfiles");
         }
@@ -82,7 +83,7 @@ namespace Fun_Funding.Infrastructure.StorageService
 
         }
 
-        public List<string> UploadUrlBlobFiles(List<IFormFile> files)
+        public async Task<List<string>> UploadUrlBlobFiles(List<IFormFile> files)
         {
             var uploadedUrls = new List<string>();
             foreach (var file in files)
@@ -91,7 +92,7 @@ namespace Fun_Funding.Infrastructure.StorageService
                 string uniqueFileName = $"{Path.GetFileNameWithoutExtension(file.FileName)}_{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
                 using (var memoryStream = new MemoryStream())
                 {
-                     file.CopyToAsync(memoryStream);
+                    await file.CopyToAsync(memoryStream);
                     memoryStream.Position = 0;
 
                     // Tạo BlobClient cho từng file
@@ -103,7 +104,7 @@ namespace Fun_Funding.Infrastructure.StorageService
                     };
 
                     // Upload file lên Blob Storage
-                     blobClient.UploadAsync(memoryStream, new BlobUploadOptions
+                    await blobClient.UploadAsync(memoryStream, new BlobUploadOptions
                     {
                         HttpHeaders = blobHttpHeaders
                     });
@@ -116,6 +117,38 @@ namespace Fun_Funding.Infrastructure.StorageService
                 }
             }
             return uploadedUrls;
+        }
+
+        public async Task<string> UploadUrlSingleFiles(IFormFile file)
+        {
+
+            string fileName = file.FileName;
+            string uniqueFileName = $"{Path.GetFileNameWithoutExtension(file.FileName)}_{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+            using (var memoryStream = new MemoryStream())
+            {
+                await file.CopyToAsync(memoryStream);
+                memoryStream.Position = 0;
+
+                // Tạo BlobClient cho từng file
+                var blobClient = _blobContainerClient.GetBlobClient(uniqueFileName);
+                // Thiết lập HTTP Headers với Content-Type phù hợp
+                var blobHttpHeaders = new BlobHttpHeaders
+                {
+                    ContentType = file.ContentType // Lấy Content-Type từ file upload
+                };
+
+                // Upload file lên Blob Storage
+                await blobClient.UploadAsync(memoryStream, new BlobUploadOptions
+                {
+                    HttpHeaders = blobHttpHeaders
+                });
+
+                // Lấy URL của file sau khi upload
+                string fileUrl = blobClient.Uri.ToString();
+
+                return fileUrl;
+            }
+
         }
     }
 }

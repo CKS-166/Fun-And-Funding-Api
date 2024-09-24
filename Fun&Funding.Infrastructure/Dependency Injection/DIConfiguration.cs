@@ -69,6 +69,8 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             // Register the UnitOfWork
             service.AddScoped<IUnitOfWork, UnitOfWork>();
             service.AddScoped<IAzureService, AzureService>();
+            service.AddScoped<ITransactionService, TransactionService>();
+            service.AddScoped<IPackageBackerService, PackageBackerService>();
             service.AddAutoMapper(typeof(MapperConfig).Assembly);
             #region Repositories
             service.AddScoped<IBankAccountRepository, BankAccountRepository>();
@@ -77,7 +79,7 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             service.AddScoped<IOrderRepository, OrderRepository>();
             service.AddScoped<IPackageBackerRepository, PackageBackerRepository>();
             service.AddScoped<IPackageRepository, PackageRepository>();
-            service.AddScoped<IProjectRepository, ProjectRepository>();
+            service.AddScoped<IFundingProjectRepository, FundingProjectRepository>();
             service.AddScoped<IRewardItemRepository, RewardItemRepository>();
             service.AddScoped<ISourceFileRepository, SourceFileRepository>();
             service.AddScoped<ISystemWalletRepository, SystemWalletRepository>();
@@ -89,6 +91,7 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             #region Sevices
             service.AddScoped<IAuthenticationService, AuthenticationService>();
             service.AddScoped<ITokenGenerator, TokenGenerator>();
+            service.AddScoped<IWithdrawService, WithdrawService>();
             service.AddScoped<IFundingProjectService, FundingProjectManagementService>();
             service.AddScoped<ICategoryService, CategoryService>();
             #endregion

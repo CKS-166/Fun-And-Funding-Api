@@ -1,4 +1,4 @@
-﻿using Fun_Funding.Domain.Entity;
+﻿using Fun_Funding.Application.ViewModel.RewardItemDTO;
 using Fun_Funding.Domain.Enum;
 using System;
 using System.Collections.Generic;
@@ -7,13 +7,12 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Fun_Funding.Application.ViewModel.RewardItemDTO;
 
 namespace Fun_Funding.Application.ViewModel.PackageDTO
 {
-    public class PackageAddRequest
+    public class PackageUpdateRequest
     {
-        [Required]
+        public Guid Id { get; set; }
         public string? Name { get; set; }
         public string? Description { get; set; }
         [Range(0, (double)decimal.MaxValue)]
@@ -23,7 +22,6 @@ namespace Fun_Funding.Application.ViewModel.PackageDTO
         [Column(TypeName = "decimal(18, 2)")]
         public decimal LimitQuantity { get; set; }
         public PackageType PackageTypes { get; set; }
-
-        public virtual ICollection<ItemAddRequest> RewardItems { get; set; }
+        public virtual ICollection<ItemUpdateRequest> RewardItems { get; set; }
     }
 }

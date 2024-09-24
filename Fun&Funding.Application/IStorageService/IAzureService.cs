@@ -12,7 +12,9 @@ namespace Fun_Funding.Application.IStorageService
     {
         public Task<List<BlobContentInfo>> UploadBlobFiles(List<IFormFile> files);
         public Task<List<BlobContentInfo>> UploadFiles(List<IFormFile> files);
-        public List<string> UploadUrlBlobFiles(List<IFormFile> files);
-        public  Task<List<BlobItem>> GetUploadedItems();
+        public Task<List<string>> UploadUrlBlobFiles(List<IFormFile> files);
+        public Task<string> UploadUrlSingleFiles(IFormFile file);
+
+        public Task<List<BlobItem>> GetUploadedItems();
     }
 }

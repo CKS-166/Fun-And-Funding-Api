@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 
 namespace Fun_Funding.Application.ViewModel.RewardItemDTO
 {
-    public class ItemAddRequest
+    public class ItemUpdateRequest
     {
+        public Guid Id { get; set; }
         public string Name { get; set; }
         //public string ImageUrl { get; set; }
         public string? Description { get; set; }
         public int Quantity { get; set; }
-
         public IFormFile? ImageFile { get; set; }
     }
 }

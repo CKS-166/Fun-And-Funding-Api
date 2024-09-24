@@ -12,22 +12,30 @@ namespace Fun_Funding.Infrastructure.Mapper
     public class MapperConfig : Profile
     {
 
+
         public MapperConfig()
         {
-            MappingFunfingProject();
+            MappingFundingProject();
         }
-        public void MappingFunfingProject()
+        
+        public void MappingFundingProject()
         {
             CreateMap<FundingFileRequest, FundingFile>().ReverseMap();
-
             CreateMap<ItemAddRequest, RewardItem>().ReverseMap();
-
             CreateMap<PackageAddRequest, Package>()
-                .ForMember(des => des.RewardItems, src => src.MapFrom(x => x.RewardItems)).ReverseMap();
-
-            CreateMap<BankAccountRequest, BankAccount>();
-
+                .ForMember(des => des.RewardItems , src => src.MapFrom(x => x.RewardItems)).ReverseMap();
+            CreateMap<BankAccountRequest, BankAccount>().ReverseMap();
+            CreateMap<PackageUpdateRequest, Package>().ReverseMap();
+            CreateMap<ItemUpdateRequest, RewardItem>().ReverseMap();
+            CreateMap<FundingFileResponse, FundingFile>().ReverseMap();
             CreateMap<FundingProjectAddRequest, FundingProject>()
+                .ForMember(des => des.BankAccount, src => src.MapFrom(x => x.BankAccount))
+                .ForMember(des => des.Packages , src => src.MapFrom(x => x.Packages)).ReverseMap();
+            CreateMap<FundingProjectResponse, FundingProject>()
+                .ForMember(des => des.BankAccount, src => src.MapFrom(x => x.BankAccount))
+                .ForMember(des => des.Packages, src => src.MapFrom(x => x.Packages)).ReverseMap(); 
+            
+            CreateMap<FundingProjectUpdateRequest, FundingProject>()
                 .ForMember(des => des.BankAccount, src => src.MapFrom(x => x.BankAccount))
                 .ForMember(des => des.Packages, src => src.MapFrom(x => x.Packages)).ReverseMap();
 
