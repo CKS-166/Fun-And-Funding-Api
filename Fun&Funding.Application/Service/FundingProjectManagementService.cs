@@ -64,7 +64,6 @@ namespace Fun_Funding.Application.Service
                     return ResultDTO<string>.Fail("Project must config its bank account for payment");
                 }
                 //validate startDate endDate info
-                project.CreatedDate = DateTime.Now;
                 if (project.EndDate <= project.CreatedDate)
                 {
                     return ResultDTO<string>.Fail("End date must be greater that start date");
@@ -73,7 +72,6 @@ namespace Fun_Funding.Application.Service
                 {
                     return ResultDTO<string>.Fail("Funding campaign length must be at least 60 days");
                 }
-                project.CreatedDate = DateTime.Now;
                 project.Status = ProjectStatus.Pending;
                 //free package
                 Package freePack = new Package

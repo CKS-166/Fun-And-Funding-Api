@@ -23,7 +23,8 @@ namespace Fun_Funding.Application.ViewModel.FundingProjectDTO
         public string Description { get; set; } = string.Empty;
         [Required]
         public string Introduction { get; set; } = string.Empty;
-
+        [Required]
+        public DateTime StartDate { get; set; }
         [Required]
         public DateTime EndDate { get; set; }
         [Required(ErrorMessage = "Target is required.")]
@@ -43,6 +44,7 @@ namespace Fun_Funding.Application.ViewModel.FundingProjectDTO
         //public IFormFile ThumbnailFile { get; set; }
 
         //public List<IFormFile> Stories {  get; set; }
+        [Required]
         public List<FundingFileRequest> FundingFiles { get; set; }
         [Required]
         public string Email { get; set; }
