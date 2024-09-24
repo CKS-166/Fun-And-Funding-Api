@@ -4,11 +4,6 @@ using Fun_Funding.Application.ViewModel.WithdrawDTO;
 using Fun_Funding.Domain.Entity;
 using Fun_Funding.Domain.Enum;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fun_Funding.Application.Service
 {
@@ -53,10 +48,10 @@ namespace Fun_Funding.Application.Service
                     Description = $"Admin id: {adminId} just APPROVED withdraw id: {request.Id} with amount: {request.Amount}",
                     CreatedDate = DateTime.UtcNow,
                     TransactionType = TransactionTypes.FundingWithdraw,
-                    
+
                 };
                 await _unitOfWork.TransactionRepository.AddAsync(transaction);
-                
+
 
                 await _unitOfWork.CommitAsync();
                 return ResultDTO<WithdrawRequest>.Success(request, "Successfully approved this request");
@@ -138,11 +133,11 @@ namespace Fun_Funding.Application.Service
                 // change status
                 request.Status = WithdrawRequestStatus.Processing;
                 _unitOfWork.WithdrawRequestRepository.Update(request);
-                
+
                 //get BankAccount
                 var project = await _unitOfWork.FundingProjectRepository.GetQueryable()
                     .Include(x => x.BankAccount)
-                    .FirstOrDefaultAsync(x=>x.Id.Equals(request.ProjectId));
+                    .FirstOrDefaultAsync(x => x.Id.Equals(request.ProjectId));
                 var bankAccount = await _unitOfWork.BankAccountRepository.GetByIdAsync(project.BankAccount.Id);
                 await _unitOfWork.CommitAsync();
                 AdminResponse response = new AdminResponse

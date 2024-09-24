@@ -57,6 +57,11 @@ namespace Fun_Funding.Infrastructure.Repository
             return await _entitySet.ToListAsync(cancellationToken);
         }
 
+        public virtual async Task<IEnumerable<T>> GetAllAsync()
+        {
+            return await _entitySet.ToListAsync();
+        }
+
         public virtual async Task<IEnumerable<T>> GetAllAsync(
             Expression<Func<T, bool>> filter = null,
             Expression<Func<T, object>> orderBy = null,
