@@ -129,7 +129,7 @@ namespace Fun_Funding.Application.Service
 
                 project.SourceFiles = files;
                 project.Packages.Add(freePack);
-                _unitOfWork.ProjectRepository.Add(project);
+                _unitOfWork.FundingProjectRepository.Add(project);
                 _unitOfWork.Commit();
                 return ResultDTO<string>.Success("Add Sucessfully");
             }
@@ -142,7 +142,7 @@ namespace Fun_Funding.Application.Service
         {
             try
             {
-                FundingProject project = _unitOfWork.ProjectRepository.GetQueryable()
+                FundingProject project = _unitOfWork.FundingProjectRepository.GetQueryable()
                     .Include(p => p.Packages).ThenInclude(pack => pack.RewardItems)
                     .Include(p => p.SourceFiles)
                     .FirstOrDefault(p => p.Id == id);
@@ -161,7 +161,7 @@ namespace Fun_Funding.Application.Service
         {
             try
             {
-                FundingProject existedProject = _unitOfWork.ProjectRepository.GetById(projectRequest.Id);
+                FundingProject existedProject = _unitOfWork.FundingProjectRepository.GetById(projectRequest.Id);
                 if (existedProject == null) {
                     return ResultDTO<string>.Fail("Project not found", 404);
                 }
