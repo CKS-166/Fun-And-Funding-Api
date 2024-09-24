@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fun_Funding.Application.Service
+namespace Fun_Funding.Application.ViewModel.WithdrawDTO
 {
-    public interface IUserService
+    public class WithdrawReq
     {
+        public Guid ProjectId { get; set; }
     }
 }

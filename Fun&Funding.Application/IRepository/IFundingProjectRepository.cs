@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Fun_Funding.Application.IRepository
 {
-    public interface IProjectRepository : IBaseRepository<FundingProject>
+    public interface IFundingProjectRepository : IBaseRepository<FundingProject>
     {
     }
 }

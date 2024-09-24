@@ -77,7 +77,7 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             service.AddScoped<IOrderRepository, OrderRepository>();
             service.AddScoped<IPackageBackerRepository, PackageBackerRepository>();
             service.AddScoped<IPackageRepository, PackageRepository>();
-            service.AddScoped<IProjectRepository, ProjectRepository>();
+            service.AddScoped<IFundingProjectRepository, FundingProjectRepository>();
             service.AddScoped<IRewardItemRepository, RewardItemRepository>();
             service.AddScoped<ISourceFileRepository, SourceFileRepository>();
             service.AddScoped<ISystemWalletRepository, SystemWalletRepository>();
@@ -89,6 +89,7 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             #region Sevices
             service.AddScoped<IAuthenticationService, AuthenticationService>();
             service.AddScoped<ITokenGenerator, TokenGenerator>();
+            service.AddScoped<IWithdrawService, WithdrawService>();
             #endregion
             return service;
             

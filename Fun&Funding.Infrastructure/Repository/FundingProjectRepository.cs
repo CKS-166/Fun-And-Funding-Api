@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace Fun_Funding.Infrastructure.Repository
 {
-    public class ProjectRepository : BaseRepository<FundingProject>, IProjectRepository
+    public class FundingProjectRepository : BaseRepository<FundingProject>, IFundingProjectRepository
     {
-        public ProjectRepository(MyDbContext context) : base(context)
+        public FundingProjectRepository(MyDbContext context) : base(context)
         {
         }
     }
