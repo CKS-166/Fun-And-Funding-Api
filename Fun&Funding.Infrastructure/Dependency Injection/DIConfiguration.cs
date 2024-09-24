@@ -73,6 +73,8 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             // Register the UnitOfWork
             service.AddScoped<IUnitOfWork, UnitOfWork>();
             service.AddScoped<IAzureService, AzureService>();
+            service.AddScoped<ITransactionService, TransactionService>();
+            service.AddScoped<IPackageBackerService, PackageBackerService>();
             service.AddAutoMapper(typeof(MapperConfig).Assembly);
             #region Repositories
             service.AddScoped<IBankAccountRepository, BankAccountRepository>();

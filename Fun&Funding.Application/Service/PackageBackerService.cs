@@ -46,6 +46,9 @@ namespace Fun_Funding.Application.Service
                 if (package.LimitQuantity == 0)
                     return ResultDTO<PackageBackerResponse>.Fail("Package is currently out of quantity!");
 
+                if (_unitOfWork.FundingProjectRepository.GetById(package.ProjectId).Status != ProjectStatus.Processing)
+                    return ResultDTO<PackageBackerResponse>.Fail("Project is currently cannot be donated to!");
+
                 if (packageBackerRequest.DonateAmount <= 0)
                     return ResultDTO<PackageBackerResponse>.Fail("Invalid donate amount");
 
