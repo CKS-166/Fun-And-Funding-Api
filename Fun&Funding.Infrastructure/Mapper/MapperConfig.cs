@@ -1,26 +1,23 @@
 ﻿using AutoMapper;
-using Azure.Storage.Blobs.Models;
 using Fun_Funding.Application.ViewModel.BankAccountDTO;
+using Fun_Funding.Application.ViewModel.CategoryDTO;
 using Fun_Funding.Application.ViewModel.FundingFileDTO;
 using Fun_Funding.Application.ViewModel.FundingProjectDTO;
 using Fun_Funding.Application.ViewModel.PackageDTO;
 using Fun_Funding.Application.ViewModel.RewardItemDTO;
 using Fun_Funding.Domain.Entity;
-using Microsoft.AspNetCore.Http.HttpResults;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fun_Funding.Infrastructure.Mapper
 {
     public class MapperConfig : Profile
     {
 
-        public MapperConfig() {
+
+        public MapperConfig()
+        {
             MappingFundingProject();
         }
+        
         public void MappingFundingProject()
         {
             CreateMap<FundingFileRequest, FundingFile>().ReverseMap();
@@ -40,10 +37,12 @@ namespace Fun_Funding.Infrastructure.Mapper
             
             CreateMap<FundingProjectUpdateRequest, FundingProject>()
                 .ForMember(des => des.BankAccount, src => src.MapFrom(x => x.BankAccount))
-                .ForMember(des => des.Packages, src => src.MapFrom(x => x.Packages)).ReverseMap(); ;
+                .ForMember(des => des.Packages, src => src.MapFrom(x => x.Packages)).ReverseMap();
 
+            CreateMap<Category, CategoryResponse>().ReverseMap();
+            CreateMap<CategoryRequest, Category>().ReverseMap();
         }
     }
 
-    
+
 }
