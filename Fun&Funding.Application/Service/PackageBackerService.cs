@@ -49,8 +49,13 @@ namespace Fun_Funding.Application.Service
                 if (_unitOfWork.FundingProjectRepository.GetById(package.ProjectId).Status != ProjectStatus.Processing)
                     return ResultDTO<PackageBackerResponse>.Fail("Project is currently cannot be donated to!");
 
-                if (packageBackerRequest.DonateAmount <= 0)
-                    return ResultDTO<PackageBackerResponse>.Fail("Invalid donate amount");
+                if (package.PackageTypes.Equals(PackageType.FixedPackage))
+                    packageBackerRequest.DonateAmount = package.RequiredAmount;
+                else
+                {
+                    if (packageBackerRequest.DonateAmount <= 0)
+                        return ResultDTO<PackageBackerResponse>.Fail("Invalid donate amount");
+                }
 
                 // add donation
                 var packageBacker = new PackageBacker
