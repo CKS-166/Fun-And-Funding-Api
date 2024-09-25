@@ -26,7 +26,7 @@ namespace Fun_Funding.Application.Service
             _mapper = mapper;
             _azureService = azureService;
         }
-        public async Task<ResultDTO<string>> CreateFundingProject(FundingProjectAddRequest projectRequest)
+        public async Task<ResultDTO<FundingProjectResponse>> CreateFundingProject(FundingProjectAddRequest projectRequest)
         {
             try
             {
@@ -36,7 +36,7 @@ namespace Fun_Funding.Application.Service
                 User owner = _unitOfWork.UserRepository.GetQueryable().FirstOrDefault(u => u.Email == projectRequest.Email);
                 if (owner == null)
                 {
-                    return ResultDTO<string>.Fail("Owner not found", 404);
+                    return ResultDTO<FundingProjectResponse>.Fail("Owner not found", 404);
                 }
                 project.User = owner;
                 //validate package amount
@@ -44,30 +44,34 @@ namespace Fun_Funding.Application.Service
                 {
                     if (pack.RequiredAmount < 5000)
                     {
-                        return ResultDTO<string>.Fail("Price for package must be at least 5000");
+                        return ResultDTO<FundingProjectResponse>.Fail("Price for package must be at least 5000");
                     }
                     if (pack.RewardItems.Count < 1)
                     {
-                        return ResultDTO<string>.Fail("Each package must have at least 1 item");
+                        return ResultDTO<FundingProjectResponse>.Fail("Each package must have at least 1 item");
                     }
                     if (pack.LimitQuantity < 1)
                     {
-                        return ResultDTO<string>.Fail("Each package must limit at least 1 quantity");
+                        return ResultDTO<FundingProjectResponse>.Fail("Each package must limit at least 1 quantity");
                     }
                 }
                 //validate bank
                 if (projectRequest.BankAccount is null)
                 {
-                    return ResultDTO<string>.Fail("Project must config its bank account for payment");
+                    return ResultDTO<FundingProjectResponse>.Fail("Project must config its bank account for payment");
                 }
                 //validate startDate endDate info
+                if (project.StartDate < DateTime.Now)
+                {
+                    return ResultDTO<FundingProjectResponse>.Fail("Start date cannot be before today");
+                }
                 if (project.EndDate <= project.StartDate)
                 {
-                    return ResultDTO<string>.Fail("End date must be greater that start date");
+                    return ResultDTO<FundingProjectResponse>.Fail("End date must be greater that start date");
                 }
                 if ((project.EndDate - project.StartDate).TotalDays < 60)
                 {
-                    return ResultDTO<string>.Fail("Funding campaign length must be at least 60 days");
+                    return ResultDTO<FundingProjectResponse>.Fail("Funding campaign length must be at least 60 days");
                 }
                 project.CreatedDate = DateTime.Now;
                 project.Status = ProjectStatus.Pending;
@@ -92,7 +96,7 @@ namespace Fun_Funding.Application.Service
                         var res = _azureService.UploadUrlSingleFiles(req.URL);
                         if (res == null)
                         {
-                            return ResultDTO<string>.Fail("Fail to upload file");
+                            return ResultDTO<FundingProjectResponse>.Fail("Fail to upload file");
                         }
                         FundingFile media = new FundingFile
                         {
@@ -114,7 +118,7 @@ namespace Fun_Funding.Application.Service
                             .RewardItems.FirstOrDefault(r => r.Name == rewardItem.Name);
 
                         // If ImageFile is present, upload it and set the ImageUrl
-                        if (rewardRequest?.ImageFile != null && rewardRequest.ImageFile is IFormFile)
+                        if (rewardRequest?.ImageFile != null)
                         {
                             var uploadResult = _azureService.UploadUrlSingleFiles(rewardRequest.ImageFile);
                             rewardItem.ImageUrl = uploadResult.Result; // Append the uploaded URL to the mapped reward item
@@ -128,7 +132,7 @@ namespace Fun_Funding.Application.Service
                 project.Packages.Add(freePack);
                 _unitOfWork.FundingProjectRepository.Add(project);
                 _unitOfWork.Commit();
-                return ResultDTO<string>.Success("Add Sucessfully");
+                return GetProjectById(project.Id).Result;
             }
             catch (Exception ex)
             {
@@ -140,7 +144,7 @@ namespace Fun_Funding.Application.Service
         {
             try
             {
-                FundingProject project = _unitOfWork.FundingProjectRepository.GetQueryable()
+                FundingProject project =  _unitOfWork.FundingProjectRepository.GetQueryable()
                     .Include(p => p.Packages).ThenInclude(pack => pack.RewardItems)
                     .Include(p => p.SourceFiles)
                     .FirstOrDefault(p => p.Id == id);
@@ -161,7 +165,11 @@ namespace Fun_Funding.Application.Service
         {
             try
             {
-                FundingProject existedProject = _unitOfWork.FundingProjectRepository.GetById(projectRequest.Id);
+                var existedProject = _unitOfWork.FundingProjectRepository.GetQueryable()
+                .Include(p => p.SourceFiles)
+                .Include(p => p.Packages).ThenInclude(pack => pack.RewardItems)
+                .FirstOrDefault(o => o.Id == projectRequest.Id);
+
                 if (existedProject == null)
                 {
                     return ResultDTO<string>.Fail("Project not found", 404);
@@ -189,41 +197,125 @@ namespace Fun_Funding.Application.Service
                     return ResultDTO<string>.Fail("Project must config its bank account for payment");
                 }
 
-                _mapper.Map(projectRequest, existedProject);
-                existedProject.CreatedDate = DateTime.Now;
-                existedProject.Status = ProjectStatus.Pending;
+                existedProject.Name = projectRequest.Name;
+                existedProject.Description = projectRequest.Description;
+                BankAccount bank = _mapper.Map<BankAccount>(projectRequest.BankAccount);
+                existedProject.BankAccount = bank;
+                existedProject.Introduction = projectRequest.Introduction;
+                
                 //update files 
-
-                foreach (FundingFileUpdateRequest req in projectRequest.FundingFiles)
+                if (projectRequest.FundingFiles?.Count > 0)
                 {
-                    if (req.URL.Length > 0 && req.URL is not null)
-                    {
-                        var res = _azureService.UploadUrlSingleFiles(req.URL);
-                        FundingFile file = _unitOfWork.SourceFileRepository.GetQueryable().FirstOrDefault(f => f.Id == req.Id);
-                        file.Name = req.Name;
-                        file.URL = res.Result;
-                    }
+                    List<FundingFile> files = new List<FundingFile>();
 
-                }
-                //add iamge into item 
-                foreach (var package in existedProject.Packages)
-                {
-                    foreach (var rewardItem in package.RewardItems)
+                    foreach (FundingFileUpdateRequest req in projectRequest.FundingFiles)
                     {
-                        // Find the corresponding reward item in the request to get its ImageFile
-                        var rewardRequest = projectRequest.Packages
-                            .FirstOrDefault(p => p.Name == package.Name)?
-                            .RewardItems.FirstOrDefault(r => r.Name == rewardItem.Name);
-
-                        // If ImageFile is present, upload it and set the ImageUrl
-                        if (rewardRequest?.ImageFile != null && rewardRequest.ImageFile is IFormFile)
+                        if (req.URL.Length > 0)
                         {
-                            var uploadResult = _azureService.UploadUrlSingleFiles(rewardRequest.ImageFile);
-                            rewardItem.ImageUrl = uploadResult.Result; // Append the uploaded URL to the mapped reward item
+                            var res = _azureService.UploadUrlSingleFiles(req.URL);
+                            if (res == null)
+                            {
+                                return ResultDTO<string>.Fail("Fail to upload file");
+                            }
+                            FundingFile media = new FundingFile
+                            {
+                                Name = req.Name,
+                                URL = res.Result,
+                                Filetype = req.Filetype
+                            };
+                            files.Add(media);
                         }
                     }
+                    // Add each file from 'files' list to the 'SourceFiles' ICollection
+                    foreach (var file in files)
+                    {
+                        existedProject.SourceFiles.Add(file);
+                    }
+
                 }
 
+                //add iamge into item 
+                foreach (var packageRequest in projectRequest.Packages)
+                {
+                    var existedPack = existedProject.Packages.FirstOrDefault(p => p.Id == packageRequest.Id);
+                    if (existedPack != null)
+                    {
+                        existedPack.Name = packageRequest.Name;
+                        existedPack.RequiredAmount = packageRequest.RequiredAmount;
+                        existedPack.LimitQuantity = packageRequest.LimitQuantity;
+                        //Handle change image of existing item
+                        foreach (var rewardItemRequest in packageRequest.RewardItems)
+                        {
+                            var existedRewardItem = _unitOfWork.RewardItemRepository.GetQueryable().FirstOrDefault(r => r.Id == rewardItemRequest.Id);
+                            if (existedRewardItem != null)
+                            {
+                                // Update existing reward item
+                                existedRewardItem.Name = rewardItemRequest.Name;
+                                existedRewardItem.Description = rewardItemRequest.Description;
+                                existedRewardItem.Quantity = rewardItemRequest.Quantity;
+
+                                // Handle image upload for reward item
+                                if (rewardItemRequest.ImageFile != null && rewardItemRequest.ImageFile is IFormFile)
+                                {
+                                    var imageUploadResult = _azureService.UploadUrlSingleFiles(rewardItemRequest.ImageFile);
+                                    existedRewardItem.ImageUrl = imageUploadResult.Result;
+                                }
+                            }
+                            else
+                            {
+                                // Handle adding new reward items if necessary
+                                RewardItem newRewardItem = new RewardItem
+                                {
+                                    Name = rewardItemRequest.Name,
+                                    Description = rewardItemRequest.Description,
+                                    // Handle image upload for new reward item
+                                };
+                                if (rewardItemRequest.ImageFile != null && rewardItemRequest.ImageFile is IFormFile)
+                                {
+                                    var imageUploadResult = _azureService.UploadUrlSingleFiles(rewardItemRequest.ImageFile);
+                                    newRewardItem.ImageUrl = imageUploadResult.Result;
+                                }
+                                existedPack.RewardItems.Add(newRewardItem);
+                            }
+
+                        }
+                    }
+                    else
+                    {
+                        Package newPackage = new Package
+                        {
+                            Name = packageRequest.Name,
+                            RequiredAmount = packageRequest.RequiredAmount,
+                            LimitQuantity = packageRequest.LimitQuantity,
+                            RewardItems = new List<RewardItem>()
+                        };
+                        // Add reward items to the new package
+                        foreach (var rewardItemRequest in packageRequest.RewardItems)
+                        {
+                            RewardItem newRewardItem = new RewardItem
+                            {
+                                Name = rewardItemRequest.Name,
+                                Description = rewardItemRequest.Description,
+                                Quantity = rewardItemRequest.Quantity,
+                            };
+
+                            // Handle image upload for new reward item
+                            if (rewardItemRequest.ImageFile != null && rewardItemRequest.ImageFile is IFormFile)
+                            {
+                                var imageUploadResult = _azureService.UploadUrlSingleFiles(rewardItemRequest.ImageFile);
+                                newRewardItem.ImageUrl = imageUploadResult.Result;
+                            }
+
+                            newPackage.RewardItems.Add(newRewardItem);
+                        }
+                        // Add the new package to the project's packages
+                        existedProject.Packages.Add(newPackage);
+                    }
+                }
+                
+                _unitOfWork.FundingProjectRepository.Update(existedProject);
+
+                _unitOfWork.Commit();
                 return ResultDTO<string>.Success("Ok");
             }
             catch (Exception ex)

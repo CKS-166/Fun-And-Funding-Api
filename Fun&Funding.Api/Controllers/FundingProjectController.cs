@@ -25,8 +25,8 @@ namespace Fun_Funding.Api.Controllers
             return Ok(response);
         }
 
-        [HttpGet("id")]
-        public async Task<IActionResult> GetProjectById([FromQuery] Guid id)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetProjectById(Guid id)
         {
             var response = await _fundingProjectService.GetProjectById(id);
             return Ok(response);
