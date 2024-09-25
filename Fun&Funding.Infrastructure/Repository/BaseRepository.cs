@@ -107,5 +107,6 @@ namespace Fun_Funding.Infrastructure.Repository
         {
             return _entitySet.AsQueryable();
         }
+
     }
 }

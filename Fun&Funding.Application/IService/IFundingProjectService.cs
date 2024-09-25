@@ -12,7 +12,7 @@ namespace Fun_Funding.Application.IService
     public interface IFundingProjectService
     {
         Task<ResultDTO<FundingProjectResponse>> GetProjectById(Guid id);
-        Task<ResultDTO<string>> CreateFundingProject(FundingProjectAddRequest req);
+        Task<ResultDTO<FundingProjectResponse>> CreateFundingProject(FundingProjectAddRequest req);
 
         Task<ResultDTO<string>> UpdateFundingProject(FundingProjectUpdateRequest req);
 

@@ -10,9 +10,8 @@ using System.Threading.Tasks;
 
 namespace Fun_Funding.Application.ViewModel.PackageDTO
 {
-    public class PackageUpdateRequest
+    public class PackageResponse
     {
-        [Required]
         public Guid Id { get; set; }
         public string? Name { get; set; }
         public string? Description { get; set; }
@@ -23,6 +22,6 @@ namespace Fun_Funding.Application.ViewModel.PackageDTO
         [Column(TypeName = "decimal(18, 2)")]
         public decimal LimitQuantity { get; set; }
         public PackageType PackageTypes { get; set; }
-        public virtual ICollection<ItemUpdateRequest> RewardItems { get; set; }
+        public virtual ICollection<ItemResponse> RewardItems { get; set; }
     }
 }
