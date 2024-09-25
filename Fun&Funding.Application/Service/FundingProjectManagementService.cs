@@ -1,21 +1,16 @@
 ﻿using AutoMapper;
-using Azure.Core;
+using Fun_Funding.Application.ExceptionHandler;
 using Fun_Funding.Application.IService;
 using Fun_Funding.Application.IStorageService;
 using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.FundingFileDTO;
 using Fun_Funding.Application.ViewModel.FundingProjectDTO;
 using Fun_Funding.Application.ViewModel.PackageDTO;
-using Fun_Funding.Application.ViewModel.RewardItemDTO;
 using Fun_Funding.Domain.Entity;
 using Fun_Funding.Domain.Enum;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Net;
 
 namespace Fun_Funding.Application.Service
 {
@@ -174,6 +169,7 @@ namespace Fun_Funding.Application.Service
                 .Include(p => p.SourceFiles)
                 .Include(p => p.Packages).ThenInclude(pack => pack.RewardItems)
                 .FirstOrDefault(o => o.Id == projectRequest.Id);
+
                 if (existedProject == null)
                 {
                     return ResultDTO<string>.Fail("Project not found", 404);
@@ -235,6 +231,7 @@ namespace Fun_Funding.Application.Service
                     {
                         existedProject.SourceFiles.Add(file);
                     }
+
                 }
 
                 //add iamge into item 
@@ -324,6 +321,70 @@ namespace Fun_Funding.Application.Service
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<ResultDTO<FundingProjectResponse>> UpdateFundingProjectStatus(Guid id, ProjectStatus status)
+        {
+            try
+            {
+                var project = await _unitOfWork.FundingProjectRepository.GetQueryable()
+                    .Include(p => p.SourceFiles)
+                    .Include(p => p.Packages)
+                    .Include(p => p.User)
+                    .Include(p => p.BankAccount)
+                    .FirstOrDefaultAsync(p => p.Id == id);
+
+                //pending status change list
+                List<ProjectStatus> pendingChangelist = new List<ProjectStatus>()
+                {
+                    ProjectStatus.Approved,
+                    ProjectStatus.Rejected,
+                    ProjectStatus.Deleted
+                };
+
+                bool isChanged = false;
+
+                if (project != null)
+                {
+                    //change status from pending
+                    if (project.Status == ProjectStatus.Pending && pendingChangelist.Contains(status))
+                    {
+                        project.Status = status;
+                        isChanged = true;
+                    }
+                    //other status
+                    else if (false)
+                    {
+
+                    }
+
+                    if (isChanged)
+                    {
+                        _unitOfWork.FundingProjectRepository.Update(project);
+                        await _unitOfWork.CommitAsync();
+
+                        var response = _mapper.Map<FundingProject, FundingProjectResponse>(project);
+
+                        return ResultDTO<FundingProjectResponse>.Success(response);
+                    }
+                    else throw new ExceptionHandler.ExceptionError(
+                        (int)HttpStatusCode.BadRequest,
+                        $"Funding Project with status {project.Status} cannot be changed to {status}.");
+                }
+                else
+                {
+                    throw new ExceptionHandler.ExceptionError((int)HttpStatusCode.NotFound, "Funding Project Not Found.");
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
             }
         }
     }

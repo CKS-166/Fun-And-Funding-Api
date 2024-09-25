@@ -1,9 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Fun_Funding.Application.IService;
 using Fun_Funding.Application.IStorageService;
-using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel.FundingProjectDTO;
-using Fun_Funding.Application.ViewModel.FundingFileDTO;
+using Fun_Funding.Domain.Enum;
+using Microsoft.AspNetCore.Mvc;
 namespace Fun_Funding.Api.Controllers
 {
     [Route("api/funding-projects")]
@@ -37,6 +36,13 @@ namespace Fun_Funding.Api.Controllers
         public async Task<IActionResult> UpdateProject([FromForm] FundingProjectUpdateRequest req)
         {
             var response = await _fundingProjectService.UpdateFundingProject(req);
+            return Ok(response);
+        }
+
+        [HttpPut("{id}/status")]
+        public async Task<IActionResult> UpdateProjectStatus([FromRoute] Guid id, [FromQuery] ProjectStatus status)
+        {
+            var response = await _fundingProjectService.UpdateFundingProjectStatus(id, status);
             return Ok(response);
         }
     }
