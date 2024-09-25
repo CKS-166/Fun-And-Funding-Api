@@ -106,6 +106,10 @@ namespace Fun_Funding.Application.Service
                     .Include(x=>x.User)
                     .Where(x => x.UserId == id)
                     .ToList();
+                if (listById is null)
+                {
+                    return ResultDTO<List<DonationResponse>>.Fail("There are no donation found with this id");
+                }
 
                 var response = listById.Select(x => new DonationResponse
                 {
