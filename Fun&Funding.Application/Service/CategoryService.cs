@@ -38,6 +38,11 @@ namespace Fun_Funding.Application.Service
             }
             catch (Exception ex)
             {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+
                 throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
             }
         }
@@ -53,7 +58,7 @@ namespace Fun_Funding.Application.Service
                     _unitOfWork.CategoryRepository.Remove(category);
                     await _unitOfWork.CommitAsync();
 
-                    return new ResultDTO(true, ["Delete successfully."], null, (int)HttpStatusCode.NoContent);
+                    return ResultDTO.Success();
                 }
                 else
                 {
@@ -62,6 +67,11 @@ namespace Fun_Funding.Application.Service
             }
             catch (Exception ex)
             {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+
                 throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
             }
         }
@@ -121,6 +131,11 @@ namespace Fun_Funding.Application.Service
             }
             catch (Exception ex)
             {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+
                 throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
             }
         }
@@ -141,10 +156,6 @@ namespace Fun_Funding.Application.Service
                     return ResultDTO<CategoryResponse>.Success(response);
                 }
             }
-            catch (ExceptionError ex)
-            {
-                throw ex;
-            }
             catch (Exception ex)
             {
                 if (ex is ExceptionError exceptionError)
@@ -162,20 +173,20 @@ namespace Fun_Funding.Application.Service
         {
             try
             {
-                var existingCategory = await _unitOfWork.CategoryRepository.GetByIdAsync(id);
+                var category = await _unitOfWork.CategoryRepository.GetByIdAsync(id);
 
-                if (existingCategory == null)
+                if (category == null)
                 {
                     throw new ExceptionError((int)HttpStatusCode.NotFound, "Category Not Found.");
                 }
                 else
                 {
-                    var categoryToUpdate = _mapper.Map<Category>(request);
+                    _mapper.Map(request, category);
 
-                    _unitOfWork.CategoryRepository.Update(categoryToUpdate);
+                    _unitOfWork.CategoryRepository.Update(category);
                     await _unitOfWork.CommitAsync();
 
-                    var response = _mapper.Map<CategoryResponse>(categoryToUpdate);
+                    var response = _mapper.Map<CategoryResponse>(category);
 
                     return new ResultDTO<CategoryResponse>(true, ["Update successfully."], response, (int)HttpStatusCode.OK);
 
@@ -183,6 +194,11 @@ namespace Fun_Funding.Application.Service
             }
             catch (Exception ex)
             {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+
                 throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
             }
         }

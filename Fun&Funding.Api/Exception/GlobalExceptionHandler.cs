@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Fun_Funding.Api.Exception
 {
@@ -12,8 +12,8 @@ namespace Fun_Funding.Api.Exception
         }
         public override void OnException(ExceptionContext context)
         {
-            // Lấy log ExceptionError
-            var exceptionError = context.Exception as ExceptionError;
+            // log ExceptionError in Application Project
+            var exceptionError = context.Exception as Fun_Funding.Application.ExceptionHandler.ExceptionError;
 
             // Nếu là ExceptionError, trả về StatusCode và Message
             if (exceptionError != null)
