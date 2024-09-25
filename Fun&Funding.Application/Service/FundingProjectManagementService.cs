@@ -1,21 +1,16 @@
 ﻿using AutoMapper;
-using Azure.Core;
+using Fun_Funding.Application.ExceptionHandler;
 using Fun_Funding.Application.IService;
 using Fun_Funding.Application.IStorageService;
 using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.FundingFileDTO;
 using Fun_Funding.Application.ViewModel.FundingProjectDTO;
 using Fun_Funding.Application.ViewModel.PackageDTO;
-using Fun_Funding.Application.ViewModel.RewardItemDTO;
 using Fun_Funding.Domain.Entity;
 using Fun_Funding.Domain.Enum;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Net;
 
 namespace Fun_Funding.Application.Service
 {
@@ -25,10 +20,11 @@ namespace Fun_Funding.Application.Service
         public IMapper _mapper;
         public IAzureService _azureService;
 
-        public FundingProjectManagementService(IUnitOfWork unitOfWork, IMapper mapper, IAzureService azureService) {
+        public FundingProjectManagementService(IUnitOfWork unitOfWork, IMapper mapper, IAzureService azureService)
+        {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-            _azureService = azureService;   
+            _azureService = azureService;
         }
         public async Task<ResultDTO<string>> CreateFundingProject(FundingProjectAddRequest projectRequest)
         {
@@ -38,7 +34,8 @@ namespace Fun_Funding.Application.Service
                 FundingProject project = _mapper.Map<FundingProject>(projectRequest);
                 //check owner
                 User owner = _unitOfWork.UserRepository.GetQueryable().FirstOrDefault(u => u.Email == projectRequest.Email);
-                if (owner == null) {
+                if (owner == null)
+                {
                     return ResultDTO<string>.Fail("Owner not found", 404);
                 }
                 project.User = owner;
@@ -119,7 +116,7 @@ namespace Fun_Funding.Application.Service
                         // If ImageFile is present, upload it and set the ImageUrl
                         if (rewardRequest?.ImageFile != null && rewardRequest.ImageFile is IFormFile)
                         {
-                            var uploadResult =  _azureService.UploadUrlSingleFiles(rewardRequest.ImageFile);
+                            var uploadResult = _azureService.UploadUrlSingleFiles(rewardRequest.ImageFile);
                             rewardItem.ImageUrl = uploadResult.Result; // Append the uploaded URL to the mapped reward item
                         }
                     }
@@ -133,7 +130,8 @@ namespace Fun_Funding.Application.Service
                 _unitOfWork.Commit();
                 return ResultDTO<string>.Success("Add Sucessfully");
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 throw new Exception(ex.Message);
             }
         }
@@ -146,13 +144,15 @@ namespace Fun_Funding.Application.Service
                     .Include(p => p.Packages).ThenInclude(pack => pack.RewardItems)
                     .Include(p => p.SourceFiles)
                     .FirstOrDefault(p => p.Id == id);
-                if (project is null) {
+                if (project is null)
+                {
                     return ResultDTO<FundingProjectResponse>.Fail("Project not found", 404);
                 }
                 FundingProjectResponse result = _mapper.Map<FundingProjectResponse>(project);
                 return ResultDTO<FundingProjectResponse>.Success(result);
             }
-            catch (Exception ex) { 
+            catch (Exception ex)
+            {
                 throw ex;
             }
         }
@@ -162,7 +162,8 @@ namespace Fun_Funding.Application.Service
             try
             {
                 FundingProject existedProject = _unitOfWork.FundingProjectRepository.GetById(projectRequest.Id);
-                if (existedProject == null) {
+                if (existedProject == null)
+                {
                     return ResultDTO<string>.Fail("Project not found", 404);
                 }
                 //update regulations for funding goals and end date
@@ -202,7 +203,7 @@ namespace Fun_Funding.Application.Service
                         file.Name = req.Name;
                         file.URL = res.Result;
                     }
-                    
+
                 }
                 //add iamge into item 
                 foreach (var package in existedProject.Packages)
@@ -228,6 +229,70 @@ namespace Fun_Funding.Application.Service
             catch (Exception ex)
             {
                 throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<ResultDTO<FundingProjectResponse>> UpdateFundingProjectStatus(Guid id, ProjectStatus status)
+        {
+            try
+            {
+                var project = await _unitOfWork.FundingProjectRepository.GetQueryable()
+                    .Include(p => p.SourceFiles)
+                    .Include(p => p.Packages)
+                    .Include(p => p.User)
+                    .Include(p => p.BankAccount)
+                    .FirstOrDefaultAsync(p => p.Id == id);
+
+                //pending status change list
+                List<ProjectStatus> pendingChangelist = new List<ProjectStatus>()
+                {
+                    ProjectStatus.Approved,
+                    ProjectStatus.Rejected,
+                    ProjectStatus.Deleted
+                };
+
+                bool isChanged = false;
+
+                if (project != null)
+                {
+                    //change status from pending
+                    if (project.Status == ProjectStatus.Pending && pendingChangelist.Contains(status))
+                    {
+                        project.Status = status;
+                        isChanged = true;
+                    }
+                    //other status
+                    else if (false)
+                    {
+
+                    }
+
+                    if (isChanged)
+                    {
+                        _unitOfWork.FundingProjectRepository.Update(project);
+                        await _unitOfWork.CommitAsync();
+
+                        var response = _mapper.Map<FundingProject, FundingProjectResponse>(project);
+
+                        return ResultDTO<FundingProjectResponse>.Success(response);
+                    }
+                    else throw new ExceptionHandler.ExceptionError(
+                        (int)HttpStatusCode.BadRequest,
+                        $"Funding Project with status {project.Status} cannot be changed to {status}.");
+                }
+                else
+                {
+                    throw new ExceptionHandler.ExceptionError((int)HttpStatusCode.NotFound, "Funding Project Not Found.");
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
             }
         }
     }
