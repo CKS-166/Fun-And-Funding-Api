@@ -1,4 +1,3 @@
-
 using Fun_Funding.Api.Exception;
 using Fun_Funding.Application;
 using Fun_Funding.Infrastructure;
@@ -25,7 +24,7 @@ namespace Fun_Funding.Api
             builder.Services.AddControllers(options =>
             {
                 options.Filters.Add<GlobalExceptionHandler>();
-            })   
+            })
             .AddNewtonsoftJson(options =>
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
             );

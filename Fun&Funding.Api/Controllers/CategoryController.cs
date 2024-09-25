@@ -23,21 +23,18 @@ namespace Fun_Funding.Api.Controller
             return Ok(response);
         }
 
-        [HttpGet("id")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetCategoryById([FromRoute] Guid id)
         {
             var response = await _categoryService.GetCategoryById(id);
             return Ok(response);
         }
 
-        [HttpDelete("id")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCategory([FromRoute] Guid id)
         {
             var response = await _categoryService.DeleteCategory(id);
-            return new ObjectResult(response)
-            {
-                StatusCode = response.StatusCode
-            };
+            return NoContent();
         }
 
         [HttpPost]
@@ -50,7 +47,7 @@ namespace Fun_Funding.Api.Controller
             };
         }
 
-        [HttpPut("id")]
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdateCategory([FromRoute] Guid id, [FromBody] CategoryRequest request)
         {
             var response = await _categoryService.UpdateCategory(id, request);
