@@ -11,7 +11,7 @@ namespace Fun_Funding.Application.IService
 {
     public interface IAuthenticationService
     {
-        Task<ResultDTO<string>> RegisterUserAsync(RegisterRequest registerModel, string role);
+        Task<ResultDTO<string>> RegisterUserAsync(RegisterRequest registerModel, IList<string> roles);
         Task<ResultDTO<string>> LoginAsync(LoginRequest loginDTO);
     }
 }

@@ -9,8 +9,8 @@ namespace Fun_Funding.Domain.Entity
 {
     public class UserFile : BaseEntity
     {
-        public string Name { get; set; }
-        public string URL { get; set; }
+        public string? Name { get; set; }
+        public string? URL { get; set; }
         public FileType Filetype { get; set; }
         public Guid? UserId { get; set; }
     }

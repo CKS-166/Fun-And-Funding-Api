@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Fun_Funding.Domain.Enum
 {
-    public enum UserStatus
+    public enum PackageStatus
     {
-        Inactive,
-        Active
+        Active,
+        Inactive
     }
 }
