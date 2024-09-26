@@ -1,10 +1,8 @@
 using AutoMapper;
-using Azure.Core;
 using Fun_Funding.Application.ExceptionHandler;
 using Fun_Funding.Application.IService;
 using Fun_Funding.Application.IStorageService;
 using Fun_Funding.Application.ViewModel;
-using Fun_Funding.Application.ViewModel.CategoryDTO;
 using Fun_Funding.Application.ViewModel.FundingFileDTO;
 using Fun_Funding.Application.ViewModel.FundingProjectDTO;
 using Fun_Funding.Application.ViewModel.PackageDTO;
@@ -12,15 +10,8 @@ using Fun_Funding.Domain.Entity;
 using Fun_Funding.Domain.Enum;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
-using System.Net;
-using System.Runtime.ConstrainedExecution;
 
 namespace Fun_Funding.Application.Service
 {
@@ -155,7 +146,7 @@ namespace Fun_Funding.Application.Service
         {
             try
             {
-                FundingProject project =  _unitOfWork.FundingProjectRepository.GetQueryable()
+                FundingProject project = _unitOfWork.FundingProjectRepository.GetQueryable()
                     .Include(p => p.Packages).ThenInclude(pack => pack.RewardItems)
                     .Include(p => p.SourceFiles)
                     .FirstOrDefault(p => p.Id == id);
@@ -213,7 +204,7 @@ namespace Fun_Funding.Application.Service
                 BankAccount bank = _mapper.Map<BankAccount>(projectRequest.BankAccount);
                 existedProject.BankAccount = bank;
                 existedProject.Introduction = projectRequest.Introduction;
-                
+
                 //update files 
                 if (projectRequest.FundingFiles?.Count > 0)
                 {
@@ -323,7 +314,7 @@ namespace Fun_Funding.Application.Service
                         existedProject.Packages.Add(newPackage);
                     }
                 }
-                
+
                 _unitOfWork.FundingProjectRepository.Update(existedProject);
 
                 _unitOfWork.Commit();
@@ -421,7 +412,7 @@ namespace Fun_Funding.Application.Service
             }
             catch (Exception ex)
             {
-                 throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
             }
         }
 
@@ -444,6 +435,40 @@ namespace Fun_Funding.Application.Service
                     ProjectStatus.Deleted
                 };
 
+                //approved status change list
+                List<ProjectStatus> approvedChangelist = new List<ProjectStatus>()
+                {
+                    ProjectStatus.Processing,
+                    ProjectStatus.Deleted
+                };
+
+                //rejected status change list
+                List<ProjectStatus> rejectedChangelist = new List<ProjectStatus>()
+                {
+                    ProjectStatus.Deleted
+                };
+
+                //successful status change list
+                List<ProjectStatus> successfulChangelist = new List<ProjectStatus>()
+                {
+                    ProjectStatus.Withdrawed
+                };
+
+
+                //processing status change list
+                List<ProjectStatus> processingChangelist = new List<ProjectStatus>()
+                {
+                    ProjectStatus.Successful,
+                    ProjectStatus.Failed
+                };
+
+                //failed status change list
+                List<ProjectStatus> failedChangelist = new List<ProjectStatus>()
+                {
+                    ProjectStatus.Deleted,
+                    ProjectStatus.Refunded
+                };
+
                 bool isChanged = false;
 
                 if (project != null)
@@ -454,10 +479,35 @@ namespace Fun_Funding.Application.Service
                         project.Status = status;
                         isChanged = true;
                     }
-                    //other status
-                    else if (false)
+                    //change status from approved
+                    else if (project.Status == ProjectStatus.Approved && approvedChangelist.Contains(status))
                     {
-
+                        project.Status = status;
+                        isChanged = true;
+                    }
+                    //change status from rejected
+                    else if (project.Status == ProjectStatus.Rejected && rejectedChangelist.Contains(status))
+                    {
+                        project.Status = status;
+                        isChanged = true;
+                    }
+                    //change status from processing
+                    else if (project.Status == ProjectStatus.Processing && processingChangelist.Contains(status))
+                    {
+                        project.Status = status;
+                        isChanged = true;
+                    }
+                    //change status from successful
+                    else if (project.Status == ProjectStatus.Successful && successfulChangelist.Contains(status))
+                    {
+                        project.Status = status;
+                        isChanged = true;
+                    }
+                    //change status from failed
+                    else if (project.Status == ProjectStatus.Failed && failedChangelist.Contains(status))
+                    {
+                        project.Status = status;
+                        isChanged = true;
                     }
 
                     if (isChanged)
