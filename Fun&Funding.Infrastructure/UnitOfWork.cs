@@ -2,12 +2,6 @@
 using Fun_Funding.Application.IRepository;
 using Fun_Funding.Infrastructure.Database;
 using Fun_Funding.Infrastructure.Repository;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fun_Funding.Infrastructure
 {
@@ -30,6 +24,7 @@ namespace Fun_Funding.Infrastructure
         private IUserRepository _userRepository;
         private IWalletRepository _walletRepository;
         private IWithdrawRequestRepository _withdrawRequestRepository;
+        private ICommissionFeeRepository _commissionFeeRepository;
 
         public UnitOfWork(MyDbContext dbContext)
         {
@@ -146,6 +141,14 @@ namespace Fun_Funding.Infrastructure
             get
             {
                 return _withdrawRequestRepository = _withdrawRequestRepository ?? new WithdrawRequestRepository(_dbContext);
+            }
+        }
+
+        public ICommissionFeeRepository CommissionFeeRepository
+        {
+            get
+            {
+                return _commissionFeeRepository = _commissionFeeRepository ?? new CommissionFeeRepository(_dbContext);
             }
         }
 
