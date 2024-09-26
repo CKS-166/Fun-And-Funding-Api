@@ -1,4 +1,5 @@
-﻿using Fun_Funding.Application.IService;
+﻿using Fun_Funding.Application.ExceptionHandler;
+using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ITokenService;
 using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.Authentication;
@@ -8,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,6 +17,7 @@ namespace Fun_Funding.Application.Service
 {
     public class AuthenticationService : IAuthenticationService
     {
+        private static Random random = new Random();
         private readonly IUnitOfWork _unitOfWork;
         private readonly ITokenGenerator _tokenGenerator;
         private readonly UserManager<User> _userManager;
@@ -119,8 +122,6 @@ namespace Fun_Funding.Application.Service
                     Backer = newUser,
                     BankAccountId = bankAccount.Id,
                     CreatedDate = bankAccount.CreatedDate,
-                    
-                    
                 };
                 await _unitOfWork.BankAccountRepository.AddAsync(bankAccount);
                 await _unitOfWork.WalletRepository.AddAsync(wallet);
@@ -145,6 +146,42 @@ namespace Fun_Funding.Application.Service
             {
 
                 return ResultDTO<string>.Fail($"An error occurred: {ex.Message}");
+            }
+        }
+        public static string GenerateRandomPassword(int length = 7)
+        {
+            try
+            {
+                const string upperCase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+                const string lowerCase = "abcdefghijklmnopqrstuvwxyz";
+                const string numbers = "0123456789";
+                const string specialChars = "!@#$%^&*()_-+=<>?";
+
+                if (length < 7)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.Forbidden, "Mật khẩu phải dài tối thiểu 7 kí tự");
+                }
+
+                var passwordChars = new StringBuilder();
+                passwordChars.Append(upperCase[random.Next(upperCase.Length)]);
+                passwordChars.Append(numbers[random.Next(numbers.Length)]);
+                passwordChars.Append(specialChars[random.Next(specialChars.Length)]);
+
+                string allChars = upperCase + lowerCase + numbers + specialChars;
+                for (int i = passwordChars.Length; i < length; i++)
+                {
+                    passwordChars.Append(allChars[random.Next(allChars.Length)]);
+                }
+
+                return new string(passwordChars.ToString().OrderBy(c => random.Next()).ToArray());
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
             }
         }
     }

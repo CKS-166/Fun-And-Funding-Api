@@ -1,19 +1,38 @@
-﻿using Fun_Funding.Application.IService;
+﻿using AutoMapper;
+using Azure;
+using Fun_Funding.Application.ExceptionHandler;
+using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.WithdrawDTO;
 using Fun_Funding.Domain.Entity;
 using Fun_Funding.Domain.Enum;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Net;
+using System.Security.Claims;
 
 namespace Fun_Funding.Application.Service
 {
     public class WithdrawService : IWithdrawService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly UserManager<User> _userManager;
+        private readonly ClaimsPrincipal _claimsPrincipal;
+        private readonly IMapper _mapper;
+        private readonly RoleManager<IdentityRole<Guid>> _roleManager;
 
-        public WithdrawService(IUnitOfWork unitOfWork)
+        public WithdrawService(IUnitOfWork unitOfWork,
+            UserManager<User> userManager,
+            RoleManager<IdentityRole<Guid>> roleManager,
+            IHttpContextAccessor httpContextAccessor,
+            IMapper mapper)
         {
             _unitOfWork = unitOfWork;
+            _userManager = userManager;
+            _roleManager = roleManager;
+            _claimsPrincipal = httpContextAccessor.HttpContext.User;
+            _mapper = mapper;
         }
 
         public async Task<ResultDTO<WithdrawRequest>> AdminApproveRequest(Guid id)
@@ -233,6 +252,58 @@ namespace Fun_Funding.Application.Service
             }
             catch (Exception ex)
             {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<ResultDTO<string>> WalletWithdrawRequest()
+        {
+            try
+            {
+                if (_claimsPrincipal == null || !_claimsPrincipal.Identity.IsAuthenticated)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.Unauthorized, "User not authenticated.");
+                }
+                var userEmailClaims = _claimsPrincipal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email);
+                if (userEmailClaims == null)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "User not found.");
+                }
+                var userEmail = userEmailClaims.Value;
+                var user = await _unitOfWork.UserRepository.GetQueryable()
+                                .AsNoTracking()
+                                .Include(u => u.Wallet)
+                                .FirstOrDefaultAsync(u => u.Email == userEmail);
+                if (user == null)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "User not found.");
+                }
+                Wallet? wallet = user.Wallet;
+                if (wallet.Balance < 10000)
+                {
+                    return ResultDTO<string>.Fail("Your account balance must be higher than 10.000 VND to withdraw balance.", (int)HttpStatusCode.Forbidden);
+                }
+                WithdrawRequest withdrawRequest = new WithdrawRequest
+                {
+                    Id = new Guid(),
+                    Amount = wallet.Balance,
+                    CreatedDate = DateTime.UtcNow,
+                    ExpiredDate = DateTime.UtcNow.AddDays(7),
+                    IsFinished = false,
+                    WalletId = wallet.Id,
+                    RequestType = TransactionTypes.WithdrawWalletMoney,
+                    Status = WithdrawRequestStatus.Pending,
+                };
+                await _unitOfWork.WithdrawRequestRepository.AddAsync(withdrawRequest);
+                await _unitOfWork.CommitAsync();
+                return ResultDTO<string>.Success("", "Your withdraw has been create, please wait for admin to review");
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
                 throw new Exception(ex.Message);
             }
         }
