@@ -1,8 +1,12 @@
 using Fun_Funding.Api.Exception;
 using Fun_Funding.Application;
+using Fun_Funding.Application.IEmailService;
+using Fun_Funding.Domain.EmailModel;
 using Fun_Funding.Infrastructure;
 using Fun_Funding.Infrastructure.Dependency_Injection;
+using Fun_Funding.Infrastructure.EmailService;
 using Microsoft.OpenApi.Models;
+using System.Net.Mail;
 
 namespace Fun_Funding.Api
 {
@@ -28,6 +32,18 @@ namespace Fun_Funding.Api
             .AddNewtonsoftJson(options =>
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
             );
+            //email service
+            var smtpSettings = builder.Configuration.GetSection("SmtpSettings").Get<SmtpSettings>();
+
+            builder.Services.AddFluentEmail(smtpSettings.FromEmail, smtpSettings.FromName)
+                .AddRazorRenderer()
+                .AddSmtpSender(new SmtpClient(smtpSettings.Host)
+                {
+                    Port = smtpSettings.Port,
+                    Credentials = new System.Net.NetworkCredential(smtpSettings.UserName, smtpSettings.Password),
+                    EnableSsl = true,
+                });
+            builder.Services.AddTransient<IEmailService, EmailService>();
 
             builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
