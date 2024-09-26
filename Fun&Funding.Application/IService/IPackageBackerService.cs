@@ -11,5 +11,6 @@ namespace Fun_Funding.Application.IService
     public interface IPackageBackerService
     {
         Task<ResultDTO<PackageBackerResponse>> DonateFundingProject(PackageBackerRequest packageBackerRequest);
+        Task<ResultDTO<List<DonationResponse>>> ViewDonationById(Guid id);
     }
 }

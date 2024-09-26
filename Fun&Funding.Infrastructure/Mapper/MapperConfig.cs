@@ -3,9 +3,11 @@ using Fun_Funding.Application.ViewModel.BankAccountDTO;
 using Fun_Funding.Application.ViewModel.CategoryDTO;
 using Fun_Funding.Application.ViewModel.FundingFileDTO;
 using Fun_Funding.Application.ViewModel.FundingProjectDTO;
+using Fun_Funding.Application.ViewModel.PackageBackerDTO;
 using Fun_Funding.Application.ViewModel.PackageDTO;
 using Fun_Funding.Application.ViewModel.RewardItemDTO;
 using Fun_Funding.Domain.Entity;
+using Fun_Funding.Domain.Enum;
 
 namespace Fun_Funding.Infrastructure.Mapper
 {
@@ -36,9 +38,9 @@ namespace Fun_Funding.Infrastructure.Mapper
                 .ForMember(des => des.Packages, src => src.MapFrom(x => x.Packages)).ReverseMap();
             CreateMap<FundingProjectResponse, FundingProject>()
                 .ForMember(des => des.BankAccount, src => src.MapFrom(x => x.BankAccount))
+
                 .ForMember(des =>des.SourceFiles, src => src.MapFrom(x => x.FundingFiles))
-                .ForMember(des => des.Packages, src => src.MapFrom(x => x.Packages)).ReverseMap(); 
-            
+                .ForMember(des => des.Packages, src => src.MapFrom(x => x.Packages)).ReverseMap();            
             CreateMap<FundingProjectUpdateRequest, FundingProject>()
                 .ForMember(des => des.BankAccount, src => src.MapFrom(x => x.BankAccount))
                 .ForMember(des => des.Packages, src => src.MapFrom(x => x.Packages))
@@ -47,6 +49,7 @@ namespace Fun_Funding.Infrastructure.Mapper
             CreateMap<Category, CategoryResponse>().ReverseMap();
             CreateMap<CategoryRequest, Category>().ReverseMap();
         }
+        
     }
 
 
