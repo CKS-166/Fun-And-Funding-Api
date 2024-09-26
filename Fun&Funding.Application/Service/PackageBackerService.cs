@@ -4,6 +4,7 @@ using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.PackageBackerDTO;
 using Fun_Funding.Domain.Entity;
 using Fun_Funding.Domain.Enum;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -96,5 +97,37 @@ namespace Fun_Funding.Application.Service
             }
         }
 
+        public async Task<ResultDTO<List<DonationResponse>>> ViewDonationById(Guid id)
+        {
+            try
+            {
+                var listById = _unitOfWork.PackageBackerRepository.GetQueryable()
+                    .Include(x => x.Package)
+                    .Include(x=>x.User)
+                    .Where(x => x.UserId == id)
+                    .ToList();
+                if (listById is null)
+                {
+                    return ResultDTO<List<DonationResponse>>.Fail("There are no donation found with this id");
+                }
+
+                var response = listById.Select(x => new DonationResponse
+                {
+                    UserName = x.User.FullName,
+                    CreateDate = x.CreatedDate,
+                    DonateAmount = x.DonateAmount,
+                    PackageName = x.Package.Name,
+                    Types = x.Package.PackageTypes,
+
+                }).ToList();
+                
+                return ResultDTO<List<DonationResponse>>.Success(response, "donation by id");
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
     }
 }

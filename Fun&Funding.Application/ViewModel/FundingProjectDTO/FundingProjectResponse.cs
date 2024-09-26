@@ -30,7 +30,7 @@ namespace Fun_Funding.Application.ViewModel.FundingProjectDTO
 
         public BankAccountRequest? BankAccount { get; set; }
         //public virtual ICollection<Category> Categories { get; set; }
-        public virtual ICollection<PackageUpdateRequest> Packages { get; set; }
+        public virtual ICollection<PackageResponse> Packages { get; set; }
         //public IFormFile ThumbnailFile { get; set; }
 
         //public List<IFormFile> Stories {  get; set; }

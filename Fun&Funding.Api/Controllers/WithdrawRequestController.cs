@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Fun_Funding.Api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/withdraw-requests")]
     [ApiController]
     public class WithdrawRequestController : ControllerBase
     {
@@ -27,19 +27,19 @@ namespace Fun_Funding.Api.Controllers
             var result = await _withdrawService.OwnerCreateRequest(request);
             return Ok(result);
         }
-        [HttpPatch("admin-processing-request")]
+        [HttpPatch("processing-request")]
         public async Task<IActionResult> ProcessingRequest(Guid id)
         {
             var result = await _withdrawService.AdminProcessingRequest(id);
             return Ok(result);
         }
-        [HttpPatch("admin-approved-request")]
+        [HttpPatch("approved-request")]
         public async Task<IActionResult> ApprovedRequest(Guid id)
         {
             var result = await _withdrawService.AdminApproveRequest(id);
             return Ok(result);
         }
-        [HttpPatch("admin-cancel-request")]
+        [HttpPatch("cancel-request")]
         public async Task<IActionResult> CancelRequest(Guid id)
         {
             var result = await _withdrawService.AdminCancelRequest(id);

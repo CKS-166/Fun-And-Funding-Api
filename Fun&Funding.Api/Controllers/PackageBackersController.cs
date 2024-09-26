@@ -23,6 +23,14 @@ namespace Fun_Funding.Api.Controllers
         {
             _packageBackerService = packageBackerService;
         }
+        [HttpGet]
+        public async Task<IActionResult> GetDonationById(Guid userId) { 
+            var result = await _packageBackerService.ViewDonationById(userId);
+            if (result._isSuccess)
+                return Ok(result);
+            else
+                return BadRequest(result);
+        }
 
         [HttpPost]
         public async Task<IActionResult> DonateFundingProject([FromBody] PackageBackerRequest packageBackerRequest)

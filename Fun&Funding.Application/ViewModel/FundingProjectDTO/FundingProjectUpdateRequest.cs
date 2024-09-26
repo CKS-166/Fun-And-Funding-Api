@@ -18,15 +18,6 @@ namespace Fun_Funding.Application.ViewModel.FundingProjectDTO
         public string Name { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public string Introduction { get; set; } = string.Empty;
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
-        [Range(0, (double)decimal.MaxValue)]
-        [Column(TypeName = "decimal(18, 2)")]
-        public decimal Target { get; set; }
-        [Range(0, (double)decimal.MaxValue)]
-        [Column(TypeName = "decimal(18, 2)")]
-        public decimal Balance { get; set; }
-        public ProjectStatus Status { get; set; }
 
         public BankAccountRequest? BankAccount { get; set; }
         //public virtual ICollection<Category> Categories { get; set; }
@@ -35,8 +26,7 @@ namespace Fun_Funding.Application.ViewModel.FundingProjectDTO
 
         //public List<IFormFile> Stories {  get; set; }
 
-        public List<FundingFileUpdateRequest> FundingFiles { get; set; }
+        public List<FundingFileUpdateRequest>? FundingFiles { get; set; }
 
-        public string Email { get; set; }
     }
 }
