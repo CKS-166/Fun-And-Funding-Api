@@ -57,7 +57,6 @@ namespace Fun_Funding.Application.Service
                 {
                     _unitOfWork.CategoryRepository.Remove(category);
                     await _unitOfWork.CommitAsync();
-
                     return ResultDTO.Success();
                 }
                 else
