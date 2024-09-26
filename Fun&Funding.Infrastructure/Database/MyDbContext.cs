@@ -12,11 +12,11 @@ namespace Fun_Funding.Infrastructure.Database
     {
         public MyDbContext()
         {
-            
+
         }
         public MyDbContext(DbContextOptions<MyDbContext> options) : base(options)
         {
-            
+
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -45,6 +45,14 @@ namespace Fun_Funding.Infrastructure.Database
                 .OnDelete(DeleteBehavior.Restrict); // Restrict deletion if needed
 
             // Add other model configurations below if needed
+            modelBuilder.Entity<Category>()
+                .HasQueryFilter(x => x.IsDeleted == false);
+
+            modelBuilder.Entity<FundingProject>()
+                .HasQueryFilter(x => x.IsDeleted == false);
+
+            modelBuilder.Entity<MarketingProject>()
+                .HasQueryFilter(x => x.IsDeleted == false);
         }
 
 
