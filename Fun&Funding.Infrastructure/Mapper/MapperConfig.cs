@@ -30,16 +30,21 @@ namespace Fun_Funding.Infrastructure.Mapper
             CreateMap<PackageUpdateRequest, Package>().ReverseMap();
             CreateMap<ItemUpdateRequest, RewardItem>().ReverseMap();
             CreateMap<FundingFileResponse, FundingFile>().ReverseMap();
+            CreateMap<FundingFileUpdateRequest, FundingFile>().ReverseMap();
+            CreateMap<ItemResponse,RewardItem>().ReverseMap();
+            CreateMap<PackageResponse, Package>().ReverseMap();
             CreateMap<FundingProjectAddRequest, FundingProject>()
                 .ForMember(des => des.BankAccount, src => src.MapFrom(x => x.BankAccount))
                 .ForMember(des => des.Packages, src => src.MapFrom(x => x.Packages)).ReverseMap();
             CreateMap<FundingProjectResponse, FundingProject>()
                 .ForMember(des => des.BankAccount, src => src.MapFrom(x => x.BankAccount))
-                .ForMember(des => des.Packages, src => src.MapFrom(x => x.Packages)).ReverseMap();
 
+                .ForMember(des =>des.SourceFiles, src => src.MapFrom(x => x.FundingFiles))
+                .ForMember(des => des.Packages, src => src.MapFrom(x => x.Packages)).ReverseMap();            
             CreateMap<FundingProjectUpdateRequest, FundingProject>()
                 .ForMember(des => des.BankAccount, src => src.MapFrom(x => x.BankAccount))
-                .ForMember(des => des.Packages, src => src.MapFrom(x => x.Packages)).ReverseMap();
+                .ForMember(des => des.Packages, src => src.MapFrom(x => x.Packages))
+                .ReverseMap(); ;
 
             CreateMap<Category, CategoryResponse>().ReverseMap();
             CreateMap<CategoryRequest, Category>().ReverseMap();
