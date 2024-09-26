@@ -459,6 +459,9 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("PackageStatus")
+                        .HasColumnType("int");
+
                     b.Property<int>("PackageTypes")
                         .HasColumnType("int");
 
@@ -749,6 +752,9 @@ namespace Fun_Funding.Infrastructure.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Address")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Bio")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ConcurrencyStamp")

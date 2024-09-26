@@ -14,6 +14,7 @@ namespace Fun_Funding.Application.ViewModel.UserDTO
         public Guid Id { get; set; }
         public DateTime CreatedDate { get; set; }
         public string? Email { get; set; }
+        public string? Bio { get; set; }
         public string? FullName { get; set; }
         public string? Avatar { get; set; }
         public string? Address { get; set; }

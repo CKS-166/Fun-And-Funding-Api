@@ -20,28 +20,27 @@ namespace Fun_Funding.Infrastructure.TokenGeneratorService
         {
             _configuration = configuration;
         }
-        public string GenerateToken(User user, IList<string> userRole)
+        public string GenerateToken(User user, IList<string> userRoles)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
             var signingCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Name, user.FullName!),
-                new Claim(ClaimTypes.Email,user.Email!),
-                new Claim("jti", "JcmF8uj2ISveL5FvvNk4pnp8xrhINz8-1614225624"),
-                new Claim("api_key" , "JcmF8uj2ISveL5FvvNk4pnp8xrhINz8")
-            };
+    {
+        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+        new Claim(ClaimTypes.Name, user.FullName!),
+        new Claim(ClaimTypes.Email, user.Email!),
+        new Claim("jti", "JcmF8uj2ISveL5FvvNk4pnp8xrhINz8-1614225624"),
+        new Claim("api_key", "JcmF8uj2ISveL5FvvNk4pnp8xrhINz8")
+    };
 
-            if (userRole != null) // case: register dont need to claim role
+            if (userRoles != null && userRoles.Count > 0) // Ensure userRoles is not null or empty
             {
-                foreach (var role in userRole)
+                foreach (var role in userRoles)
                 {
-                    claims.Add(new Claim(ClaimTypes.Role, role.ToString()));
+                    claims.Add(new Claim(ClaimTypes.Role, role)); // Add each role as a claim
                 }
             }
-
 
             var securityToken = new JwtSecurityToken(
                 issuer: _configuration["Jwt:Issuer"],
@@ -52,5 +51,6 @@ namespace Fun_Funding.Infrastructure.TokenGeneratorService
 
             return new JwtSecurityTokenHandler().WriteToken(securityToken);
         }
+
     }
 }

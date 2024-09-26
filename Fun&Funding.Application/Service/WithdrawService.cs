@@ -20,24 +20,27 @@ namespace Fun_Funding.Application.Service
         private readonly UserManager<User> _userManager;
         private readonly ClaimsPrincipal _claimsPrincipal;
         private readonly IMapper _mapper;
+        private readonly IUserService _userService;
         private readonly RoleManager<IdentityRole<Guid>> _roleManager;
 
         public WithdrawService(IUnitOfWork unitOfWork,
             UserManager<User> userManager,
             RoleManager<IdentityRole<Guid>> roleManager,
             IHttpContextAccessor httpContextAccessor,
-            IMapper mapper)
+            IMapper mapper,
+            IUserService userService)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
             _roleManager = roleManager;
             _claimsPrincipal = httpContextAccessor.HttpContext.User;
             _mapper = mapper;
+            _userService = userService;
         }
 
         public async Task<ResultDTO<WithdrawRequest>> AdminApproveRequest(Guid id)
         {
-            Guid adminId = Guid.Parse("2612B994-5974-4D9A-B25B-4BF65C4D3813");
+            var admin = await _userService.GetUserInfo();
             var request = await _unitOfWork.WithdrawRequestRepository.GetByIdAsync(id);
             if (request is null)
             {
@@ -64,7 +67,7 @@ namespace Fun_Funding.Application.Service
                 {
                     Id = new Guid(),
                     TotalAmount = request.Amount,
-                    Description = $"Admin id: {adminId} just APPROVED withdraw id: {request.Id} with amount: {request.Amount}",
+                    Description = $"Admin id: {admin._data.Id} just APPROVED withdraw id: {request.Id} with amount: {request.Amount}",
                     CreatedDate = DateTime.UtcNow,
                     TransactionType = TransactionTypes.FundingWithdraw,
 
@@ -84,7 +87,7 @@ namespace Fun_Funding.Application.Service
 
         public async Task<ResultDTO<WithdrawRequest>> AdminCancelRequest(Guid id)
         {
-            Guid adminId = Guid.Parse("2612B994-5974-4D9A-B25B-4BF65C4D3813");
+            var admin = await _userService.GetUserInfo();
             var request = await _unitOfWork.WithdrawRequestRepository.GetByIdAsync(id);
             if (request is null)
             {
@@ -111,7 +114,7 @@ namespace Fun_Funding.Application.Service
                 {
                     Id = new Guid(),
                     TotalAmount = request.Amount,
-                    Description = $"Admin id: {adminId} just CANCEL withdraw id: {request.Id}",
+                    Description = $"Admin id: {admin._data.Id} just CANCEL withdraw id: {request.Id}",
                     CreatedDate = DateTime.UtcNow,
                     TransactionType = TransactionTypes.FundingWithdraw,
 
@@ -131,7 +134,7 @@ namespace Fun_Funding.Application.Service
 
         public async Task<ResultDTO<AdminResponse>> AdminProcessingRequest(Guid id)
         {
-            Guid adminId = Guid.Parse("2612B994-5974-4D9A-B25B-4BF65C4D3813");
+            var admin = await _userService.GetUserInfo();
             var request = await _unitOfWork.WithdrawRequestRepository.GetByIdAsync(id);
             if (request is null)
             {
@@ -161,7 +164,7 @@ namespace Fun_Funding.Application.Service
                 await _unitOfWork.CommitAsync();
                 AdminResponse response = new AdminResponse
                 {
-                    AdminId = adminId,
+                    AdminId = admin._data.Id,
                     BankCode = bankAccount.BankCode,
                     BankNumber = bankAccount.BankNumber,
                     WithdrawRequest = request,
@@ -192,8 +195,8 @@ namespace Fun_Funding.Application.Service
         public async Task<ResultDTO<WithdrawResponse>> OwnerCreateRequest(WithdrawReq request)
         {
             // Check User
-            Guid userId = Guid.Parse("BC40B290-0A7F-46F1-BA70-E79EEDDE847F");
-            if (userId == null)
+            var user = await _userService.GetUserInfo();
+            if (user._data == null)
             {
                 return ResultDTO<WithdrawResponse>.Fail("UserID can not be null");
             }
@@ -208,7 +211,7 @@ namespace Fun_Funding.Application.Service
                 return ResultDTO<WithdrawResponse>.Fail("Project can not be null");
             }
             // Check Project match user id
-            if (!fundingProject.UserId.Equals(userId))
+            if (!fundingProject.UserId.Equals(user._data.Id))
             {
                 return ResultDTO<WithdrawResponse>.Fail("This User do not have same valid projectId");
             }

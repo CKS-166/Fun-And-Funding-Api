@@ -28,21 +28,23 @@ namespace Fun_Funding.Api.Controllers
             return Ok(result);
         }
         [HttpPost("register-backer")]
-        public async Task<ActionResult<string>> registerBacker(RegisterRequest registerModel)
+        public async Task<ActionResult<string>> RegisterBacker(RegisterRequest registerModel)
         {
-            var result = await _authService.RegisterUserAsync(registerModel, Role.Backer);
+            var result = await _authService.RegisterUserAsync(registerModel, new List<string> { Role.Backer });
             return Ok(result);
         }
+
         [HttpPost("register-admin")]
-        public async Task<ActionResult<string>> registerAdmin(RegisterRequest registerModel)
+        public async Task<ActionResult<string>> RegisterAdmin(RegisterRequest registerModel)
         {
-            var result = await _authService.RegisterUserAsync(registerModel, Role.Admin);
+            var result = await _authService.RegisterUserAsync(registerModel, new List<string> { Role.Admin });
             return Ok(result);
         }
-        [HttpPost("register-projectOwner")]
-        public async Task<ActionResult<string>> registerProjectOwner(RegisterRequest registerModel)
+
+        [HttpPost("register-game-owner")]
+        public async Task<ActionResult<string>> RegisterProjectOwner(RegisterRequest registerModel)
         {
-            var result = await _authService.RegisterUserAsync(registerModel, Role.GameOwner);
+            var result = await _authService.RegisterUserAsync(registerModel, new List<string> { Role.GameOwner });
             return Ok(result);
         }
         [HttpPost("SendMail")]

@@ -47,7 +47,7 @@ namespace Fun_Funding.Api.Controllers
         public async Task<IActionResult> GetFundingProjects([FromQuery] ListRequest request, string? categoryName, ProjectStatus status, decimal? fromTarget, decimal? toTarget)
         {
             var response = await _fundingProjectService.GetFundingProjects(request, categoryName, status, fromTarget, toTarget);
-            return Ok(response)
+            return Ok(response);
         }
 
         [HttpPut("{id}/status")]
