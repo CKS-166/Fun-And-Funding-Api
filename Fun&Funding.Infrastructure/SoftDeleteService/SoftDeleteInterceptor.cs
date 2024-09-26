@@ -1,11 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore.Diagnostics;
+﻿using Fun_Funding.Domain.Entity;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Fun_Funding.Domain.Entity;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace Fun_Funding.Infrastructure.SoftDeleteService
 {
