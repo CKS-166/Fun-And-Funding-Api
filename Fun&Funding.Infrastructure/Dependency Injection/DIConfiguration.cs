@@ -88,6 +88,7 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             service.AddScoped<IUserRepository, UserRepository>();
             service.AddScoped<IWalletRepository, WalletRepository>();
             service.AddScoped<IWithdrawRequestRepository, WithdrawRequestRepository>();
+            service.AddScoped<ICommissionFeeRepository, CommissionFeeRepository>();
             #endregion
             #region Sevices
             service.AddScoped<IAuthenticationService, AuthenticationService>();
@@ -95,6 +96,7 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             service.AddScoped<IWithdrawService, WithdrawService>();
             service.AddScoped<IFundingProjectService, FundingProjectManagementService>();
             service.AddScoped<ICategoryService, CategoryService>();
+            service.AddScoped<ICommissionFeeService, CommissionFeeService>();
             #endregion
             return service;
 
