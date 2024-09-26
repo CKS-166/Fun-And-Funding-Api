@@ -1,5 +1,6 @@
 ﻿using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.FundingProjectDTO;
+using Fun_Funding.Domain.Enum;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
@@ -16,6 +17,6 @@ namespace Fun_Funding.Application.IService
 
         Task<ResultDTO<string>> UpdateFundingProject(FundingProjectUpdateRequest req);
 
-
+        Task<ResultDTO<PaginatedResponse<FundingProjectResponse>>> GetFundingProjects(ListRequest request, string? categoryName, ProjectStatus status, decimal? fromTarget, decimal? toTarget);
     }
 }

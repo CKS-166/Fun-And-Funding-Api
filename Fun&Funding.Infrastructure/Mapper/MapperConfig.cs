@@ -5,19 +5,19 @@ using Fun_Funding.Application.ViewModel.FundingFileDTO;
 using Fun_Funding.Application.ViewModel.FundingProjectDTO;
 using Fun_Funding.Application.ViewModel.PackageDTO;
 using Fun_Funding.Application.ViewModel.RewardItemDTO;
+using Fun_Funding.Application.ViewModel.UserDTO;
+using Fun_Funding.Application.ViewModel.WalletDTO;
 using Fun_Funding.Domain.Entity;
 
 namespace Fun_Funding.Infrastructure.Mapper
 {
     public class MapperConfig : Profile
     {
-
-
-        public MapperConfig()
-        {
+        public MapperConfig() {
             MappingFundingProject();
+            MappingUser();
+            MappingWallet();
         }
-        
         public void MappingFundingProject()
         {
             CreateMap<FundingFileRequest, FundingFile>().ReverseMap();
@@ -42,7 +42,25 @@ namespace Fun_Funding.Infrastructure.Mapper
             CreateMap<Category, CategoryResponse>().ReverseMap();
             CreateMap<CategoryRequest, Category>().ReverseMap();
         }
+
+        public void MappingUser()
+        {
+            // UserUpdateRequest -> User
+            CreateMap<UserUpdateRequest, User>()
+                .ReverseMap();
+
+            // UserInfoResponse -> User
+            CreateMap<UserInfoResponse, User>()
+                .ForPath(des => des.File.URL, src => src.MapFrom(x => x.Avatar))
+                .ForMember(des => des.Wallet, src => src.MapFrom(x => x.Wallet))
+                .ReverseMap();
+        }
+
+        public void MappingWallet()
+        {
+            //WalletInfoResponse -> Wallet
+            CreateMap<WalletInfoResponse, Wallet>()
+                .ReverseMap();
+        }
     }
-
-
 }

@@ -45,5 +45,11 @@ namespace Fun_Funding.Api.Controllers
             var result = await _withdrawService.AdminCancelRequest(id);
             return Ok(result);
         }
+        [HttpPost("wallet-request")]
+        public async Task<IActionResult> WalletWithdrawRequest()
+        {
+            var result = await _withdrawService.WalletWithdrawRequest();
+            return Ok(result);
+        }
     }
 }

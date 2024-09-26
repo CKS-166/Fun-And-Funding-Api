@@ -4,6 +4,8 @@ using Fun_Funding.Application.IStorageService;
 using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel.FundingProjectDTO;
 using Fun_Funding.Application.ViewModel.FundingFileDTO;
+using Fun_Funding.Application.ViewModel;
+using Fun_Funding.Domain.Enum;
 namespace Fun_Funding.Api.Controllers
 {
     [Route("api/funding-projects")]
@@ -39,7 +41,11 @@ namespace Fun_Funding.Api.Controllers
             var response = await _fundingProjectService.UpdateFundingProject(req);
             return Ok(response);
         }
+        [HttpGet]
+        public async Task<IActionResult> GetFundingProjects([FromQuery] ListRequest request, string? categoryName, ProjectStatus status, decimal? fromTarget, decimal? toTarget)
+        {
+            var response = await _fundingProjectService.GetFundingProjects(request, categoryName, status, fromTarget, toTarget);
+            return Ok(response);
+        }
     }
-
-
 }
