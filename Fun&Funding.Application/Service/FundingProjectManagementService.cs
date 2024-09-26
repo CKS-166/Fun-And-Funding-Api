@@ -11,6 +11,7 @@ using Fun_Funding.Domain.Enum;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
+using System.Runtime.ConstrainedExecution;
 
 namespace Fun_Funding.Application.Service
 {
@@ -19,7 +20,8 @@ namespace Fun_Funding.Application.Service
         public IUnitOfWork _unitOfWork;
         public IMapper _mapper;
         public IAzureService _azureService;
-
+        private int maxDays = 60;
+        private int minDays = 1;
         public FundingProjectManagementService(IUnitOfWork unitOfWork, IMapper mapper, IAzureService azureService)
         {
             _unitOfWork = unitOfWork;
@@ -69,9 +71,9 @@ namespace Fun_Funding.Application.Service
                 {
                     return ResultDTO<FundingProjectResponse>.Fail("End date must be greater that start date");
                 }
-                if ((project.EndDate - project.StartDate).TotalDays < 60)
+                if ((project.EndDate - project.StartDate).TotalDays <= minDays || (project.EndDate - project.StartDate).TotalDays >= maxDays)
                 {
-                    return ResultDTO<FundingProjectResponse>.Fail("Funding campaign length must be at least 60 days");
+                    return ResultDTO<FundingProjectResponse>.Fail("Funding campaign length must be at least 1 day and maximum 60 days");
                 }
                 project.CreatedDate = DateTime.Now;
                 project.Status = ProjectStatus.Pending;
@@ -161,7 +163,7 @@ namespace Fun_Funding.Application.Service
             }
         }
 
-        public async Task<ResultDTO<string>> UpdateFundingProject(FundingProjectUpdateRequest projectRequest)
+        public async Task<ResultDTO<FundingProjectResponse>> UpdateFundingProject(FundingProjectUpdateRequest projectRequest)
         {
             try
             {
@@ -169,10 +171,10 @@ namespace Fun_Funding.Application.Service
                 .Include(p => p.SourceFiles)
                 .Include(p => p.Packages).ThenInclude(pack => pack.RewardItems)
                 .FirstOrDefault(o => o.Id == projectRequest.Id);
-
+                // check status
                 if (existedProject == null)
                 {
-                    return ResultDTO<string>.Fail("Project not found", 404);
+                    return ResultDTO<FundingProjectResponse>.Fail("Project not found", 404);
                 }
                 //update regulations for funding goals and end date
 
@@ -181,20 +183,20 @@ namespace Fun_Funding.Application.Service
                 {
                     if (pack.RequiredAmount < 5000)
                     {
-                        return ResultDTO<string>.Fail("Price for package must be at least 5000");
+                        return ResultDTO<FundingProjectResponse>.Fail("Price for package must be at least 5000");
                     }
                     if (pack.RewardItems.Count < 1)
                     {
-                        return ResultDTO<string>.Fail("Each package must have at least 1 item");
+                        return ResultDTO<FundingProjectResponse>.Fail("Each package must have at least 1 item");
                     }
                     if (pack.LimitQuantity < 1)
                     {
-                        return ResultDTO<string>.Fail("Each package must limit at least 1 quantity");
+                        return ResultDTO<FundingProjectResponse>.Fail("Each package must limit at least 1 quantity");
                     }
                 }
                 if (projectRequest.BankAccount is null)
                 {
-                    return ResultDTO<string>.Fail("Project must config its bank account for payment");
+                    return ResultDTO<FundingProjectResponse>.Fail("Project must config its bank account for payment");
                 }
 
                 existedProject.Name = projectRequest.Name;
@@ -215,7 +217,7 @@ namespace Fun_Funding.Application.Service
                             var res = _azureService.UploadUrlSingleFiles(req.URL);
                             if (res == null)
                             {
-                                return ResultDTO<string>.Fail("Fail to upload file");
+                                return ResultDTO<FundingProjectResponse>.Fail("Fail to upload file");
                             }
                             FundingFile media = new FundingFile
                             {
@@ -231,10 +233,9 @@ namespace Fun_Funding.Application.Service
                     {
                         existedProject.SourceFiles.Add(file);
                     }
-
                 }
-
-                //add iamge into item 
+                List<Package> packageList = new List<Package>();
+                //add image into item 
                 foreach (var packageRequest in projectRequest.Packages)
                 {
                     var existedPack = existedProject.Packages.FirstOrDefault(p => p.Id == packageRequest.Id);
@@ -243,6 +244,7 @@ namespace Fun_Funding.Application.Service
                         existedPack.Name = packageRequest.Name;
                         existedPack.RequiredAmount = packageRequest.RequiredAmount;
                         existedPack.LimitQuantity = packageRequest.LimitQuantity;
+                        existedPack.PackageTypes = PackageType.FixedPackage;
                         //Handle change image of existing item
                         foreach (var rewardItemRequest in packageRequest.RewardItems)
                         {
@@ -277,7 +279,6 @@ namespace Fun_Funding.Application.Service
                                 }
                                 existedPack.RewardItems.Add(newRewardItem);
                             }
-
                         }
                     }
                     else
@@ -287,6 +288,7 @@ namespace Fun_Funding.Application.Service
                             Name = packageRequest.Name,
                             RequiredAmount = packageRequest.RequiredAmount,
                             LimitQuantity = packageRequest.LimitQuantity,
+                            PackageTypes = PackageType.FixedPackage,
                             RewardItems = new List<RewardItem>()
                         };
                         // Add reward items to the new package
@@ -316,7 +318,8 @@ namespace Fun_Funding.Application.Service
                 _unitOfWork.FundingProjectRepository.Update(existedProject);
 
                 _unitOfWork.Commit();
-                return ResultDTO<string>.Success("Ok");
+                FundingProjectResponse result = _mapper.Map<FundingProjectResponse>(existedProject);
+                return ResultDTO<FundingProjectResponse>.Success(result);
             }
             catch (Exception ex)
             {

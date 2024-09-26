@@ -8,7 +8,7 @@ namespace Fun_Funding.Application.IService
     {
         Task<ResultDTO<FundingProjectResponse>> GetProjectById(Guid id);
         Task<ResultDTO<FundingProjectResponse>> CreateFundingProject(FundingProjectAddRequest req);
-        Task<ResultDTO<string>> UpdateFundingProject(FundingProjectUpdateRequest req);
+        Task<ResultDTO<FundingProjectResponse>> UpdateFundingProject(FundingProjectUpdateRequest req);
         Task<ResultDTO<FundingProjectResponse>> UpdateFundingProjectStatus(Guid id, ProjectStatus status);
     }
 }
