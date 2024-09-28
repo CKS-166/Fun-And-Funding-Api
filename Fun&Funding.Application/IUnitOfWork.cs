@@ -1,9 +1,4 @@
 ﻿using Fun_Funding.Application.IRepository;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fun_Funding.Application
 {
@@ -24,6 +19,7 @@ namespace Fun_Funding.Application
         IUserRepository UserRepository { get; }
         IWalletRepository WalletRepository { get; }
         IWithdrawRequestRepository WithdrawRequestRepository { get; }
+        ICommissionFeeRepository CommissionFeeRepository { get; }
 
         // Methods for committing and rolling back
         void Commit();

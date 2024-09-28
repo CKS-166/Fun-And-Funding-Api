@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Fun_Funding.Domain.Enum
+﻿namespace Fun_Funding.Domain.Enum
 {
     public enum ProjectStatus
     {
@@ -15,6 +9,7 @@ namespace Fun_Funding.Domain.Enum
         Failed,
         Rejected,
         Approved,
-        Withdrawed
+        Withdrawed,
+        Refunded
     }
 }

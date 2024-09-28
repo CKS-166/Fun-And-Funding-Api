@@ -34,7 +34,7 @@ namespace Fun_Funding.Application.Service
 
                 var response = _mapper.Map<CategoryResponse>(category);
 
-                return new ResultDTO<CategoryResponse>(true, ["Add successfully."], response, (int)HttpStatusCode.Created);
+                return new ResultDTO<CategoryResponse>(true, ["Create successfully."], response, (int)HttpStatusCode.Created);
             }
             catch (Exception ex)
             {
@@ -57,7 +57,6 @@ namespace Fun_Funding.Application.Service
                 {
                     _unitOfWork.CategoryRepository.Remove(category);
                     await _unitOfWork.CommitAsync();
-
                     return ResultDTO.Success();
                 }
                 else
