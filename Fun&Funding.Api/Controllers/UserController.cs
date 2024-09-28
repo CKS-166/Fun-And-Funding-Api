@@ -40,14 +40,14 @@ namespace Fun_Funding.Api.Controllers
             return Ok(response);
         }
         [HttpPatch("info")]
-        //[Authorize]
+        [Authorize]
         public async Task<ActionResult> UpdateUser(UserUpdateRequest userUpdateRequest)
         {
             var response = await _userService.UpdateUser(userUpdateRequest);
             return Ok(response);
         }
         [HttpPatch("status/{id}")]
-        //[Authorize(Roles = Role.Admin)]
+        [Authorize(Roles = Role.Admin)]
         public async Task<IActionResult> ChangeUserStatus([FromRoute] Guid id)
         {
             var response = await _userService.ChangeUserStatus(id);

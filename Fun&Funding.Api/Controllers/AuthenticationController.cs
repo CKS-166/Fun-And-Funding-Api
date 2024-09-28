@@ -1,11 +1,14 @@
-﻿using Fun_Funding.Application.IEmailService;
-using Fun_Funding.Application.IService;
+﻿using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel.Authentication;
 using Fun_Funding.Application.ViewModel.AuthenticationDTO;
 using Fun_Funding.Application.ViewModel.EmailDTO;
 using Fun_Funding.Domain.Constrain;
+using Fun_Funding.Domain.Enum;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
+using LoginRequest = Fun_Funding.Application.ViewModel.AuthenticationDTO.LoginRequest;
+using RegisterRequest = Fun_Funding.Application.ViewModel.Authentication.RegisterRequest;
 
 namespace Fun_Funding.Api.Controllers
 {
@@ -14,12 +17,10 @@ namespace Fun_Funding.Api.Controllers
     public class AuthenticationController : ControllerBase
     {
         private readonly IAuthenticationService _authService;
-        private readonly IEmailService _emailService;
 
-        public AuthenticationController(IAuthenticationService authService, IEmailService emailService)
+        public AuthenticationController(IAuthenticationService authService)
         {
             _authService = authService;
-            _emailService = emailService;
         }
         [HttpPost("login")]
         public async Task<ActionResult<string>> login(LoginRequest loginDTO)
@@ -47,11 +48,17 @@ namespace Fun_Funding.Api.Controllers
             var result = await _authService.RegisterUserAsync(registerModel, new List<string> { Role.GameOwner });
             return Ok(result);
         }
-        [HttpPost("SendMail")]
-        public async Task<IActionResult> SendMail([FromBody] EmailRequest emailRequest)
+        [HttpPost("password")]
+        public async Task<IActionResult> SendResetPasswordEmailAsync([FromQuery] EmailRequest emailRequest)
         {
-            await _emailService.SendEmailAsync(emailRequest.ToEmail, emailRequest.Subject, emailRequest.Body);
-            return Ok("Email sent successfully!");
+            var result = await _authService.SendResetPasswordEmailAsync(emailRequest);
+            return Ok(result);
+        }
+        [HttpPatch("password")]
+        public async Task<IActionResult> ResetPasswordAsync([FromBody] NewPasswordRequest newPasswordRequest)
+        {
+            var result = await _authService.ResetPasswordAsync(newPasswordRequest);
+            return BadRequest(result);
         }
     }
 }

@@ -10,6 +10,7 @@
   <ItemGroup>
     <Folder Include="Database\" />
     <Folder Include="Authentication\" />
+    <Folder Include="Media\" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Fun_Funding.Domain.Enum;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,7 +10,6 @@ namespace Fun_Funding.Application.ViewModel.EmailDTO
     public class EmailRequest
     {
         public string ToEmail { get; set; }
-        public string Subject { get; set; }
-        public string Body { get; set; }
+        public EmailType EmailType { get; set; }
     }
 }
