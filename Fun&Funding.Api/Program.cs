@@ -1,10 +1,11 @@
 using Fun_Funding.Api.Exception;
 using Fun_Funding.Application;
-using Fun_Funding.Application.IEmailService;
+using Fun_Funding.Application.IEmailServices;
 using Fun_Funding.Domain.EmailModel;
 using Fun_Funding.Infrastructure;
 using Fun_Funding.Infrastructure.Dependency_Injection;
 using Fun_Funding.Infrastructure.EmailService;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.OpenApi.Models;
 using System.Net.Mail;
 
@@ -92,6 +93,12 @@ namespace Fun_Funding.Api
 
 
             var app = builder.Build();
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(
+        Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).FullName, "Fun&Funding.Infrastructure", "Media")),
+                RequestPath = "/Media"
+            });
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
