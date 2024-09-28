@@ -12,6 +12,7 @@ using Fun_Funding.Application.ViewModel.BankAccountDTO;
 using Fun_Funding.Application.ViewModel.FundingFileDTO;
 using Fun_Funding.Application.ViewModel.PackageDTO;
 using Microsoft.AspNetCore.Http;
+using Fun_Funding.Application.ViewModel.CategoryDTO;
 
 namespace Fun_Funding.Application.ViewModel.FundingProjectDTO
 {
@@ -48,6 +49,8 @@ namespace Fun_Funding.Application.ViewModel.FundingProjectDTO
         public List<FundingFileRequest> FundingFiles { get; set; }
         [Required]
         public string Email { get; set; }
+
+        public List<CategoryProjectRequest> Categories { get; set; }
 
     }
 }

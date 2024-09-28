@@ -41,6 +41,15 @@ namespace Fun_Funding.Application.Service
                     return ResultDTO<FundingProjectResponse>.Fail("Owner not found", 404);
                 }
                 project.User = owner;
+                //validate category
+                foreach (CategoryProjectRequest cate in projectRequest.Categories)
+                {
+                    Category category = _unitOfWork.CategoryRepository.GetById(cate.Id);
+                    if (category == null) {
+                        return ResultDTO<FundingProjectResponse>.Fail("Category not found",404);
+                    }
+                    project.Categories.Add(category);
+                }
                 //validate package amount
                 foreach (PackageAddRequest pack in projectRequest.Packages)
                 {
@@ -149,6 +158,9 @@ namespace Fun_Funding.Application.Service
                 FundingProject project = _unitOfWork.FundingProjectRepository.GetQueryable()
                     .Include(p => p.Packages).ThenInclude(pack => pack.RewardItems)
                     .Include(p => p.SourceFiles)
+                    .Include(p=>p.BankAccount)
+                    .Include(p => p.User)
+                    .AsSplitQuery()
                     .FirstOrDefault(p => p.Id == id);
                 if (project is null)
                 {
