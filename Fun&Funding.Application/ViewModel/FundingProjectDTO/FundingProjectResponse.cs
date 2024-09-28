@@ -9,6 +9,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Fun_Funding.Application.ViewModel.UserDTO;
 
 namespace Fun_Funding.Application.ViewModel.FundingProjectDTO
 {
@@ -28,7 +29,7 @@ namespace Fun_Funding.Application.ViewModel.FundingProjectDTO
         public decimal Balance { get; set; }
         public ProjectStatus Status { get; set; }
 
-        public BankAccountRequest? BankAccount { get; set; }
+        public BankAccountInfoResponse? BankAccount { get; set; }
         //public virtual ICollection<Category> Categories { get; set; }
         public virtual ICollection<PackageResponse> Packages { get; set; }
         //public IFormFile ThumbnailFile { get; set; }
@@ -38,5 +39,7 @@ namespace Fun_Funding.Application.ViewModel.FundingProjectDTO
         public List<FundingFileResponse> FundingFiles { get; set; }
 
         public string Email { get; set; }
+
+        public UserInfoResponse User { get; set; }
     }
 }
