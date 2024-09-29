@@ -5,6 +5,7 @@ using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.CommissionDTO;
 using Fun_Funding.Domain.Entity;
 using Fun_Funding.Domain.Enum;
+using System.Linq.Expressions;
 using System.Net;
 
 namespace Fun_Funding.Application.Service
@@ -65,6 +66,65 @@ namespace Fun_Funding.Application.Service
                     throw new ExceptionError((int)HttpStatusCode.NotFound, "No Commission Fee in Database.");
                 }
 
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
+
+        public async Task<ResultDTO<PaginatedResponse<CommissionFeeResponse>>>
+            GetCommissionFees(ListRequest request, CommissionType? type)
+        {
+            try
+            {
+                Expression<Func<CommissionFee, bool>> filter = null;
+                Expression<Func<CommissionFee, object>> orderBy = c => c.UpdateDate;
+
+                if (!string.IsNullOrEmpty(request.SearchValue))
+                {
+                    filter = c => c.Version.ToLower().Contains(request.SearchValue.ToLower());
+                }
+
+                if (type.HasValue)
+                {
+                    filter = c => c.CommissionType == type;
+                }
+
+                var list = await _unitOfWork.CommissionFeeRepository.GetAllAsync(
+                    filter: filter,
+                    orderBy: orderBy,
+                    isAscending: request.IsAscending.Value,
+                    pageIndex: request.PageIndex,
+                    pageSize: request.PageSize);
+
+                if (list != null)
+                {
+                    var totalItems = _unitOfWork.CommissionFeeRepository.GetAll(filter).Count();
+                    var totalPages = (int)Math.Ceiling((double)totalItems / (int)request.PageSize);
+
+                    IEnumerable<CommissionFeeResponse> commissionFees = _mapper.Map<IEnumerable<CommissionFeeResponse>>(list);
+
+                    PaginatedResponse<CommissionFeeResponse> response = new PaginatedResponse<CommissionFeeResponse>
+                    {
+                        PageSize = request.PageSize.Value,
+                        PageIndex = request.PageIndex.Value,
+                        TotalItems = totalItems,
+                        TotalPages = totalPages,
+                        Items = commissionFees
+                    };
+
+                    return ResultDTO<PaginatedResponse<CommissionFeeResponse>>.Success(response);
+                }
+                else
+                {
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "Commission Fee Not Found.");
+                }
             }
             catch (Exception ex)
             {

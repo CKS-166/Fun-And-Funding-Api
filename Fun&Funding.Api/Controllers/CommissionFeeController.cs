@@ -1,4 +1,5 @@
 ﻿using Fun_Funding.Application.IService;
+using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.CommissionDTO;
 using Fun_Funding.Domain.Enum;
 using Microsoft.AspNetCore.Mvc;
@@ -16,10 +17,17 @@ namespace Fun_Funding.Api.Controllers
             _commissionFeeService = commissionFeeService;
         }
 
-        [HttpGet]
+        [HttpGet("applied-commission-fee")]
         public IActionResult GetAppliedCommissionFee([FromQuery] CommissionType type)
         {
             var response = _commissionFeeService.GetAppliedCommissionFee(type);
+            return Ok(response);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetCommissionFees([FromQuery] ListRequest request, [FromQuery] CommissionType? type)
+        {
+            var response = await _commissionFeeService.GetCommissionFees(request, type);
             return Ok(response);
         }
 
