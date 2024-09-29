@@ -9,5 +9,6 @@ namespace Fun_Funding.Application.IService
         ResultDTO<CommissionFeeResponse> GetAppliedCommissionFee(CommissionType type);
         Task<ResultDTO<CommissionFeeResponse>> UpdateCommsisionFee(Guid id, CommissionFeeUpdateRequest request);
         Task<ResultDTO<CommissionFeeResponse>> CreateCommissionFee(CommissionFeeAddRequest request);
+        Task<ResultDTO<PaginatedResponse<CommissionFeeResponse>>> GetCommissionFees(ListRequest request, CommissionType? type);
     }
 }
