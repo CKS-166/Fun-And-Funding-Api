@@ -81,7 +81,7 @@ namespace Fun_Funding.Application.Service
                 {
                     return ResultDTO<FundingProjectResponse>.Fail("End date must be greater that start date");
                 }
-                if ((project.EndDate - project.StartDate).TotalDays <= minDays || (project.EndDate - project.StartDate).TotalDays >= maxDays)
+                if ((project.EndDate - project.StartDate).TotalDays < minDays || (project.EndDate - project.StartDate).TotalDays > maxDays)
                 {
                     return ResultDTO<FundingProjectResponse>.Fail("Funding campaign length must be at least 1 day and maximum 60 days");
                 }
@@ -188,6 +188,10 @@ namespace Fun_Funding.Application.Service
                 if (existedProject == null)
                 {
                     return ResultDTO<FundingProjectResponse>.Fail("Project not found", 404);
+                }
+                if (existedProject.Status != ProjectStatus.Processing)
+                {
+                    return ResultDTO<FundingProjectResponse>.Fail("Project is not processing");
                 }
                 //update regulations for funding goals and end date
 

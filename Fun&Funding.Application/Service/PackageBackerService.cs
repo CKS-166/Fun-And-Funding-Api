@@ -69,8 +69,10 @@ namespace Fun_Funding.Application.Service
                     IsHidden = false
                 };
 
+                Package donatedPack = _unitOfWork.PackageRepository.GetById(packageBackerRequest.PackageId);
+                donatedPack.LimitQuantity -= 1;
                 await _unitOfWork.PackageBackerRepository.AddAsync(packageBacker);
-
+                _unitOfWork.PackageRepository.Update(donatedPack);
                 // add transaction
                 var description = $"Donation to package: {package.Name}";
                 await _transactionService.CreateTransactionAsync(
