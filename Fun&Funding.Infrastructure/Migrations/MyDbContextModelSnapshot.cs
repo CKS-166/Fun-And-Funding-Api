@@ -471,6 +471,9 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Property<decimal>("RequiredAmount")
                         .HasColumnType("decimal(18, 2)");
 
+                    b.Property<string>("Url")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ProjectId");
