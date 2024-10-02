@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fun_Funding.Infrastructure.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20240926032325_update-mirror")]
-    partial class updatemirror
+    [Migration("20241001113414_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -473,6 +473,9 @@ namespace Fun_Funding.Infrastructure.Migrations
 
                     b.Property<decimal>("RequiredAmount")
                         .HasColumnType("decimal(18, 2)");
+
+                    b.Property<string>("Url")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 

@@ -50,10 +50,18 @@ namespace Fun_Funding.Application.Service
                         return ResultDTO<FundingProjectResponse>.Fail("Category not found",404);
                     }
                     project.Categories.Add(category);
+
+
                 }
                 //validate package amount
+                var packageNames = new HashSet<string>();
                 foreach (PackageAddRequest pack in projectRequest.Packages)
                 {
+                    // Check for duplicate package names
+                    if (!packageNames.Add(pack.Name)) // Add will return false if the name already exists
+                    {
+                        return ResultDTO<FundingProjectResponse>.Fail($"Duplicate package name found: {pack.Name}");
+                    }
                     if (pack.RequiredAmount < 5000)
                     {
                         return ResultDTO<FundingProjectResponse>.Fail("Price for package must be at least 5000");
@@ -122,6 +130,14 @@ namespace Fun_Funding.Application.Service
                 //add iamge into item 
                 foreach (var package in project.Packages)
                 {
+                    var pack = projectRequest.Packages
+                            .FirstOrDefault(p => p.Name == package.Name);
+                    if (pack?.ImageFile != null)
+                    {
+                        var packageImage = _azureService.UploadUrlSingleFiles(pack.ImageFile);
+                        package.Url = packageImage.Result;
+                    }
+
                     foreach (var rewardItem in package.RewardItems)
                     {
                         // Find the corresponding reward item in the request to get its ImageFile
