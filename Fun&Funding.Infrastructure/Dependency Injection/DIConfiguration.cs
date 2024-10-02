@@ -32,6 +32,13 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"),
             b => b.MigrationsAssembly(typeof(DIConfiguration).Assembly.FullName))
             .AddInterceptors(new SoftDeleteInterceptor()), ServiceLifetime.Scoped);
+            // MongoDb
+            service.AddScoped<MongoDBContext>();
+
+            // Register NoSQL repositories
+            service.AddScoped<ILikeRepository, LikeRepository>();
+            service.AddScoped(typeof(IMongoBaseRepository<>), typeof(MongoBaseRepository<>)); // Changed to AddScoped
+
 
             //Identity
             service.AddIdentity<User, IdentityRole<Guid>>()
