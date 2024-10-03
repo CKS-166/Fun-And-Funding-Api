@@ -13,8 +13,8 @@ namespace Fun_Funding.Application.IService
             decimal totalAmount,
             string description,
             TransactionTypes transactionType,
-            Guid packageId,
             Guid walletId,
+            Guid? packageId = null,
             Guid? systemWalletId = null,
             Guid? commissionFeeId = null,
             Guid? orderId = null
