@@ -14,7 +14,6 @@ namespace Fun_Funding.Application.ViewModel.TransactionDTO
         public decimal TotalAmount { get; set; }
         public Guid? PackageId { get; set; }
         public Guid? OrderId { get; set; }
-        public Guid? WalletId { get; set; }
         public Guid? CommissionFeeId { get; set; }
     }
 }

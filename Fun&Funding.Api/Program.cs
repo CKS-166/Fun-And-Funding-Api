@@ -8,6 +8,8 @@ using Fun_Funding.Infrastructure.EmailService;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.OpenApi.Models;
 using System.Net.Mail;
+using Net.payOS;
+using System.Security.Claims;
 
 namespace Fun_Funding.Api
 {
@@ -19,6 +21,32 @@ namespace Fun_Funding.Api
 
             // Add services to the container.
             builder.Services.AddInfrastructure(builder.Configuration);
+
+            builder.Services.AddAuthentication()
+                .AddGoogle(options =>
+                {
+                    options.ClientId = builder.Configuration["Authentication:Google:ClientId"];
+                    options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+                    options.Scope.Add("profile");
+                    options.Events.OnCreatingTicket = (context) =>
+                    {
+                        var picture = context.User.GetProperty("picture").GetString();
+
+                        context.Identity.AddClaim(new Claim("User_avatar", picture));
+
+                        return Task.CompletedTask;
+                    };
+
+                }); 
+
+            PayOS payOS = new PayOS(
+                builder.Configuration["PayOS:PAYOS_CLIENT_ID"] ?? throw new System.Exception("Cannot find environment"),
+                builder.Configuration["PayOS:PAYOS_API_KEY"] ?? throw new System.Exception("Cannot find environment"),
+                builder.Configuration["PayOS:PAYOS_CHECKSUM_KEY"] ?? throw new System.Exception("Cannot find environment")
+                );
+
+            builder.Services.AddSingleton(payOS);
+
             //add CORS
             builder.Services.AddCors(p => p.AddPolicy("MyCors", build =>
             {

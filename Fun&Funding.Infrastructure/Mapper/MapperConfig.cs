@@ -6,8 +6,10 @@ using Fun_Funding.Application.ViewModel.FundingFileDTO;
 using Fun_Funding.Application.ViewModel.FundingProjectDTO;
 using Fun_Funding.Application.ViewModel.PackageDTO;
 using Fun_Funding.Application.ViewModel.RewardItemDTO;
+using Fun_Funding.Application.ViewModel.TransactionDTO;
 using Fun_Funding.Application.ViewModel.UserDTO;
 using Fun_Funding.Application.ViewModel.WalletDTO;
+using Fun_Funding.Application.ViewModel.WithdrawDTO;
 using Fun_Funding.Domain.Entity;
 
 namespace Fun_Funding.Infrastructure.Mapper
@@ -77,6 +79,12 @@ namespace Fun_Funding.Infrastructure.Mapper
         {
             //WalletInfoResponse -> Wallet
             CreateMap<WalletInfoResponse, Wallet>()
+                .ForMember(des => des.Transactions, src => src.MapFrom(x => x.Transactions))
+                .ForMember(des => des.WithdrawRequests, src => src.MapFrom(x => x.WithdrawRequests))
+                .ReverseMap();
+            CreateMap<TransactionInfoResponse, Fun_Funding.Domain.Entity.Transaction>()
+                .ReverseMap();
+            CreateMap<WithdrawResponse, WithdrawRequest>()
                 .ReverseMap();
         }
     }

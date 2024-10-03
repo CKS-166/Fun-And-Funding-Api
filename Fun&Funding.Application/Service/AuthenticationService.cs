@@ -6,15 +6,19 @@ using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.Authentication;
 using Fun_Funding.Application.ViewModel.AuthenticationDTO;
 using Fun_Funding.Application.ViewModel.EmailDTO;
+using Fun_Funding.Domain.Constrain;
 using Fun_Funding.Domain.Entity;
 using Fun_Funding.Domain.Enum;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.Json;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Reflection.Metadata.Ecma335;
 using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
@@ -218,5 +222,63 @@ namespace Fun_Funding.Application.Service
                 throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
             }
         }
+
+        public async Task<ResultDTO<string>> LoginWithGoogle(string email, string fullName, string avatarUrl, string? registeredRole)
+        {
+            //var user = await _unitOfWork.UserRepository.GetQueryable().FirstOrDefaultAsync(u => u.Email == email);
+            var user = await _unitOfWork.UserRepository.GetAsync(x => x.Email == email);
+
+            if (user == null)
+            {
+                var userAvatar = new UserFile
+                {
+                    Name = "User avatar",
+                    URL = avatarUrl,
+                    Filetype = FileType.UserAvatar
+                };
+
+                user = new User
+                {
+                    Id = Guid.NewGuid(),
+                    UserName = email,
+                    Email = email,
+                    FullName = fullName,
+                    File = userAvatar,
+                    CreatedDate = DateTime.UtcNow,
+                    UserStatus = UserStatus.Active,
+                    NormalizedEmail = email.ToUpper(),
+                    TwoFactorEnabled = true,
+                };
+
+
+                var result = await _userManager.CreateAsync(user);
+                if (!result.Succeeded)
+                {
+                    return ResultDTO<string>.Fail("Error creating new user with google!");
+                }
+                await _userManager.AddToRoleAsync(user, registeredRole);
+            }
+
+            var userRoles = await _userManager.GetRolesAsync(user);
+
+            var token = _tokenGenerator.GenerateToken(user, userRoles);
+
+            return ResultDTO<string>.Success(token, "Login with google successfully!");
+        }
+
+        public async Task<ResultDTO<bool>> CheckUserExistByEmail(string email)
+        {
+            try
+            {
+                var user = _unitOfWork.UserRepository.GetAsync(x => x.Email == email);
+                return ResultDTO<bool>.Success(user != null);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+
     }
 }
