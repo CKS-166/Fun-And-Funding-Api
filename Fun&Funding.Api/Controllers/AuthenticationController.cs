@@ -78,6 +78,11 @@ namespace Fun_Funding.Api.Controllers
             if (!string.IsNullOrEmpty(registeredRole))
                 properties.Items.Add("registeredRole", registeredRole.ToString());
 
+            if (registeredRole == null)
+            {
+                return Redirect("http://localhost:5173/choose-project-plan");
+            }
+
             return Challenge(properties, GoogleDefaults.AuthenticationScheme);
         }
         [HttpGet("google-response")]
