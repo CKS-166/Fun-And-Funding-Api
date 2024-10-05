@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MongoDB.Driver;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -14,7 +15,8 @@ namespace Fun_Funding.Application.IRepository
         T Get(Expression<Func<T, bool>> filter);
         List<T> GetList(Expression<Func<T, bool>> filter);
         void Remove(Expression<Func<T, bool>> filter);
-        void Update(Expression<Func<T, bool>> filter, T entity);
+        void Update(Expression<Func<T, bool>> filter, UpdateDefinition<T> updateDefinition);
+        public void SoftRemove(Expression<Func<T, bool>> filter, UpdateDefinition<T> updateDefinition);
     }
 
 }

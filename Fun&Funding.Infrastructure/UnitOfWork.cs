@@ -8,8 +8,11 @@ namespace Fun_Funding.Infrastructure
     public class UnitOfWork : IUnitOfWork
     {
         private readonly MyDbContext _dbContext;
+        private readonly MongoDBContext _mongoDBContext;
 
         // Repositories
+        private ILikeRepository _likeRepository;
+        private ICommentRepository _commentRepository;
         private IBankAccountRepository _bankAccountRepository;
         private ICategoryRepository _categoryRepository;
         private IOrderDetailRepository _orderDetailRepository;
@@ -26,9 +29,10 @@ namespace Fun_Funding.Infrastructure
         private IWithdrawRequestRepository _withdrawRequestRepository;
         private ICommissionFeeRepository _commissionFeeRepository;
 
-        public UnitOfWork(MyDbContext dbContext)
+        public UnitOfWork(MyDbContext dbContext, MongoDBContext mongoDBContext)
         {
             _dbContext = dbContext;
+            _mongoDBContext = mongoDBContext;
         }
 
         // Repository properties
@@ -149,6 +153,21 @@ namespace Fun_Funding.Infrastructure
             get
             {
                 return _commissionFeeRepository = _commissionFeeRepository ?? new CommissionFeeRepository(_dbContext);
+            }
+        }
+
+        public ILikeRepository likeRepository
+        {
+            get
+            {
+                return _likeRepository = _likeRepository ?? new LikeRepository(_mongoDBContext);
+            }
+        }
+
+        public ICommentRepository commentRepository {
+            get
+            {
+                return _commentRepository = _commentRepository ?? new CommentRepository(_mongoDBContext);
             }
         }
 

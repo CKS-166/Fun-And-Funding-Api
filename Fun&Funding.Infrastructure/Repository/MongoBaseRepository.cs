@@ -32,28 +32,36 @@ namespace Fun_Funding.Infrastructure.Repository
             return _collection.Find(filter).FirstOrDefault();
         }
 
-        // Get all documents in the collection
-        public List<T> GetAll()
-        {
-            return _collection.Find(FilterDefinition<T>.Empty).ToList();
-        }
-
-        // Get a list of documents based on a filter
         public List<T> GetList(Expression<Func<T, bool>> filter)
         {
+            var combinedFilter = Builders<T>.Filter.And(filter, Builders<T>.Filter.Eq("IsDelete", false));
+            return _collection.Find(combinedFilter).ToList();
+        }
+
+        public List<T> GetAll()
+        {
+            var filter = Builders<T>.Filter.Eq("IsDelete", false);
             return _collection.Find(filter).ToList();
         }
+
 
         // Remove a document based on a filter
         public void Remove(Expression<Func<T, bool>> filter)
         {
             _collection.DeleteOne(filter);
+            
         }
 
         // Update a document based on a filter
-        public void Update(Expression<Func<T, bool>> filter, T entity)
+        public void Update(Expression<Func<T, bool>> filter, UpdateDefinition<T> updateDefinition)
         {
-            _collection.ReplaceOne(filter, entity);
+            _collection.UpdateOne(filter, updateDefinition);
+        }
+
+
+        public void SoftRemove(Expression<Func<T, bool>> filter, UpdateDefinition<T> updateDefinition)
+        {
+            _collection.UpdateOne(filter, updateDefinition);
         }
     }
 

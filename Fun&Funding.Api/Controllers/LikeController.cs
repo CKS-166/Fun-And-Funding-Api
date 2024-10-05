@@ -1,6 +1,12 @@
-﻿using Fun_Funding.Application.IRepository;
+﻿using Fun_Funding.Api.Exception;
+using Fun_Funding.Application;
+using Fun_Funding.Application.IRepository;
+using Fun_Funding.Application.IService;
+using Fun_Funding.Application.ViewModel.LikeDTO;
 using Fun_Funding.Domain.Entity.NoSqlEntities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Driver;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -10,79 +16,58 @@ namespace Fun_Funding.Api.Controllers
     [ApiController]
     public class LikeController : ControllerBase
     {
-        private readonly ILikeRepository _likeRepository;
+        private readonly ILikeService _likeService;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public LikeController(ILikeRepository likeRepository)
+        public LikeController( ILikeService likeService,IUnitOfWork unitOfWork)
         {
-            _likeRepository = likeRepository;
+            _likeService = likeService;
+            _unitOfWork = unitOfWork;
         }
 
-        // GET: api/like
-        [HttpGet]
-        public ActionResult<IEnumerable<Like>> Get()
+        [HttpGet("get-all-liked-projects")]
+        public async Task<IActionResult> GetAll()
         {
-            var likes = _likeRepository.GetAll(); // Get all likes from the repository
-            return Ok(likes);
+            var result = await _likeService.GetAll();
+            return Ok(result);
         }
-
-        // GET api/like/{id}
-        [HttpGet("{id}")]
-        public ActionResult<Like> Get(Guid id)
+        [HttpPost("like-project")]
+        public async Task<IActionResult> likeProject([FromBody] LikeRequest likeRequest)
         {
-            var like = _likeRepository.Get(l => l.Id == id); // Get like by ID
-            if (like == null)
+            var result = await _likeService.LikeProject(likeRequest);
+            if (!result._isSuccess)
             {
-                return NotFound(); // Return 404 if not found
+                return BadRequest(result._message);
             }
-            return Ok(like);
+            return Ok(result);
         }
-
-        // POST api/like
-        [HttpPost]
-        public ActionResult<Like> Post([FromBody] Like like)
+        [HttpGet("get-like/{id}")]
+        public async Task<IActionResult> GetProjectLike(Guid id)
         {
-            if (like == null)
+            try
             {
-                return BadRequest("Like object is null."); // Return 400 if the like object is null
+                var result = _likeService.GetLikesByProject(id);
+                return Ok(result);
             }
-            like.Id = Guid.NewGuid(); // Generate a new ID for the like
-            like.CreateDate = DateTime.UtcNow; // Set the creation date
-            _likeRepository.Create(like); // Create a new like in the repository
-
-            return CreatedAtAction(nameof(Get), new { id = like.Id }, like); // Return 201 with the created like
+            catch (ExceptionError ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
-
-        // PUT api/like/{id}
-        [HttpPut("{id}")]
-        public ActionResult Put(Guid id, [FromBody] Like like)
+        [HttpGet("check-user-like/{id}")]
+        [Authorize]
+        public async Task<IActionResult> CheckUserLike(Guid id)
         {
-            if (like == null || like.Id != id)
+            try
             {
-                return BadRequest("Like object is null or ID mismatch."); // Return 400 if the object is null or ID doesn't match
+                var result = _likeService.CheckUserLike(id);
+                return Ok(result);
             }
-
-            var existingLike = _likeRepository.Get(l => l.Id == id); // Check if like exists
-            if (existingLike == null)
+            catch (ExceptionError ex)
             {
-                return NotFound(); // Return 404 if not found
+                return BadRequest(ex.Message);
             }
-
-            _likeRepository.Update(l => l.Id == id, like); // Update the like in the repository
-            return NoContent(); // Return 204 No Content
         }
 
-        // DELETE api/like/{id}
-        [HttpDelete("{id}")]
-        public ActionResult Delete(Guid id)
-        {
-            var existingLike = _likeRepository.Get(l => l.Id == id); // Check if like exists
-            if (existingLike == null)
-            {
-                return NotFound(); // Return 404 if not found
-            }
-
-            _likeRepository.Remove(l => l.Id == id); // Remove the like from the repository
-            return NoContent(); // Return 204 No Content
-        }
     }
 }
