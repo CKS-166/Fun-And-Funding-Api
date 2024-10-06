@@ -53,5 +53,12 @@ namespace Fun_Funding.Api.Controllers
             var response = await _userService.ChangeUserStatus(id);
             return Ok(response);
         }
+        [HttpPatch("password")]
+        [Authorize]
+        public async Task<IActionResult> ChangeUserPassword(UserChangePasswordRequest userChangePasswordRequest)
+        {
+            var response = await _userService.ChangeUserPassword(userChangePasswordRequest);
+            return Ok(response);
+        }
     }
 }
