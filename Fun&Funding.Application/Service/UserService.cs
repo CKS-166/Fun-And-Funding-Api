@@ -227,10 +227,10 @@ namespace Fun_Funding.Application.Service
                 {
                     throw new ExceptionError((int)HttpStatusCode.NotFound, "User not found.");
                 }
-                if (user.DayOfBirth != null)
+                if (userUpdateRequest.DayOfBirth != null)
                 {
                     var tenYearsAgo = DateTime.Today.AddYears(-10);
-                    if (user.DayOfBirth > tenYearsAgo)
+                    if (userUpdateRequest.DayOfBirth > tenYearsAgo)
                     {
                         throw new ExceptionError((int)HttpStatusCode.BadRequest, "User must be at least 10 years old.");
                     }
