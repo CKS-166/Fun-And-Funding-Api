@@ -11,7 +11,7 @@ namespace Fun_Funding.Domain.Entity
     {
         public string KeyString { get; set; }
         public KeyStatus Status { get; set; }
-        public MarketingProject MarketingProject { get; set; }
+        public MarketplaceProject MarketingProject { get; set; }
 
     }
 }

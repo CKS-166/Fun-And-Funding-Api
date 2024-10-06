@@ -1,6 +1,7 @@
 ﻿using Fun_Funding.Application.IRepository;
 using Fun_Funding.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1;
 using System.Linq.Expressions;
 
 namespace Fun_Funding.Infrastructure.Repository
@@ -116,7 +117,35 @@ namespace Fun_Funding.Infrastructure.Repository
         {
             _context.Remove(entity);
         }
+        // Retrieve non-deleted entities
+        public IEnumerable<T> GetAllNonDeleted()
+        {
+            return _entitySet.AsNoTracking().Where(e => EF.Property<bool>(e, "IsDeleted") == false).ToList();
+        }
 
+        // Asynchronously retrieve non-deleted entities
+        public async Task<IEnumerable<T>> GetAllNonDeletedAsync(CancellationToken cancellationToken = default)
+        {
+            return await _entitySet.AsNoTracking()
+                .Where(e => EF.Property<bool>(e, "IsDeleted") == false)
+                .ToListAsync(cancellationToken);
+        }
+
+        // Get a single non-deleted entity by a condition
+        public T GetNonDeleted(Expression<Func<T, bool>> predicate)
+        {
+            return _entitySet.AsNoTracking()
+                .Where(e => EF.Property<bool>(e, "IsDeleted") == false)
+                .FirstOrDefault(predicate);
+        }
+
+        // Asynchronously get a single non-deleted entity by a condition
+        public async Task<T> GetNonDeletedAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
+        {
+            return await _entitySet.AsNoTracking()
+                .Where(e => EF.Property<bool>(e, "IsDeleted") == false)
+                .FirstOrDefaultAsync(predicate, cancellationToken);
+        }
         public virtual void RemoveRange(IEnumerable<T> entities)
         {
             _context.RemoveRange(entities);

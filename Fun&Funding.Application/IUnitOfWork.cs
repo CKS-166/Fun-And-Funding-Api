@@ -5,6 +5,8 @@ namespace Fun_Funding.Application
     public interface IUnitOfWork
     {
         // Repository interfaces
+        ILikeRepository likeRepository { get; }
+        ICommentRepository commentRepository { get; }
         IBankAccountRepository BankAccountRepository { get; }
         ICategoryRepository CategoryRepository { get; }
         IOrderDetailRepository OrderDetailRepository { get; }
@@ -20,6 +22,13 @@ namespace Fun_Funding.Application
         IWalletRepository WalletRepository { get; }
         IWithdrawRequestRepository WithdrawRequestRepository { get; }
         ICommissionFeeRepository CommissionFeeRepository { get; }
+        IProjectCouponRepository ProjectCouponRepository { get; }
+        IMilestoneRepository MilestoneRepository { get; }
+        IProjectMilestoneBackerRepository ProjectMilestoneBackerRepository { get; }
+        IProjectMilestoneRepository ProjectMilestoneRepository { get; }
+        IRequirementRepository RequirementRepository { get; }
+        IProjectMilestoneRequirementRepository ProjectMilestoneRequirementRepository { get; }
+        IProjectRequirementFileRepository ProjectRequirementFileRepository { get; }
 
         // Methods for committing and rolling back
         void Commit();

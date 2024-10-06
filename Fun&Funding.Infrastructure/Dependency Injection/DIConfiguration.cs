@@ -32,6 +32,13 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"),
             b => b.MigrationsAssembly(typeof(DIConfiguration).Assembly.FullName))
             .AddInterceptors(new SoftDeleteInterceptor()), ServiceLifetime.Scoped);
+            // MongoDb
+            service.AddScoped<MongoDBContext>();
+
+            // Register NoSQL repositories
+            service.AddScoped<ILikeRepository, LikeRepository>();
+            service.AddScoped(typeof(IMongoBaseRepository<>), typeof(MongoBaseRepository<>)); // Changed to AddScoped
+
 
             //Identity
             service.AddIdentity<User, IdentityRole<Guid>>()
@@ -90,6 +97,14 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             service.AddScoped<IWalletRepository, WalletRepository>();
             service.AddScoped<IWithdrawRequestRepository, WithdrawRequestRepository>();
             service.AddScoped<ICommissionFeeRepository, CommissionFeeRepository>();
+            service.AddScoped<ICommentRepository, CommentRepository>();
+            service.AddScoped<IProjectCouponRepository, ProjectCouponRepository>();
+            service.AddScoped<IMilestoneRepository, MilestoneRepository>();
+            service.AddScoped<IProjectMilestoneBackerRepository, ProjectMilestoneBackerRepository>();
+            service.AddScoped<IProjectMilestoneRepository, ProjectMilestoneRepository>();
+            service.AddScoped<IRequirementRepository, RequirementRepository>();
+            service.AddScoped<IProjectMilestoneRequirementRepository, ProjectMilestoneRequirementRepository>();
+            service.AddScoped<IProjectRequirementFileRepository, ProjectRequirementFileRepository>();
             #endregion
             #region Sevices
             service.AddScoped<IAuthenticationService, AuthenticationService>();
@@ -98,6 +113,9 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             service.AddScoped<IFundingProjectService, FundingProjectManagementService>();
             service.AddScoped<ICategoryService, CategoryService>();
             service.AddScoped<ICommissionFeeService, CommissionFeeService>();
+            service.AddScoped<ILikeService, LikeService>();
+            service.AddScoped<ICommentService, CommentService>();
+            
             #endregion
             return service;
 
