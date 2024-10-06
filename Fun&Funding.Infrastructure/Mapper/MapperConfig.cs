@@ -67,7 +67,6 @@ namespace Fun_Funding.Infrastructure.Mapper
             CreateMap<UserInfoResponse, User>()
                 .ForPath(des => des.File.URL, src => src.MapFrom(x => x.Avatar))
                 .ForMember(des => des.Wallet, src => src.MapFrom(x => x.Wallet))
-                .ForMember(des => des.UserName, src => src.MapFrom(x => x.UserName))
                 .ReverseMap();
         }
 
