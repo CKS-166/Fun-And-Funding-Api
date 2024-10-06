@@ -97,6 +97,13 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             service.AddScoped<IWithdrawRequestRepository, WithdrawRequestRepository>();
             service.AddScoped<ICommissionFeeRepository, CommissionFeeRepository>();
             service.AddScoped<ICommentRepository, CommentRepository>();
+            service.AddScoped<IProjectCouponRepository, ProjectCouponRepository>();
+            service.AddScoped<IMilestoneRepository, MilestoneRepository>();
+            service.AddScoped<IProjectMilestoneBackerRepository, ProjectMilestoneBackerRepository>();
+            service.AddScoped<IProjectMilestoneRepository, ProjectMilestoneRepository>();
+            service.AddScoped<IRequirementRepository, RequirementRepository>();
+            service.AddScoped<IProjectMilestoneRequirementRepository, ProjectMilestoneRequirementRepository>();
+            service.AddScoped<IProjectRequirementFileRepository, ProjectRequirementFileRepository>();
             #endregion
             #region Sevices
             service.AddScoped<IAuthenticationService, AuthenticationService>();

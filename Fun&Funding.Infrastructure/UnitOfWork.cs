@@ -29,6 +29,14 @@ namespace Fun_Funding.Infrastructure
         private IWithdrawRequestRepository _withdrawRequestRepository;
         private ICommissionFeeRepository _commissionFeeRepository;
 
+        private IProjectCouponRepository _projectCouponRepository;
+        private IMilestoneRepository _milestoneRepository;
+        private IProjectMilestoneBackerRepository _projectMilestoneBackerRepository;
+        private IProjectMilestoneRepository _projectMilestoneRepository;
+        private IRequirementRepository _requirementRepository;
+        private IProjectMilestoneRequirementRepository _projectMilestoneRequirementRepository;
+        private IProjectRequirementFileRepository _projectRequirementFileRepository;
+
         public UnitOfWork(MyDbContext dbContext, MongoDBContext mongoDBContext)
         {
             _dbContext = dbContext;
@@ -170,6 +178,28 @@ namespace Fun_Funding.Infrastructure
                 return _commentRepository = _commentRepository ?? new CommentRepository(_mongoDBContext);
             }
         }
+
+        public IProjectCouponRepository ProjectCouponRepository =>
+       _projectCouponRepository ??= new ProjectCouponRepository(_dbContext);
+
+        public IMilestoneRepository MilestoneRepository =>
+            _milestoneRepository ??= new MilestoneRepository(_dbContext);
+
+        public IProjectMilestoneRepository ProjectMilestoneRepository =>
+            _projectMilestoneRepository ??= new ProjectMilestoneRepository(_dbContext);
+
+        public IRequirementRepository RequirementRepository =>
+            _requirementRepository ??= new RequirementRepository(_dbContext);
+
+        public IProjectMilestoneRequirementRepository ProjectMilestoneRequirementRepository =>
+            _projectMilestoneRequirementRepository ??= new ProjectMilestoneRequirementRepository(_dbContext);
+
+        public IProjectRequirementFileRepository ProjectRequirementFileRepository =>
+            _projectRequirementFileRepository ??= new ProjectRequirementFileRepository(_dbContext);
+
+        public IProjectMilestoneBackerRepository ProjectMilestoneBackerRepository =>
+            _projectMilestoneBackerRepository ??= new ProjectMilestoneBackerRepository(_dbContext);
+
 
         // Commit and rollback methods
         public void Commit()

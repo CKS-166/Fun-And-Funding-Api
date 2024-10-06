@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Fun_Funding.Domain.Entity
 {
-    public class MarketingFile : BaseEntity
+    public class MarketplaceFile : BaseEntity
     {
         public string Name { get; set; }
         public string URL { get; set; }

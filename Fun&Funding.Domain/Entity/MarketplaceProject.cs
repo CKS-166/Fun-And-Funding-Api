@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Fun_Funding.Domain.Entity
 {
-    public class MarketingProject : BaseEntity
+    public class MarketplaceProject : BaseEntity
     {
         public string Introduction {  get; set; }
         public string Name { get; set; }
@@ -19,8 +19,8 @@ namespace Fun_Funding.Domain.Entity
 
         public FundingProject FundingProject { get; set; }
         public Guid FundingProjectId { get; set; }
-        public virtual ICollection<GamePlatform> GamePlatforms { get; set; }
         public virtual ICollection<DigitalKey> DigitalKeys { get; set; }
-        public virtual ICollection<MarketingFile> MarketingFiles { get; set; }
+        public virtual ICollection<MarketplaceFile> MarketingFiles { get; set; }
+        public virtual ICollection<ProjectCoupon> ProjectCoupons { get; set; }
     }
 }
