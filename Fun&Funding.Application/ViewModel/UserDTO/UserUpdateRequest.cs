@@ -9,11 +9,13 @@ namespace Fun_Funding.Application.ViewModel.UserDTO
 {
     public class UserUpdateRequest
     {
+        public string? UserName { get; set; }
         public string? FullName { get; set; }
         public string? Address { get; set; }
         public string? Bio { get; set; }
         public Gender? Gender { get; set; }
         public DateTime? DayOfBirth { get; set; }
         public UserStatus? UserStatus { get; set; }
+        public string? PhoneNumber { get; set; }
     }
 }

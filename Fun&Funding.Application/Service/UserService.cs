@@ -227,6 +227,14 @@ namespace Fun_Funding.Application.Service
                 {
                     throw new ExceptionError((int)HttpStatusCode.NotFound, "User not found.");
                 }
+                if (user.DayOfBirth != null)
+                {
+                    var tenYearsAgo = DateTime.Today.AddYears(-10);
+                    if (user.DayOfBirth > tenYearsAgo)
+                    {
+                        throw new ExceptionError((int)HttpStatusCode.BadRequest, "User must be at least 10 years old.");
+                    }
+                }
                 _mapper.Map(userUpdateRequest, user);
                 _unitOfWork.UserRepository.Update(user);
                 await _unitOfWork.CommitAsync();
@@ -279,5 +287,56 @@ namespace Fun_Funding.Application.Service
                 throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
             }
         }
+        public async Task<ResultDTO<string>> ChangeUserPassword(UserChangePasswordRequest userChangePasswordRequest)
+        {
+            try
+            {
+                if (_claimsPrincipal == null || !_claimsPrincipal.Identity.IsAuthenticated)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.Unauthorized, "User not authenticated.");
+                }
+
+                var userEmailClaims = _claimsPrincipal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email);
+                if (userEmailClaims == null)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "User not found.");
+                }
+
+                var userEmail = userEmailClaims.Value;
+                User user = await _unitOfWork.UserRepository.GetAsync(x => x.Email == userEmail);
+                if (user == null)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "User not found.");
+                }
+
+                if (userChangePasswordRequest.NewPassword != userChangePasswordRequest.ConfirmPassword)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "New password and confirmation password do not match.");
+                }
+
+                var result = await _userManager.ChangePasswordAsync(user, userChangePasswordRequest.OldPassword, userChangePasswordRequest.NewPassword);
+
+                if (!result.Succeeded)
+                {
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    throw new ExceptionError((int)HttpStatusCode.BadRequest, $"Password change failed: {errors}");
+                }
+
+                _unitOfWork.UserRepository.Update(user);
+                await _unitOfWork.CommitAsync();
+
+                return ResultDTO<string>.Success("", "Password updated successfully");
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
+
     }
 }

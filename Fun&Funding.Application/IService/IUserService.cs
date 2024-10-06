@@ -15,5 +15,6 @@ namespace Fun_Funding.Application.IService
         Task<ResultDTO<UserInfoResponse>> GetUserInfoById(Guid id);
         Task<ResultDTO<string>> UpdateUser(UserUpdateRequest userUpdateRequest);
         Task<ResultDTO<UserInfoResponse>> ChangeUserStatus(Guid id);
+        Task<ResultDTO<string>> ChangeUserPassword(UserChangePasswordRequest userChangePasswordRequest);
     }
 }
