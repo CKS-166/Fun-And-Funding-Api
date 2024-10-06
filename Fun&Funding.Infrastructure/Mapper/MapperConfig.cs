@@ -21,6 +21,8 @@ namespace Fun_Funding.Infrastructure.Mapper
             MappingFundingProject();
             MappingUser();
             MappingWallet();
+            MappingCategory();
+            MappingCommissionFee();
         }
         public void MappingFundingProject()
         {
@@ -47,19 +49,12 @@ namespace Fun_Funding.Infrastructure.Mapper
             CreateMap<FundingProjectResponse, FundingProject>()
                 .ForMember(des => des.BankAccount, src => src.MapFrom(x => x.BankAccount))
                 .ForMember(des => des.User, src => src.MapFrom(x => x.User))
-                .ForMember(des =>des.SourceFiles, src => src.MapFrom(x => x.FundingFiles))
-                .ForMember(des => des.Packages, src => src.MapFrom(x => x.Packages)).ReverseMap();            
+                .ForMember(des => des.SourceFiles, src => src.MapFrom(x => x.FundingFiles))
+                .ForMember(des => des.Packages, src => src.MapFrom(x => x.Packages)).ReverseMap();
             CreateMap<FundingProjectUpdateRequest, FundingProject>()
                 .ForMember(des => des.BankAccount, src => src.MapFrom(x => x.BankAccount))
                 .ForMember(des => des.Packages, src => src.MapFrom(x => x.Packages))
                 .ReverseMap();
-
-            CreateMap<Category, CategoryResponse>().ReverseMap();
-            CreateMap<CategoryRequest, Category>().ReverseMap();
-
-            CreateMap<CommissionFee, CommissionFeeResponse>().ReverseMap();
-            CreateMap<CommissionFeeAddRequest, CommissionFee>().ReverseMap();
-            CreateMap<CommissionFeeUpdateRequest, CommissionFee>().ReverseMap();
         }
 
         public void MappingUser()
@@ -72,6 +67,7 @@ namespace Fun_Funding.Infrastructure.Mapper
             CreateMap<UserInfoResponse, User>()
                 .ForPath(des => des.File.URL, src => src.MapFrom(x => x.Avatar))
                 .ForMember(des => des.Wallet, src => src.MapFrom(x => x.Wallet))
+                .ForMember(des => des.UserName, src => src.MapFrom(x => x.UserName))
                 .ReverseMap();
         }
 
@@ -86,6 +82,19 @@ namespace Fun_Funding.Infrastructure.Mapper
                 .ReverseMap();
             CreateMap<WithdrawResponse, WithdrawRequest>()
                 .ReverseMap();
+        }
+
+        public void MappingCategory()
+        {
+            CreateMap<Category, CategoryResponse>().ReverseMap();
+            CreateMap<CategoryRequest, Category>().ReverseMap();
+        }
+
+        public void MappingCommissionFee()
+        {
+            CreateMap<CommissionFee, CommissionFeeResponse>().ReverseMap();
+            CreateMap<CommissionFeeAddRequest, CommissionFee>().ReverseMap();
+            CreateMap<CommissionFeeUpdateRequest, CommissionFee>().ReverseMap();
         }
     }
 }
