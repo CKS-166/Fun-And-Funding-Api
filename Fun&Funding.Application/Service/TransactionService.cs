@@ -22,8 +22,8 @@ namespace Fun_Funding.Application.Service
             decimal totalAmount,
             string description,
             TransactionTypes transactionType,
-            Guid packageId,
             Guid walletId,
+            Guid? packageId,
             Guid? systemWalletId = null,
             Guid? commissionFeeId = null,
             Guid? orderId = null
@@ -40,7 +40,8 @@ namespace Fun_Funding.Application.Service
                 Wallet = wallet,
                 SystemWalletId = systemWalletId,
                 CommissionFeeId = commissionFeeId,
-                OrderId = orderId ?? Guid.Empty
+                OrderId = orderId,
+                CreatedDate = DateTime.UtcNow,
             };
 
             await _unitOfWork.TransactionRepository.AddAsync(transaction);

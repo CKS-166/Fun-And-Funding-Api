@@ -17,5 +17,7 @@ namespace Fun_Funding.Application.IService
         Task<ResultDTO<string>> LoginAsync(LoginRequest loginDTO);
         Task<ResultDTO<string>> SendResetPasswordEmailAsync(EmailRequest emailRequest);
         Task<ResultDTO<string>> ResetPasswordAsync(NewPasswordRequest newPasswordRequest);
+        Task<ResultDTO<string>> LoginWithGoogle(string email, string fullName, string avatarUrl, string? registeredRole);
+        Task<ResultDTO<bool>> CheckUserExistByEmail(string email);
     }
 }

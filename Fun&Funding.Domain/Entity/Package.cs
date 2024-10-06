@@ -13,6 +13,8 @@ namespace Fun_Funding.Domain.Entity
     {
         public string? Name { get; set; }
         public string? Description { get; set; }
+        public string? Url { get; set; }
+
         [Range(0, (double)decimal.MaxValue)]
         [Column(TypeName = "decimal(18, 2)")]
         public decimal RequiredAmount { get; set; }

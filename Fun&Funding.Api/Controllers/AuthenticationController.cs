@@ -4,11 +4,16 @@ using Fun_Funding.Application.ViewModel.AuthenticationDTO;
 using Fun_Funding.Application.ViewModel.EmailDTO;
 using Fun_Funding.Domain.Constrain;
 using Fun_Funding.Domain.Enum;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using LoginRequest = Fun_Funding.Application.ViewModel.AuthenticationDTO.LoginRequest;
 using RegisterRequest = Fun_Funding.Application.ViewModel.Authentication.RegisterRequest;
+using Microsoft.AspNetCore.Http.HttpResults;
+using System.Security.Claims;
+using Newtonsoft.Json;
 
 namespace Fun_Funding.Api.Controllers
 {
@@ -16,9 +21,9 @@ namespace Fun_Funding.Api.Controllers
     [ApiController]
     public class AuthenticationController : ControllerBase
     {
-        private readonly IAuthenticationService _authService;
+        private readonly Application.IService.IAuthenticationService _authService;
 
-        public AuthenticationController(IAuthenticationService authService)
+        public AuthenticationController(Application.IService.IAuthenticationService authService)
         {
             _authService = authService;
         }
@@ -60,5 +65,52 @@ namespace Fun_Funding.Api.Controllers
             var result = await _authService.ResetPasswordAsync(newPasswordRequest);
             return BadRequest(result);
         }
-    }
+        [HttpGet("signin-google")]
+        public IActionResult SignInGoogle(string? registeredRole = null)
+        {
+            var redirectUrl = Url.Action(nameof(GoogleResponse), "Authentication");
+            var properties = new AuthenticationProperties { RedirectUri = redirectUrl,
+                Items = { 
+                    { "prompt", "consent" },
+                }
+            };
+
+            if (!string.IsNullOrEmpty(registeredRole))
+                properties.Items.Add("registeredRole", registeredRole.ToString());
+
+            return Challenge(properties, GoogleDefaults.AuthenticationScheme);
+        }
+        [HttpGet("google-response")]
+        public async Task<IActionResult> GoogleResponse()
+        {
+            var authenticateResult = await HttpContext.AuthenticateAsync(GoogleDefaults.AuthenticationScheme);
+            if (!authenticateResult.Succeeded || authenticateResult.Principal == null)
+                return Unauthorized();
+            var claims = authenticateResult.Principal;
+            var email = claims.FindFirst(ClaimTypes.Email)?.Value;
+            var fullName = claims.FindFirst(ClaimTypes.Name)?.Value;
+            var avatarUrl = claims.FindFirst(c => c.Type == "User_avatar")?.Value;
+
+            //if (authenticateResult.Properties.Items.TryGetValue("isRegistered", out var customParam))
+            //{
+            //    Console.WriteLine($"Custom Parameter: {customParam}");
+            //}
+
+            var registeredRole = authenticateResult.Properties.Items.FirstOrDefault(i => i.Key == "registeredRole").Value;
+
+            var loginResult = await _authService.LoginWithGoogle(email, fullName, avatarUrl, registeredRole);
+
+            return Ok(loginResult);
+        }
+
+        [HttpGet("check-exist/{email}")]
+        public async Task<IActionResult> CheckUserExistByEmail(string email)
+        {
+            var checkResult = await _authService.CheckUserExistByEmail(email);
+
+            return Ok(checkResult);
+        }
+
+
+}
 }
