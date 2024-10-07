@@ -19,6 +19,7 @@ namespace Fun_Funding.Application
         ISystemWalletRepository SystemWalletRepository { get; }
         ITransactionRepository TransactionRepository { get; }
         IUserRepository UserRepository { get; }
+        IUserFileRepository UserFileRepository { get; }
         IWalletRepository WalletRepository { get; }
         IWithdrawRequestRepository WithdrawRequestRepository { get; }
         ICommissionFeeRepository CommissionFeeRepository { get; }

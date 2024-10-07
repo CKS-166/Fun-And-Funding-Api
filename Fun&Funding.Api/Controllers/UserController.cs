@@ -60,5 +60,12 @@ namespace Fun_Funding.Api.Controllers
             var response = await _userService.ChangeUserPassword(userChangePasswordRequest);
             return Ok(response);
         }
+        [HttpPatch("avatar")]
+        [Authorize]
+        public async Task<IActionResult> UploadUserAvatar([FromForm] UserFileRequest userFileRequest)
+        {
+            var response = await _userService.UploadUserAvatar(userFileRequest);
+            return Ok(response);
+        }
     }
 }
