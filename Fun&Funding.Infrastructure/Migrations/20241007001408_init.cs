@@ -107,18 +107,38 @@ namespace Fun_Funding.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "GamePlatform",
+                name: "Milestones",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    PlatformName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MilestoneName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Duration = table.Column<TimeSpan>(type: "time", nullable: false),
+                    DisbursementPercentage = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_GamePlatform", x => x.Id);
+                    table.PrimaryKey("PK_Milestones", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Requirements",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Requirements", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -315,7 +335,7 @@ namespace Fun_Funding.Infrastructure.Migrations
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_FundingProject_BankAccount_BankAccountId",
                         column: x => x.BankAccountId,
@@ -401,29 +421,6 @@ namespace Fun_Funding.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "FAQ",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    FundingProjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_FAQ", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_FAQ_FundingProject_FundingProjectId",
-                        column: x => x.FundingProjectId,
-                        principalTable: "FundingProject",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "FundingFile",
                 columns: table => new
                 {
@@ -447,7 +444,7 @@ namespace Fun_Funding.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "MarketingProject",
+                name: "MarketplaceProject",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -462,9 +459,9 @@ namespace Fun_Funding.Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_MarketingProject", x => x.Id);
+                    table.PrimaryKey("PK_MarketplaceProject", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_MarketingProject_FundingProject_FundingProjectId",
+                        name: "FK_MarketplaceProject_FundingProject_FundingProjectId",
                         column: x => x.FundingProjectId,
                         principalTable: "FundingProject",
                         principalColumn: "Id",
@@ -497,6 +494,36 @@ namespace Fun_Funding.Infrastructure.Migrations
                         principalTable: "FundingProject",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProjectMilestones",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    status = table.Column<int>(type: "int", nullable: false),
+                    MilestoneId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    FundingProjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProjectMilestones", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProjectMilestones_FundingProject_FundingProjectId",
+                        column: x => x.FundingProjectId,
+                        principalTable: "FundingProject",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_ProjectMilestones_Milestones_MilestoneId",
+                        column: x => x.MilestoneId,
+                        principalTable: "Milestones",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -605,39 +632,15 @@ namespace Fun_Funding.Infrastructure.Migrations
                 {
                     table.PrimaryKey("PK_DigitalKey", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_DigitalKey_MarketingProject_MarketingProjectId",
+                        name: "FK_DigitalKey_MarketplaceProject_MarketingProjectId",
                         column: x => x.MarketingProjectId,
-                        principalTable: "MarketingProject",
+                        principalTable: "MarketplaceProject",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "GamePlatformMarketingProject",
-                columns: table => new
-                {
-                    GamePlatformsId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    MarketingProjectsId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_GamePlatformMarketingProject", x => new { x.GamePlatformsId, x.MarketingProjectsId });
-                    table.ForeignKey(
-                        name: "FK_GamePlatformMarketingProject_GamePlatform_GamePlatformsId",
-                        column: x => x.GamePlatformsId,
-                        principalTable: "GamePlatform",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_GamePlatformMarketingProject_MarketingProject_MarketingProjectsId",
-                        column: x => x.MarketingProjectsId,
-                        principalTable: "MarketingProject",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "MarketingFile",
+                name: "MarketplaceFile",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -645,18 +648,44 @@ namespace Fun_Funding.Infrastructure.Migrations
                     URL = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Filetype = table.Column<int>(type: "int", nullable: false),
                     MarketingProjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    MarketplaceProjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_MarketingFile", x => x.Id);
+                    table.PrimaryKey("PK_MarketplaceFile", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_MarketingFile_MarketingProject_MarketingProjectId",
-                        column: x => x.MarketingProjectId,
-                        principalTable: "MarketingProject",
+                        name: "FK_MarketplaceFile_MarketplaceProject_MarketplaceProjectId",
+                        column: x => x.MarketplaceProjectId,
+                        principalTable: "MarketplaceProject",
                         principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProjectCoupon",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CouponKey = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CouponName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CommissionRate = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    status = table.Column<int>(type: "int", nullable: false),
+                    MarketplaceProjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProjectCoupon", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProjectCoupon_MarketplaceProject_MarketplaceProjectId",
+                        column: x => x.MarketplaceProjectId,
+                        principalTable: "MarketplaceProject",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -745,6 +774,67 @@ namespace Fun_Funding.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ProjectMilestoneBacker",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Star = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Comment = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    BackerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ProjectMilestoneId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProjectMilestoneBacker", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProjectMilestoneBacker_AspNetUsers_BackerId",
+                        column: x => x.BackerId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_ProjectMilestoneBacker_ProjectMilestones_ProjectMilestoneId",
+                        column: x => x.ProjectMilestoneId,
+                        principalTable: "ProjectMilestones",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProjectMilestoneRequirements",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    RequirementStatus = table.Column<int>(type: "int", nullable: false),
+                    UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    RequirementId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ProjectMilestoneId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProjectMilestoneRequirements", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProjectMilestoneRequirements_ProjectMilestones_ProjectMilestoneId",
+                        column: x => x.ProjectMilestoneId,
+                        principalTable: "ProjectMilestones",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_ProjectMilestoneRequirements_Requirements_RequirementId",
+                        column: x => x.RequirementId,
+                        principalTable: "Requirements",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "OrderDetail",
                 columns: table => new
                 {
@@ -768,6 +858,30 @@ namespace Fun_Funding.Infrastructure.Migrations
                         name: "FK_OrderDetail_Order_OrderId",
                         column: x => x.OrderId,
                         principalTable: "Order",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProjectRequirementFiles",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    URL = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    File = table.Column<int>(type: "int", nullable: false),
+                    ProjectMilestoneRequirementId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProjectRequirementFiles", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ProjectRequirementFiles_ProjectMilestoneRequirements_ProjectMilestoneRequirementId",
+                        column: x => x.ProjectMilestoneRequirementId,
+                        principalTable: "ProjectMilestoneRequirements",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -822,11 +936,6 @@ namespace Fun_Funding.Infrastructure.Migrations
                 column: "MarketingProjectId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_FAQ_FundingProjectId",
-                table: "FAQ",
-                column: "FundingProjectId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_FundingFile_FundingProjectId",
                 table: "FundingFile",
                 column: "FundingProjectId");
@@ -842,18 +951,13 @@ namespace Fun_Funding.Infrastructure.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_GamePlatformMarketingProject_MarketingProjectsId",
-                table: "GamePlatformMarketingProject",
-                column: "MarketingProjectsId");
+                name: "IX_MarketplaceFile_MarketplaceProjectId",
+                table: "MarketplaceFile",
+                column: "MarketplaceProjectId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MarketingFile_MarketingProjectId",
-                table: "MarketingFile",
-                column: "MarketingProjectId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_MarketingProject_FundingProjectId",
-                table: "MarketingProject",
+                name: "IX_MarketplaceProject_FundingProjectId",
+                table: "MarketplaceProject",
                 column: "FundingProjectId",
                 unique: true);
 
@@ -886,6 +990,46 @@ namespace Fun_Funding.Infrastructure.Migrations
                 name: "IX_PackageBacker_UserId",
                 table: "PackageBacker",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProjectCoupon_MarketplaceProjectId",
+                table: "ProjectCoupon",
+                column: "MarketplaceProjectId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProjectMilestoneBacker_BackerId",
+                table: "ProjectMilestoneBacker",
+                column: "BackerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProjectMilestoneBacker_ProjectMilestoneId",
+                table: "ProjectMilestoneBacker",
+                column: "ProjectMilestoneId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProjectMilestoneRequirements_ProjectMilestoneId",
+                table: "ProjectMilestoneRequirements",
+                column: "ProjectMilestoneId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProjectMilestoneRequirements_RequirementId",
+                table: "ProjectMilestoneRequirements",
+                column: "RequirementId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProjectMilestones_FundingProjectId",
+                table: "ProjectMilestones",
+                column: "FundingProjectId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProjectMilestones_MilestoneId",
+                table: "ProjectMilestones",
+                column: "MilestoneId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProjectRequirementFiles_ProjectMilestoneRequirementId",
+                table: "ProjectRequirementFiles",
+                column: "ProjectMilestoneRequirementId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_RefundRequest_OrderId",
@@ -979,22 +1123,25 @@ namespace Fun_Funding.Infrastructure.Migrations
                 name: "CategoryFundingProject");
 
             migrationBuilder.DropTable(
-                name: "FAQ");
-
-            migrationBuilder.DropTable(
                 name: "FundingFile");
 
             migrationBuilder.DropTable(
-                name: "GamePlatformMarketingProject");
-
-            migrationBuilder.DropTable(
-                name: "MarketingFile");
+                name: "MarketplaceFile");
 
             migrationBuilder.DropTable(
                 name: "OrderDetail");
 
             migrationBuilder.DropTable(
                 name: "PackageBacker");
+
+            migrationBuilder.DropTable(
+                name: "ProjectCoupon");
+
+            migrationBuilder.DropTable(
+                name: "ProjectMilestoneBacker");
+
+            migrationBuilder.DropTable(
+                name: "ProjectRequirementFiles");
 
             migrationBuilder.DropTable(
                 name: "RefundRequest");
@@ -1024,10 +1171,10 @@ namespace Fun_Funding.Infrastructure.Migrations
                 name: "Category");
 
             migrationBuilder.DropTable(
-                name: "GamePlatform");
+                name: "DigitalKey");
 
             migrationBuilder.DropTable(
-                name: "DigitalKey");
+                name: "ProjectMilestoneRequirements");
 
             migrationBuilder.DropTable(
                 name: "Order");
@@ -1045,10 +1192,19 @@ namespace Fun_Funding.Infrastructure.Migrations
                 name: "Wallet");
 
             migrationBuilder.DropTable(
-                name: "MarketingProject");
+                name: "MarketplaceProject");
+
+            migrationBuilder.DropTable(
+                name: "ProjectMilestones");
+
+            migrationBuilder.DropTable(
+                name: "Requirements");
 
             migrationBuilder.DropTable(
                 name: "FundingProject");
+
+            migrationBuilder.DropTable(
+                name: "Milestones");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");

@@ -10,7 +10,6 @@ namespace Fun_Funding.Application.ViewModel.UserDTO
         public string UserName { get; set; } = string.Empty;
         public string? Email { get; set; }
         public string? Bio { get; set; }
-        public string? UserName { get; set; }
         public string? FullName { get; set; }
         public string? Avatar { get; set; }
         public string? Address { get; set; }
