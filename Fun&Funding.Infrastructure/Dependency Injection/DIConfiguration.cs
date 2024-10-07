@@ -116,6 +116,7 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             service.AddScoped<ICommissionFeeService, CommissionFeeService>();
             service.AddScoped<ILikeService, LikeService>();
             service.AddScoped<ICommentService, CommentService>();
+            service.AddScoped<IProjectMilestoneBackerService, ProjectMilestoneBackerService>();
             
             #endregion
             return service;

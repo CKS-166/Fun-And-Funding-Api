@@ -5,12 +5,14 @@ using Fun_Funding.Application.ViewModel.CommissionDTO;
 using Fun_Funding.Application.ViewModel.FundingFileDTO;
 using Fun_Funding.Application.ViewModel.FundingProjectDTO;
 using Fun_Funding.Application.ViewModel.PackageDTO;
+using Fun_Funding.Application.ViewModel.ProjectMilestoneBackerDTO;
 using Fun_Funding.Application.ViewModel.RewardItemDTO;
 using Fun_Funding.Application.ViewModel.TransactionDTO;
 using Fun_Funding.Application.ViewModel.UserDTO;
 using Fun_Funding.Application.ViewModel.WalletDTO;
 using Fun_Funding.Application.ViewModel.WithdrawDTO;
 using Fun_Funding.Domain.Entity;
+using System.Security.Cryptography;
 
 namespace Fun_Funding.Infrastructure.Mapper
 {
@@ -23,6 +25,7 @@ namespace Fun_Funding.Infrastructure.Mapper
             MappingWallet();
             MappingCategory();
             MappingCommissionFee();
+            MappingProjectMilestoneBacker();
         }
         public void MappingFundingProject()
         {
@@ -94,6 +97,16 @@ namespace Fun_Funding.Infrastructure.Mapper
             CreateMap<CommissionFee, CommissionFeeResponse>().ReverseMap();
             CreateMap<CommissionFeeAddRequest, CommissionFee>().ReverseMap();
             CreateMap<CommissionFeeUpdateRequest, CommissionFee>().ReverseMap();
+        }
+
+        public void MappingProjectMilestoneBacker()
+        {
+            CreateMap<ProjectMilestoneBacker, ProjectMilestoneBackerRequest>().ReverseMap();
+            CreateMap<ProjectMilestoneBacker, ProjectMilestoneBackerResponse>()
+                .ForMember(des => des.Backer, src => src.MapFrom(x => x.Backer))
+                .ForMember(des => des.ProjectMilestone, src => src.MapFrom(x => x.ProjectMilestone))
+                .ReverseMap();
+            
         }
     }
 }
