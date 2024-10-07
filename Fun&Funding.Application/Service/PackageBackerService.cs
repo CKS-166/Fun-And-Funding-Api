@@ -44,7 +44,7 @@ namespace Fun_Funding.Application.Service
                 if (wallet == null)
                     return ResultDTO<PackageBackerResponse>.Fail("Wallet not found");
 
-                if (package.LimitQuantity == 0)
+                if (package.LimitQuantity == 0 && package.PackageTypes.Equals(PackageType.FixedPackage))
                     return ResultDTO<PackageBackerResponse>.Fail("Package is currently out of quantity!");
 
                 if (_unitOfWork.FundingProjectRepository.GetById(package.ProjectId).Status != ProjectStatus.Processing)
