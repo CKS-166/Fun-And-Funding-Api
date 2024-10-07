@@ -25,6 +25,7 @@ namespace Fun_Funding.Infrastructure
         private ISystemWalletRepository _systemWalletRepository;
         private ITransactionRepository _transactionRepository;
         private IUserRepository _userRepository;
+        private IUserFileRepository _userFileRepository;
         private IWalletRepository _walletRepository;
         private IWithdrawRequestRepository _withdrawRequestRepository;
         private ICommissionFeeRepository _commissionFeeRepository;
@@ -137,6 +138,14 @@ namespace Fun_Funding.Infrastructure
             get
             {
                 return _userRepository = _userRepository ?? new UserRepository(_dbContext);
+            }
+        }
+
+        public IUserFileRepository UserFileRepository
+        {
+            get
+            {
+                return _userFileRepository = _userFileRepository ?? new UserFileRepository(_dbContext);
             }
         }
 

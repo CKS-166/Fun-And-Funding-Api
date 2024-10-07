@@ -17,6 +17,8 @@ using System.Net;
 using Fun_Funding.Domain.Enum;
 using Fun_Funding.Application.ViewModel.CategoryDTO;
 using System.Linq.Expressions;
+using Fun_Funding.Application.IStorageService;
+using Fun_Funding.Application.ViewModel.FundingProjectDTO;
 
 namespace Fun_Funding.Application.Service
 {
@@ -25,6 +27,7 @@ namespace Fun_Funding.Application.Service
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<User> _userManager;
         private readonly ClaimsPrincipal _claimsPrincipal;
+        public readonly IAzureService _azureService;
         private readonly IMapper _mapper;
         private readonly RoleManager<IdentityRole<Guid>> _roleManager;
 
@@ -32,13 +35,15 @@ namespace Fun_Funding.Application.Service
             UserManager<User> userManager,
             RoleManager<IdentityRole<Guid>> roleManager,
             IHttpContextAccessor httpContextAccessor,
-            IMapper mapper)
+            IMapper mapper,
+            IAzureService azureService)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
             _roleManager = roleManager;
             _claimsPrincipal = httpContextAccessor.HttpContext.User;
             _mapper = mapper;
+            _azureService = azureService;
         }
         public async Task<ResultDTO<PaginatedResponse<UserInfoResponse>>> GetUsers(ListRequest request)
         {
@@ -164,6 +169,7 @@ namespace Fun_Funding.Application.Service
                 var userEmail = userEmailClaims.Value;
                 var user = await _unitOfWork.UserRepository.GetQueryable()
                                 .AsNoTracking()
+                                .Include(u => u.File)
                                 .Include(u => u.Wallet)
                                 .FirstOrDefaultAsync(u => u.Email == userEmail);
                 if (user == null)
@@ -188,8 +194,10 @@ namespace Fun_Funding.Application.Service
             try
             {
                 var user = await _unitOfWork.UserRepository.GetQueryable()
-                                .Include(u => u.Wallet)
-                                .FirstOrDefaultAsync(u => u.Id == id);
+                    .AsNoTracking()
+                    .Include(u => u.File)
+                    .Include(u => u.Wallet)
+                    .FirstOrDefaultAsync(u => u.Id == id);
                 if (user is null)
                 {
                     throw new ExceptionError((int)HttpStatusCode.NotFound, "User not found.");
@@ -255,7 +263,7 @@ namespace Fun_Funding.Application.Service
         {
             try
             {
-                var parseUser = await _unitOfWork.UserRepository.GetQueryable()
+                var parseUser = await _unitOfWork.UserRepository.GetQueryable().AsNoTracking()
                                 .Include(u => u.Wallet)
                                 .FirstOrDefaultAsync(u => u.Id == id);
                 if (parseUser is null)
@@ -338,5 +346,95 @@ namespace Fun_Funding.Application.Service
             }
         }
 
+        public async Task<ResultDTO<string>> UploadUserAvatar(UserFileRequest userFileRequest)
+        {
+            try
+            {
+                if (_claimsPrincipal == null || !_claimsPrincipal.Identity.IsAuthenticated)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.Unauthorized, "User not authenticated.");
+                }
+
+                var userEmailClaims = _claimsPrincipal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email);
+                if (userEmailClaims == null)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "User not found.");
+                }
+                var userEmail = userEmailClaims.Value;
+                var user = await _unitOfWork.UserRepository.GetQueryable()
+                    .AsNoTracking()
+                    .Include(u => u.File)
+                    .Include(u => u.Wallet)
+                    .FirstOrDefaultAsync(u => u.Email == userEmail);
+                if (user == null)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "User not found.");
+                }
+
+                if(user.File == null)
+                {
+                    UserFile file = new UserFile();
+                    if (userFileRequest.URL.Length > 0)
+                    {
+                        var result = _azureService.UploadUrlSingleFiles(userFileRequest.URL);
+                        if (result == null)
+                        {
+                            throw new ExceptionError((int)HttpStatusCode.BadRequest, "File upload failed. Please try again.");
+                        }
+                        else
+                        {
+                            file.Name = userFileRequest.Name;
+                            file.URL = result.Result;
+                            file.Filetype = 0;
+                            file.UserId = user.Id;
+                        }
+                    }
+                    else
+                    {
+                        throw new ExceptionError((int)HttpStatusCode.BadRequest, "Uploaded file is empty.");
+                    }
+                    user.File = file;
+                    _unitOfWork.UserFileRepository.Add(file);
+                    _unitOfWork.UserRepository.Update(user);
+                    await _unitOfWork.CommitAsync();
+                    return ResultDTO<string>.Success("", "Upload avatar successfully");
+                }
+                else
+                {
+                    UserFile file = user.File;
+                    if (userFileRequest.URL.Length > 0)
+                    {
+                        var result = _azureService.UploadUrlSingleFiles(userFileRequest.URL);
+                        if (result == null)
+                        {
+                            throw new ExceptionError((int)HttpStatusCode.BadRequest, "File upload failed. Please try again.");
+                        }
+                        else
+                        {
+                            file.Name = userFileRequest.Name;
+                            file.URL = result.Result;
+                            file.Filetype = 0;
+                            file.UserId = user.Id;
+                        }
+                    }
+                    else
+                    {
+                        throw new ExceptionError((int)HttpStatusCode.BadRequest, "Uploaded file is empty.");
+                    }
+                    _unitOfWork.UserFileRepository.Update(file);
+                    await _unitOfWork.CommitAsync();
+                    return ResultDTO<string>.Success("", "Upload avatar successfully");
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
     }
 }

@@ -94,6 +94,7 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             service.AddScoped<ISystemWalletRepository, SystemWalletRepository>();
             service.AddScoped<ITransactionRepository, TransactionRepository>();
             service.AddScoped<IUserRepository, UserRepository>();
+            service.AddScoped<IUserFileRepository, UserFileRepository>();
             service.AddScoped<IWalletRepository, WalletRepository>();
             service.AddScoped<IWithdrawRequestRepository, WithdrawRequestRepository>();
             service.AddScoped<ICommissionFeeRepository, CommissionFeeRepository>();
