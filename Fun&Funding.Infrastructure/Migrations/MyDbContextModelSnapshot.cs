@@ -530,7 +530,7 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Property<Guid>("MarketplaceProjectId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("status")
+                    b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -564,7 +564,7 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Property<Guid>("MilestoneId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("status")
+                    b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -745,11 +745,16 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<Guid>("MilestoneId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("MilestoneId");
 
                     b.ToTable("Requirements");
                 });
@@ -1493,6 +1498,17 @@ namespace Fun_Funding.Infrastructure.Migrations
                         .HasForeignKey("OrderId");
                 });
 
+            modelBuilder.Entity("Fun_Funding.Domain.Entity.Requirement", b =>
+                {
+                    b.HasOne("Fun_Funding.Domain.Entity.Milestone", "Milestone")
+                        .WithMany("Requirements")
+                        .HasForeignKey("MilestoneId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Milestone");
+                });
+
             modelBuilder.Entity("Fun_Funding.Domain.Entity.RewardItem", b =>
                 {
                     b.HasOne("Fun_Funding.Domain.Entity.Package", null)
@@ -1670,6 +1686,8 @@ namespace Fun_Funding.Infrastructure.Migrations
             modelBuilder.Entity("Fun_Funding.Domain.Entity.Milestone", b =>
                 {
                     b.Navigation("ProjectMilestones");
+
+                    b.Navigation("Requirements");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.Order", b =>

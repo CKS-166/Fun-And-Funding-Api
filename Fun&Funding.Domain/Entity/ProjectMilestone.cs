@@ -10,7 +10,7 @@ namespace Fun_Funding.Domain.Entity
     public class ProjectMilestone : BaseEntity
     {
         public DateTime EndDate { get; set; }
-        public ProjectMilestoneStatus status { get; set; }
+        public ProjectMilestoneStatus Status { get; set; }
 
         public Guid MilestoneId { get; set; }
         public Milestone Milestone { get; set; }  

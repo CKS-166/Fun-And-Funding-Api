@@ -19,5 +19,7 @@ namespace Fun_Funding.Domain.Entity
         public DateTime UpdateDate { get; set; }
 
         public virtual ICollection<ProjectMilestone> ProjectMilestones { get; set; }   
+
+        public virtual ICollection<Requirement> Requirements { get; set; }
     }
 }
