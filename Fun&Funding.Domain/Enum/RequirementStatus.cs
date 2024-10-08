@@ -8,5 +8,9 @@ namespace Fun_Funding.Domain.Enum
 {
     public enum RequirementStatus
     {
+        Processing,
+        Successful,
+        Warning,
+        Failed
     }
 }

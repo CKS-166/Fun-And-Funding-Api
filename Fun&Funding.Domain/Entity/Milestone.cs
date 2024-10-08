@@ -12,7 +12,9 @@ namespace Fun_Funding.Domain.Entity
     {
         public string MilestoneName { get; set; }
         public string Description { get; set; }
-        public TimeSpan Duration { get; set; }
+        public int Duration { get; set; }
+
+        public int MilestoneOrder { get; set; }
         [Range(0, (double)decimal.MaxValue)]
         [Column(TypeName = "decimal(18, 2)")]
         public decimal DisbursementPercentage { get; set; }

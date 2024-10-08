@@ -16,6 +16,6 @@ namespace Fun_Funding.Application.ViewModel.ProjectMilestoneDTO
         public Guid MilestoneId { get; set; }
         public Guid FundingProjectId { get; set; }
 
-        public List<ProjectMilestoneRequirementRequest> ProjectMilestoneRequirements { get; set; }
+        //public List<ProjectMilestoneRequirementRequest> ProjectMilestoneRequirements { get; set; }
     }
 }

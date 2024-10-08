@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fun_Funding.Infrastructure.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20241008075746_init")]
+    [Migration("20241008113543_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -346,8 +346,8 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Property<decimal>("DisbursementPercentage")
                         .HasColumnType("decimal(18, 2)");
 
-                    b.Property<TimeSpan>("Duration")
-                        .HasColumnType("time");
+                    b.Property<int>("Duration")
+                        .HasColumnType("int");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -355,6 +355,9 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Property<string>("MilestoneName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("MilestoneOrder")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("UpdateDate")
                         .HasColumnType("datetime2");
