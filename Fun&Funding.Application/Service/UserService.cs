@@ -387,6 +387,7 @@ namespace Fun_Funding.Application.Service
                             file.URL = result.Result;
                             file.Filetype = 0;
                             file.UserId = user.Id;
+                            file.CreatedDate = DateTime.Now;
                         }
                     }
                     else
@@ -415,6 +416,7 @@ namespace Fun_Funding.Application.Service
                             file.URL = result.Result;
                             file.Filetype = 0;
                             file.UserId = user.Id;
+                            file.CreatedDate = DateTime.Now;
                         }
                     }
                     else
