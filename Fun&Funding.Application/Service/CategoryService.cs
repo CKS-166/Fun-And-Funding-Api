@@ -75,6 +75,34 @@ namespace Fun_Funding.Application.Service
             }
         }
 
+        public async Task<ResultDTO<IEnumerable<CategoryResponse>>> GetAllCategories()
+        {
+            try
+            {
+                var categories = await _unitOfWork.CategoryRepository.GetAllAsync();
+
+                if (categories != null && categories.Count() > 0)
+                {
+                    var response = _mapper.Map<IEnumerable<CategoryResponse>>(categories);
+
+                    return ResultDTO<IEnumerable<CategoryResponse>>.Success(response);
+                }
+                else
+                {
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "Category Not Found.");
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
+
         public async Task<ResultDTO<PaginatedResponse<CategoryResponse>>> GetCategories(ListRequest request)
         {
             try

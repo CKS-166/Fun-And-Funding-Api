@@ -10,5 +10,6 @@ namespace Fun_Funding.Application.IService
         Task<ResultDTO> DeleteCategory(Guid id);
         Task<ResultDTO<CategoryResponse>> CreateCategory(CategoryRequest request);
         Task<ResultDTO<CategoryResponse>> UpdateCategory(Guid id, CategoryRequest request);
+        Task<ResultDTO<IEnumerable<CategoryResponse>>> GetAllCategories();
     }
 }

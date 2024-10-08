@@ -23,6 +23,13 @@ namespace Fun_Funding.Api.Controller
             return Ok(response);
         }
 
+        [HttpGet("all")]
+        public async Task<IActionResult> GetAllCategories()
+        {
+            var response = await _categoryService.GetAllCategories();
+            return Ok(response);
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetCategoryById([FromRoute] Guid id)
         {
