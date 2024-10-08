@@ -117,7 +117,8 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             service.AddScoped<ILikeService, LikeService>();
             service.AddScoped<ICommentService, CommentService>();
             service.AddScoped<IProjectMilestoneBackerService, ProjectMilestoneBackerService>();
-            
+            service.AddScoped<IProjectMilestoneRequirementService, ProjectMilestoneRequirementService>();
+            service.AddScoped<IProjectMilestoneService, ProjectMilestoneService>();
             #endregion
             return service;
 
