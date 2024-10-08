@@ -16,7 +16,7 @@ namespace Fun_Funding.Domain.Entity
         [Range(0, (double)decimal.MaxValue)]
         [Column(TypeName = "decimal(18, 2)")]
         public decimal CommissionRate { get; set; }
-        public ProjectCouponStatus status { get; set; }
+        public ProjectCouponStatus Status { get; set; }
         public Guid MarketplaceProjectId { get; set; }
         public MarketplaceProject MarketplaceProject { get; set; }
     }

@@ -126,22 +126,6 @@ namespace Fun_Funding.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Requirements",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Requirements", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "SystemWallet",
                 columns: table => new
                 {
@@ -373,6 +357,29 @@ namespace Fun_Funding.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Requirements",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MilestoneId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Requirements", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Requirements_Milestones_MilestoneId",
+                        column: x => x.MilestoneId,
+                        principalTable: "Milestones",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "RefundRequest",
                 columns: table => new
                 {
@@ -502,7 +509,7 @@ namespace Fun_Funding.Infrastructure.Migrations
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    status = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
                     MilestoneId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     FundingProjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -671,7 +678,7 @@ namespace Fun_Funding.Infrastructure.Migrations
                     CouponKey = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CouponName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CommissionRate = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    status = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
                     MarketplaceProjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
@@ -1035,6 +1042,11 @@ namespace Fun_Funding.Infrastructure.Migrations
                 name: "IX_RefundRequest_OrderId",
                 table: "RefundRequest",
                 column: "OrderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Requirements_MilestoneId",
+                table: "Requirements",
+                column: "MilestoneId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_RewardItem_PackageId",

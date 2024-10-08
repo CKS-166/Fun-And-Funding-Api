@@ -9,15 +9,13 @@ using System.Threading.Tasks;
 
 namespace Fun_Funding.Application.ViewModel.ProjectMilestoneDTO
 {
-    public class ProjectMilestoneResponse
+    public class ProjectMilestoneRequest
     {
         public DateTime CreatedDate { get; set; }
-        public DateTime EndDate { get; set; }
         public ProjectMilestoneStatus Status { get; set; }
-
         public Guid MilestoneId { get; set; }
-        public Milestone Milestone { get; set; }
         public Guid FundingProjectId { get; set; }
-        public virtual List<ProjectMilestoneRequirementResponse> ProjectMilestoneRequirements { get; set; }
+
+        public List<ProjectMilestoneRequirementRequest> ProjectMilestoneRequirements { get; set; }
     }
 }
