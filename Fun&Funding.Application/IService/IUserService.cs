@@ -17,5 +17,6 @@ namespace Fun_Funding.Application.IService
         Task<ResultDTO<UserInfoResponse>> ChangeUserStatus(Guid id);
         Task<ResultDTO<string>> ChangeUserPassword(UserChangePasswordRequest userChangePasswordRequest);
         Task<ResultDTO<string>> UploadUserAvatar(UserFileRequest userFileRequest);
+        Task<ResultDTO<string>> CheckUserPassword(string password);
     }
 }

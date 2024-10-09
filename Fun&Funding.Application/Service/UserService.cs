@@ -438,5 +438,47 @@ namespace Fun_Funding.Application.Service
                 throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
             }
         }
+
+        public async Task<ResultDTO<string>> CheckUserPassword(string password)
+        {
+            try
+            {
+                if (_claimsPrincipal == null || !_claimsPrincipal.Identity.IsAuthenticated)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.Unauthorized, "User not authenticated.");
+                }
+
+                var userEmailClaims = _claimsPrincipal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email);
+                if (userEmailClaims == null)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "User not found.");
+                }
+
+                var userEmail = userEmailClaims.Value;
+                User user = await _unitOfWork.UserRepository.GetAsync(x => x.Email == userEmail);
+                if (user == null)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "User not found.");
+                }
+
+                var result = await _userManager.CheckPasswordAsync(user, password);
+
+                if (!result)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "Password validation failed.");
+                }
+
+                return ResultDTO<string>.Success("", "Password validated successfully");
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
     }
 }
