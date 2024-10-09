@@ -1,4 +1,5 @@
-﻿using Fun_Funding.Application.ViewModel.ProjectMilestoneRequirementDTO;
+﻿using Fun_Funding.Application.ViewModel.MilestoneDTO;
+using Fun_Funding.Application.ViewModel.ProjectMilestoneRequirementDTO;
 using Fun_Funding.Domain.Entity;
 using Fun_Funding.Domain.Enum;
 using System;
@@ -16,8 +17,8 @@ namespace Fun_Funding.Application.ViewModel.ProjectMilestoneDTO
         public ProjectMilestoneStatus Status { get; set; }
 
         public Guid MilestoneId { get; set; }
-        public Milestone Milestone { get; set; }
+        public MilestoneResponse Milestone { get; set; }
         public Guid FundingProjectId { get; set; }
-        public virtual List<ProjectMilestoneRequirementResponse> ProjectMilestoneRequirements { get; set; }
+        public List<ProjectMilestoneRequirementResponse> ProjectMilestoneRequirements { get; set; }
     }
 }
