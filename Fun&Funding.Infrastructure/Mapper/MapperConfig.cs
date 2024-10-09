@@ -4,10 +4,12 @@ using Fun_Funding.Application.ViewModel.CategoryDTO;
 using Fun_Funding.Application.ViewModel.CommissionDTO;
 using Fun_Funding.Application.ViewModel.FundingFileDTO;
 using Fun_Funding.Application.ViewModel.FundingProjectDTO;
+using Fun_Funding.Application.ViewModel.MilestoneDTO;
 using Fun_Funding.Application.ViewModel.PackageDTO;
 using Fun_Funding.Application.ViewModel.ProjectMilestoneBackerDTO;
 using Fun_Funding.Application.ViewModel.ProjectMilestoneDTO;
 using Fun_Funding.Application.ViewModel.ProjectMilestoneRequirementDTO;
+using Fun_Funding.Application.ViewModel.RequirementDTO;
 using Fun_Funding.Application.ViewModel.RewardItemDTO;
 using Fun_Funding.Application.ViewModel.TransactionDTO;
 using Fun_Funding.Application.ViewModel.UserDTO;
@@ -29,6 +31,7 @@ namespace Fun_Funding.Infrastructure.Mapper
             MappingCommissionFee();
             MappingProjectMilestoneBacker();
             MappingProjectMilestone();
+            MappingMilestone();
         }
         public void MappingFundingProject()
         {
@@ -109,7 +112,6 @@ namespace Fun_Funding.Infrastructure.Mapper
                 .ForMember(des => des.Backer, src => src.MapFrom(x => x.Backer))
                 .ForMember(des => des.ProjectMilestone, src => src.MapFrom(x => x.ProjectMilestone))
                 .ReverseMap();
-            
         }
 
         public void MappingProjectMilestone()
@@ -119,6 +121,12 @@ namespace Fun_Funding.Infrastructure.Mapper
                 .ForMember(des => des.ProjectMilestoneRequirements, src => src.MapFrom(x => x.ProjectMilestoneRequirements))
                 .ReverseMap();
             CreateMap<ProjectMilestoneRequirement, ProjectMilestoneRequirementResponse>().ReverseMap();
+        }
+
+        public void MappingMilestone()
+        {
+            CreateMap<Milestone, MilestoneResponse>().ReverseMap();
+            CreateMap<Requirement, RequirementResponse>().ReverseMap();
         }
     }
 }

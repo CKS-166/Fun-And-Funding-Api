@@ -10,7 +10,7 @@ namespace Fun_Funding.Domain.Enum
     {
         Pending,
         Processing,
-        Successful,
+        Completed,
         Warning,
         Failed
     }

@@ -18,8 +18,9 @@ namespace Fun_Funding.Application.Service
         private IUnitOfWork _unitOfWork;
         private IMapper _mapper;
         private int maxExpireDay = 30;
-        public ProjectMilestoneService(IUnitOfWork unitOfWork) {
+        public ProjectMilestoneService(IUnitOfWork unitOfWork, IMapper mapper) {
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
 
         public async Task<ResultDTO<ProjectMilestoneResponse>> CreateProjectMilestoneRequest(ProjectMilestoneRequest request)
@@ -43,19 +44,7 @@ namespace Fun_Funding.Application.Service
                     .GetQueryable().Include(m => m.Requirements)
                     .FirstOrDefault(m => m.Id == request.MilestoneId);
 
-                List<ProjectMilestoneRequirement> milestoneRequirements = new List<ProjectMilestoneRequirement>();
-                foreach (Requirement req in requestMilestone.Requirements) { 
-                    ProjectMilestoneRequirement requirement = new ProjectMilestoneRequirement
-                    {
-                        RequirementStatus = RequirementStatus.Processing,
-                        RequirementId = req.Id,
-                        CreatedDate = request.CreatedDate,
-                        IsDeleted = false,
-                        Content = ""
-                    };
-                    milestoneRequirements.Add(requirement);
-                }
-
+                
                 ProjectMilestone projectMilestone = new ProjectMilestone
                 {
                     EndDate = request.CreatedDate.AddDays(requestMilestone.Duration),
@@ -63,8 +52,7 @@ namespace Fun_Funding.Application.Service
                     MilestoneId = request.MilestoneId,
                     FundingProjectId = project.Id,
                     CreatedDate = request.CreatedDate,
-                    IsDeleted = false,
-                    ProjectMilestoneRequirements = milestoneRequirements
+                    IsDeleted = false
                 };
 
                 await _unitOfWork.ProjectMilestoneRepository.AddAsync(projectMilestone);
@@ -82,7 +70,10 @@ namespace Fun_Funding.Application.Service
             try
             {
                 ProjectMilestone projectMilestone =  _unitOfWork.ProjectMilestoneRepository
-                    .GetQueryable().Include(pm => pm.ProjectMilestoneRequirements).FirstOrDefault(pm => pm.Id == id);
+                    .GetQueryable()
+                    .Include(pm => pm.Milestone)
+                    .ThenInclude(pmr => pmr.Requirements)
+                    .FirstOrDefault(pm => pm.Id == id);
                 if (projectMilestone == null) {
                     return ResultDTO<ProjectMilestoneResponse>.Fail("Not found", 404);
                 }
@@ -93,5 +84,27 @@ namespace Fun_Funding.Application.Service
                 throw new Exception(ex.Message);
             }
         }
+
+        //public bool CanCreateProjectMilestone(FundingProject project, int requestedMilestoneOrder)
+        //{
+        //    // Get all the project milestones ordered by MilestoneOrder
+        //    var projectMilestones = project.ProjectMilestones
+        //        .OrderBy(pm => pm.Milestone.MilestoneOrder)
+        //        .ToList();
+
+        //    // Check if the requested milestone order is valid
+        //    if (requestedMilestoneOrder > projectMilestones.Count + 1)
+        //        return false; // Requested milestone order is greater than the next available milestone
+
+        //    // Check the status of the previous milestones
+        //    for (int i = 0; i < requestedMilestoneOrder - 1; i++)
+        //    {
+        //        var previousMilestone = projectMilestones[i];
+        //        if (previousMilestone.Status != ProjectMilestoneStatus.Completed)
+        //            return false; // Previous milestone is not completed
+        //    }
+
+        //    return true; // All previous milestones are completed, so the requested milestone can be created
+        //}
     }
 }
