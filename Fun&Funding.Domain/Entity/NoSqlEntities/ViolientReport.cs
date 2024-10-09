@@ -11,14 +11,20 @@ namespace Fun_Funding.Domain.Entity.NoSqlEntities
     public class ViolientReport
     {
         [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
-        public string Id { get; set; }  
+        [BsonRepresentation(BsonType.String)]
+        public Guid Id { get; set; }
 
-        [BsonElement("UserId")]
-        public Guid UserId { get; set; }  
+        [BsonElement("ReporterId")]
+        public Guid ReporterId { get; set; }
 
-        [BsonElement("Projected")]
-        public string Projected { get; set; }  
+        [BsonElement("ProjectId")]
+        public Guid ProjectId { get; set; }
+        [BsonElement("Content")]
+        public string Content { get; set; }
+        [BsonElement("IsHandle")]
+        public bool IsHandle { get; set; } 
+        [BsonElement("ReportDate")]
+        public DateTime Date { get; set; }
 
         [BsonElement("FileUrls")]
         public List<string> FileUrls { get; set; }

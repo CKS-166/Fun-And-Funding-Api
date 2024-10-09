@@ -33,7 +33,7 @@ namespace Fun_Funding.Application.Service
             {
                 var user = _userService.GetUserInfo().Result;
                 User exitUser = _mapper.Map<User>(user._data);
-                var list = _unitOfWork.likeRepository.GetAll().Where(l => l.ProjectId == id && l.UserId == exitUser.Id && l.IsDelete == false);
+                var list = _unitOfWork.LikeRepository.GetAll().Where(l => l.ProjectId == id && l.UserId == exitUser.Id && l.IsDelete == false);
                 return list.ToList();
             }
             catch (Exception ex)
@@ -46,7 +46,7 @@ namespace Fun_Funding.Application.Service
         {
             try
             {
-                var list = _unitOfWork.likeRepository.GetAll();
+                var list = _unitOfWork.LikeRepository.GetAll();
                 var result = list.Where(x => x.IsDelete == false).ToList();
                 return list.ToList();
 
@@ -68,7 +68,7 @@ namespace Fun_Funding.Application.Service
                     throw new Exception("Project can not found");
                 }
 
-                var list = _unitOfWork.likeRepository.GetAll()
+                var list = _unitOfWork.LikeRepository.GetAll()
                     .Where(l => l.ProjectId == id && l.IsDelete == false)
                     .ToList();
                 return list.ToList();
@@ -97,8 +97,8 @@ namespace Fun_Funding.Application.Service
                     return ResultDTO<LikeResponse>.Fail("Project can not found");
                 }
                 //check if the user and project already liked 
-                var getLikedProjects = _unitOfWork.likeRepository.Get(x => x.ProjectId.Equals(project.Id) && x.UserId.Equals(exitUser.Id));
-                Console.WriteLine($"UserId: {exitUser.Id}, ProjectId: {project.Id}");
+                var getLikedProjects = _unitOfWork.LikeRepository.Get(x => x.ProjectId.Equals(project.Id) && x.UserId.Equals(exitUser.Id));
+               
 
                 if (getLikedProjects == null)
                 {
@@ -112,7 +112,7 @@ namespace Fun_Funding.Application.Service
                         Id = Guid.NewGuid(),
                         IsDelete = false,
                     };
-                    _unitOfWork.likeRepository.Create(newLikeProject);
+                    _unitOfWork.LikeRepository.Create(newLikeProject);
                     return ResultDTO<LikeResponse>.Success(new LikeResponse { ProjectId = newLikeProject.ProjectId, UserID = newLikeProject.UserId }, "Succesfull like the project");
                 }
                 else
@@ -120,14 +120,14 @@ namespace Fun_Funding.Application.Service
                     if (getLikedProjects.IsLike == false && getLikedProjects.IsDelete) 
                     {
                         var updateDefinition = Builders<Like>.Update.Set(x => x.IsLike, true).Set(x=>x.IsDelete, false);
-                        _unitOfWork.likeRepository.Update(x => x.Id == getLikedProjects.Id, updateDefinition);
+                        _unitOfWork.LikeRepository.Update(x => x.Id == getLikedProjects.Id, updateDefinition);
 
                         return ResultDTO<LikeResponse>.Success(new LikeResponse { ProjectId = likeRequest.ProjectId, UserID = exitUser.Id }, "Succesfull like the project");
                     }
                     if (getLikedProjects.IsLike && getLikedProjects.IsDelete == false) //isLike == true ? "dislike" : "liked"
                     {
                         var update = Builders<Like>.Update.Set(l => l.IsDelete, true).Set(x => x.IsLike, false);
-                        _unitOfWork.likeRepository.SoftRemove(l => l.Id == getLikedProjects.Id, update);
+                        _unitOfWork.LikeRepository.SoftRemove(l => l.Id == getLikedProjects.Id, update);
                         return ResultDTO<LikeResponse>.Success(new LikeResponse { ProjectId = likeRequest.ProjectId, UserID = exitUser.Id }, "Succesfull dislike the project");
                     }
                 }

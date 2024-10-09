@@ -37,7 +37,6 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
 
             // Register NoSQL repositories
             service.AddScoped<ILikeRepository, LikeRepository>();
-            service.AddScoped(typeof(IMongoBaseRepository<>), typeof(MongoBaseRepository<>)); // Changed to AddScoped
 
 
             //Identity
@@ -73,13 +72,9 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
 
             //BaseRepository          
             service.AddTransient(typeof(IBaseRepository<>), typeof(BaseRepository<>));
+            service.AddScoped(typeof(IMongoBaseRepository<>), typeof(MongoBaseRepository<>));
             // Register the UnitOfWork
             service.AddScoped<IUnitOfWork, UnitOfWork>();
-            service.AddScoped<IAzureService, AzureService>();
-            service.AddScoped<ITransactionService, TransactionService>();
-            service.AddScoped<IPackageBackerService, PackageBackerService>();
-            service.AddScoped<IUserService, UserService>();
-            service.AddScoped<IWalletService, WalletService>();
             service.AddAutoMapper(typeof(MapperConfig).Assembly);
             #region Repositories
             service.AddScoped<IBankAccountRepository, BankAccountRepository>();
@@ -99,6 +94,8 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             service.AddScoped<IWithdrawRequestRepository, WithdrawRequestRepository>();
             service.AddScoped<ICommissionFeeRepository, CommissionFeeRepository>();
             service.AddScoped<ICommentRepository, CommentRepository>();
+            service.AddScoped<IReportRepository, ReportRepository>();
+            service.AddScoped<IFollowRepository, FollowRepository>();
             service.AddScoped<IProjectCouponRepository, ProjectCouponRepository>();
             service.AddScoped<IMilestoneRepository, MilestoneRepository>();
             service.AddScoped<IProjectMilestoneBackerRepository, ProjectMilestoneBackerRepository>();
@@ -119,6 +116,14 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             service.AddScoped<IProjectMilestoneBackerService, ProjectMilestoneBackerService>();
             service.AddScoped<IProjectMilestoneRequirementService, ProjectMilestoneRequirementService>();
             service.AddScoped<IProjectMilestoneService, ProjectMilestoneService>();
+            service.AddScoped<IAzureService, AzureService>();
+            service.AddScoped<ITransactionService, TransactionService>();
+            service.AddScoped<IPackageBackerService, PackageBackerService>();
+            service.AddScoped<IUserService, UserService>();
+            service.AddScoped<IWalletService, WalletService>();
+            service.AddScoped<IFollowService, FollowService>();
+            service.AddScoped<IReportService, ReportService>();
+
             #endregion
             return service;
 

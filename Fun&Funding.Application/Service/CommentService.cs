@@ -53,7 +53,7 @@ namespace Fun_Funding.Application.Service
                     UserID = exitUser.Id,
                     IsDelete = false,
                 };
-                _unitOfWork.commentRepository.Create(newComment);
+                _unitOfWork.CommentRepository.Create(newComment);
                 return ResultDTO<Comment>.Success(newComment, "Successfully Add Comment");
             }
             catch (Exception ex)
@@ -65,7 +65,7 @@ namespace Fun_Funding.Application.Service
         {
             try
             {
-                var list = _unitOfWork.commentRepository.GetAll();
+                var list = _unitOfWork.CommentRepository.GetAll();
 
                 List<CommentViewResponse> comments = new List<CommentViewResponse>();
 
@@ -102,7 +102,7 @@ namespace Fun_Funding.Application.Service
         {
             try
             {
-                var list = _unitOfWork.commentRepository.GetAll().Where(c => c.ProjectId == id);
+                var list = _unitOfWork.CommentRepository.GetAll().Where(c => c.ProjectId == id);
                 List<CommentViewResponse> comments = new List<CommentViewResponse>();
                 foreach (var comment in list)
                 {
@@ -136,7 +136,7 @@ namespace Fun_Funding.Application.Service
         public async Task<ResultDTO<Comment>> DeleteComment(Guid id)
         {
             //check comment id
-            var extiedComment = _unitOfWork.commentRepository.Get(x => x.Id == id);
+            var extiedComment = _unitOfWork.CommentRepository.Get(x => x.Id == id);
             var user = await _userService.GetUserInfo();
             User exitUser = _mapper.Map<User>(user._data);
             if (extiedComment is null)
@@ -151,7 +151,7 @@ namespace Fun_Funding.Application.Service
             try
             {
                 var updateComment = Builders<Comment>.Update.Set(x => x.IsDelete, true);
-                _unitOfWork.commentRepository.SoftRemove(x => x.Id == extiedComment.Id, updateComment);
+                _unitOfWork.CommentRepository.SoftRemove(x => x.Id == extiedComment.Id, updateComment);
                 return ResultDTO<Comment>.Success(extiedComment, "Delete Successfull");
             }
             catch (Exception ex)

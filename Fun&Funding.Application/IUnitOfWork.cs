@@ -5,8 +5,10 @@ namespace Fun_Funding.Application
     public interface IUnitOfWork
     {
         // Repository interfaces
-        ILikeRepository likeRepository { get; }
-        ICommentRepository commentRepository { get; }
+        ILikeRepository LikeRepository { get; }
+        ICommentRepository CommentRepository { get; }
+        IFollowRepository FollowRepository { get; }
+        IReportRepository ReportRepository { get; }
         IBankAccountRepository BankAccountRepository { get; }
         ICategoryRepository CategoryRepository { get; }
         IOrderDetailRepository OrderDetailRepository { get; }

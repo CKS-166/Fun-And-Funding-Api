@@ -1,4 +1,5 @@
 ﻿using Fun_Funding.Application.IRepository;
+using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Infrastructure.Database;
 using MongoDB.Driver;
 using System;
@@ -62,6 +63,38 @@ namespace Fun_Funding.Infrastructure.Repository
         public void SoftRemove(Expression<Func<T, bool>> filter, UpdateDefinition<T> updateDefinition)
         {
             _collection.UpdateOne(filter, updateDefinition);
+        }
+
+        public PaginatedResponse<T> GetAllPaged(ListRequest request, Expression<Func<T, bool>> filter = null)
+        {
+            // Apply filter (search criteria)
+            var query = _collection.Find(filter ?? (x => true)); // Default to no filter if none is provided
+
+            // Sorting logic
+            if (!string.IsNullOrEmpty(request.OrderBy))
+            {
+                var sortDefinition = request.IsAscending.GetValueOrDefault() ?
+                    Builders<T>.Sort.Ascending(request.OrderBy) :
+                    Builders<T>.Sort.Descending(request.OrderBy);
+                query = query.Sort(sortDefinition);
+            }
+
+            // Paging logic
+            var totalItems = query.CountDocuments();
+            var totalPages = (int)Math.Ceiling((double)totalItems / request.PageSize.GetValueOrDefault(10));
+
+            var items = query.Skip((request.PageIndex.GetValueOrDefault(1) - 1) * request.PageSize.GetValueOrDefault(10))
+                             .Limit(request.PageSize)
+                             .ToList();
+
+            // Return paginated response
+            return new PaginatedResponse<T>(
+                pageSize: request.PageSize.GetValueOrDefault(10),
+                pageIndex: request.PageIndex.GetValueOrDefault(1),
+                totalItems: (int)totalItems,
+                totalPages: totalPages,
+                items: items
+            );
         }
     }
 

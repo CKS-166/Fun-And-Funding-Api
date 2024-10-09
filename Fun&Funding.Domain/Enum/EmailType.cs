@@ -10,6 +10,7 @@ namespace Fun_Funding.Domain.Enum
     {
         Advertisement,
         ResetPassword,
-        Policy
+        Policy,
+        Report
     }
 }

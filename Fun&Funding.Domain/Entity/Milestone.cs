@@ -19,6 +19,7 @@ namespace Fun_Funding.Domain.Entity
         [Column(TypeName = "decimal(18, 2)")]
         public decimal DisbursementPercentage { get; set; }
         public DateTime UpdateDate { get; set; }
+        public int Version { get; set; }
 
         public virtual ICollection<ProjectMilestone> ProjectMilestones { get; set; }   
 
