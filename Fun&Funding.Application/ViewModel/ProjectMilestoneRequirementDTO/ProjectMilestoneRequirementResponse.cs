@@ -1,4 +1,5 @@
-﻿using Fun_Funding.Domain.Entity;
+﻿using Fun_Funding.Application.ViewModel.ProjectRequirementFileDTO;
+using Fun_Funding.Domain.Entity;
 using Fun_Funding.Domain.Enum;
 using System;
 using System.Collections.Generic;
@@ -16,8 +17,7 @@ namespace Fun_Funding.Application.ViewModel.ProjectMilestoneRequirementDTO
 
         public Guid RequirementId { get; set; }
         public Guid ProjectMilestoneId { get; set; }
-        public ProjectMilestone ProjectMilestone { get; set; }
 
-        public virtual ICollection<ProjectRequirementFile> RequirementFiles { get; set; }
+        public List<ProjectRequirementFileResponse> RequirementFiles { get; set; }
     }
 }
