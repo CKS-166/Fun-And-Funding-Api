@@ -21,5 +21,12 @@ namespace Fun_Funding.Api.Controllers
 
             return Ok(result);
         }
+
+        [HttpPut]
+        public IActionResult UpdateMilestoneRequirements([FromForm] List<ProjectMilestoneRequirementUpdateRequest> request)
+        {
+            var result = _projectMilestoneRequirementService.UpdateMilestoneRequirements(request);
+            return Ok(result);
+        }
     }
 }

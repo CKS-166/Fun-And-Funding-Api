@@ -9,6 +9,7 @@ using Fun_Funding.Application.ViewModel.PackageDTO;
 using Fun_Funding.Application.ViewModel.ProjectMilestoneBackerDTO;
 using Fun_Funding.Application.ViewModel.ProjectMilestoneDTO;
 using Fun_Funding.Application.ViewModel.ProjectMilestoneRequirementDTO;
+using Fun_Funding.Application.ViewModel.ProjectRequirementFileDTO;
 using Fun_Funding.Application.ViewModel.RequirementDTO;
 using Fun_Funding.Application.ViewModel.RewardItemDTO;
 using Fun_Funding.Application.ViewModel.TransactionDTO;
@@ -32,6 +33,7 @@ namespace Fun_Funding.Infrastructure.Mapper
             MappingProjectMilestoneBacker();
             MappingProjectMilestone();
             MappingMilestone();
+            MappingProjectMilestoneRequirement();
         }
         public void MappingFundingProject()
         {
@@ -127,6 +129,13 @@ namespace Fun_Funding.Infrastructure.Mapper
         {
             CreateMap<Milestone, MilestoneResponse>().ReverseMap();
             CreateMap<Requirement, RequirementResponse>().ReverseMap();
+        }
+
+        public void MappingProjectMilestoneRequirement()
+        {
+            CreateMap<ProjectRequirementFile, ProjectRequirementFileUpdateRequest>().ReverseMap();
+            CreateMap<ProjectMilestoneRequirement, ProjectMilestoneRequirementUpdateRequest>().ReverseMap();
+
         }
     }
 }
