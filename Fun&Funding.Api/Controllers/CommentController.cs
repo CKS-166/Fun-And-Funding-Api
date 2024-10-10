@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Fun_Funding.Api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/comment")]
     [ApiController]
     public class CommentController : ControllerBase
     {
