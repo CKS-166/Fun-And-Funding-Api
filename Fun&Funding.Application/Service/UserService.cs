@@ -19,6 +19,7 @@ using Fun_Funding.Application.ViewModel.CategoryDTO;
 using System.Linq.Expressions;
 using Fun_Funding.Application.IStorageService;
 using Fun_Funding.Application.ViewModel.FundingProjectDTO;
+using Fun_Funding.Domain.Constrain;
 
 namespace Fun_Funding.Application.Service
 {
@@ -31,7 +32,7 @@ namespace Fun_Funding.Application.Service
         private readonly IMapper _mapper;
         private readonly RoleManager<IdentityRole<Guid>> _roleManager;
 
-        public UserService(IUnitOfWork unitOfWork, 
+        public UserService(IUnitOfWork unitOfWork,
             UserManager<User> userManager,
             RoleManager<IdentityRole<Guid>> roleManager,
             IHttpContextAccessor httpContextAccessor,
@@ -371,7 +372,7 @@ namespace Fun_Funding.Application.Service
                     throw new ExceptionError((int)HttpStatusCode.NotFound, "User not found.");
                 }
 
-                if(user.File == null)
+                if (user.File == null)
                 {
                     UserFile file = new UserFile();
                     if (userFileRequest.URL.Length > 0)
@@ -480,5 +481,27 @@ namespace Fun_Funding.Application.Service
                 throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
             }
         }
+        public async Task<ResultDTO<string>> CheckUserRole(User user)
+        {
+            // Get the currently logged-in user
+            if (user != null)
+            {
+                return ResultDTO<string>.Fail("No User Found");
+            }
+            var roles = await _userManager.GetRolesAsync(user); // Get the roles for this user
+            if (roles.Contains(Role.Admin))
+            {
+                // User is an Admin
+                return ResultDTO<string>.Success(Role.Admin, "logged as Admin");
+            }
+            else if (roles.Contains(Role.Backer))
+            {
+                // User is a normal User
+                return ResultDTO<string>.Success(Role.Backer, "logged as Backer");
+            }
+
+            return ResultDTO<string>.Success(Role.GameOwner, "logged as Owner");
+        }
+
     }
 }

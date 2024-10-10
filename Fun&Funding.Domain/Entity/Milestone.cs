@@ -13,7 +13,6 @@ namespace Fun_Funding.Domain.Entity
         public string MilestoneName { get; set; }
         public string Description { get; set; }
         public int Duration { get; set; }
-
         public int MilestoneOrder { get; set; }
         [Range(0, (double)decimal.MaxValue)]
         [Column(TypeName = "decimal(18, 2)")]
@@ -22,7 +21,6 @@ namespace Fun_Funding.Domain.Entity
         public int Version { get; set; }
 
         public virtual ICollection<ProjectMilestone> ProjectMilestones { get; set; }   
-
         public virtual ICollection<Requirement> Requirements { get; set; }
     }
 }

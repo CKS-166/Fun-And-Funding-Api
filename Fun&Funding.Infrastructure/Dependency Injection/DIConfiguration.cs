@@ -123,7 +123,7 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             service.AddScoped<IWalletService, WalletService>();
             service.AddScoped<IFollowService, FollowService>();
             service.AddScoped<IReportService, ReportService>();
-
+            service.AddScoped<IMilestoneService, MilestoneService>();
             #endregion
             return service;
 
