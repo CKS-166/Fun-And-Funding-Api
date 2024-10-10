@@ -5,6 +5,7 @@ using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.ProjectMilestoneDTO;
 using Fun_Funding.Application.ViewModel.ProjectMilestoneRequirementDTO;
 using Fun_Funding.Domain.Entity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,7 +49,7 @@ namespace Fun_Funding.Application.Service
                                     Name = file.Name,
                                     URL = url.Result,
                                     CreatedDate = DateTime.Now,
-
+                                    File = file.Filetype
                                 };
                                 files.Add(requirementFile);
                             }
@@ -67,9 +68,56 @@ namespace Fun_Funding.Application.Service
             }
         }
 
-        public Task<ResultDTO<string>> UpdateMilestoneRequirements(List<ProjectMilestoneRequirementRequest> request)
+        public async Task<ResultDTO<string>> UpdateMilestoneRequirements(List<ProjectMilestoneRequirementUpdateRequest> request)
         {
-            throw new NotImplementedException();
+            try
+            {
+                //Projec
+                foreach (var requestItem in  request)
+                {
+                    ProjectMilestoneRequirement req = _unitOfWork.ProjectMilestoneRequirementRepository
+                        .GetQueryable().Include(pmr => pmr.RequirementFiles).FirstOrDefault(pmr => pmr.Id == requestItem.Id);
+                    req.Content = requestItem.Content;
+                    req.UpdateDate = requestItem.UpdateDate;
+                    
+                    if (requestItem.RequirementFiles != null)
+                    {
+                        foreach (var file in requestItem.RequirementFiles)
+                        {
+                            ProjectRequirementFile reqFile = _unitOfWork.ProjectRequirementFileRepository.GetById(file.Id); 
+                            reqFile.URL = file.URL;
+                            reqFile.Name = file.Name;
+                            reqFile.IsDeleted = file.IsDeleted;
+                        }
+                    }
+                    if (requestItem.AddedFiles?.Count > 0)
+                    {
+                        foreach (var file in requestItem.AddedFiles)
+                        {
+                            if (file.URL.Length > 0)
+                            {
+                                var url = _azureService.UploadUrlSingleFiles(file.URL);
+                                ProjectRequirementFile requirementFile = new ProjectRequirementFile
+                                {
+                                    Name = file.Name,
+                                    URL = url.Result,
+                                    CreatedDate = DateTime.Now,
+                                    File = file.Filetype
+                                };
+                                req.RequirementFiles.Add(requirementFile);
+                            }
+                        }
+                    }
+                    _unitOfWork.ProjectMilestoneRequirementRepository.Update(req);
+
+                }
+                _unitOfWork.Commit();
+                return ResultDTO<string>.Success("Ok");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Could not update {ex.Message}");
+            }
         }
     }
 }

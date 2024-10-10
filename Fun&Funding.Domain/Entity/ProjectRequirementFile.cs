@@ -11,6 +11,8 @@ namespace Fun_Funding.Domain.Entity
     {
         public string Name { get; set; }
         public string URL { get; set; }
+        public FileType File { get; set; }
+
         public Guid ProjectMilestoneRequirementId { get; set; } 
         public ProjectMilestoneRequirement ProjectRequirement { get; set; }
 
