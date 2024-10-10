@@ -18,6 +18,7 @@ namespace Fun_Funding.Application.Service
         private IUnitOfWork _unitOfWork;
         private IMapper _mapper;
         private int maxExpireDay = 30;
+        private int maxMilestoneExtend = 10;
         public ProjectMilestoneService(IUnitOfWork unitOfWork, IMapper mapper) {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -27,24 +28,40 @@ namespace Fun_Funding.Application.Service
         {
             try
             {
-                FundingProject project = _unitOfWork.FundingProjectRepository.GetQueryable().FirstOrDefault(p => p.Id == request.FundingProjectId);
+                FundingProject project = _unitOfWork.FundingProjectRepository
+                    .GetQueryable().Include(p => p.ProjectMilestones)
+                    .ThenInclude(pm => pm.Milestone).FirstOrDefault(p => p.Id == request.FundingProjectId);
                 if (project == null) {
                     return ResultDTO<ProjectMilestoneResponse>.Fail("Project not found", 404);
                 }
-                //case milestone 1
+                //case project not funded successfully
                 if (project.Status != ProjectStatus.FundedSucessful) {
                     return ResultDTO<ProjectMilestoneResponse>.Fail("Project is not funded successfully", 500);
                 }
-                if ((request.CreatedDate - project.EndDate).TotalDays > maxExpireDay)
-                {
-                    return ResultDTO<ProjectMilestoneResponse>.Fail("The milestone must begin within 30 days after the project's funding period ends.", 500);
-                }
+                
 
                 Milestone requestMilestone = _unitOfWork.MilestoneRepository
                     .GetQueryable().Include(m => m.Requirements)
                     .FirstOrDefault(m => m.Id == request.MilestoneId);
 
-                
+                // Check if this milestone has already been added to the project
+                bool milestoneExists = project.ProjectMilestones
+                    .Any(pm => pm.Milestone.Id == requestMilestone.Id);
+
+                if (milestoneExists)
+                {
+                    return ResultDTO<ProjectMilestoneResponse>.Fail("This milestone has already been added to the project.", 400);
+                }
+                //case request first
+                if ((request.CreatedDate - project.EndDate).TotalDays > maxExpireDay)
+                {
+                    return ResultDTO<ProjectMilestoneResponse>.Fail("The milestone must begin within 30 days after the project's funding period ends.", 500);
+                }
+                var checkValidateMilstone = CanCreateProjectMilestone(project, requestMilestone.MilestoneOrder);
+                if (checkValidateMilstone != null)
+                {
+                    return ResultDTO<ProjectMilestoneResponse>.Fail(checkValidateMilstone, 500);
+                }
                 ProjectMilestone projectMilestone = new ProjectMilestone
                 {
                     EndDate = request.CreatedDate.AddDays(requestMilestone.Duration),
@@ -85,26 +102,30 @@ namespace Fun_Funding.Application.Service
             }
         }
 
-        //public bool CanCreateProjectMilestone(FundingProject project, int requestedMilestoneOrder)
-        //{
-        //    // Get all the project milestones ordered by MilestoneOrder
-        //    var projectMilestones = project.ProjectMilestones
-        //        .OrderBy(pm => pm.Milestone.MilestoneOrder)
-        //        .ToList();
+        public string CanCreateProjectMilestone(FundingProject project, int requestedMilestoneOrder)
+        {
+            // Get all the project milestones ordered by MilestoneOrder
+            var projectMilestones = project.ProjectMilestones
+                .OrderBy(pm => pm.Milestone.MilestoneOrder)
+                .ToList();
+            if (projectMilestones != null || projectMilestones.Count != 0) {
+                // Check if the requested milestone order is valid
+                if (requestedMilestoneOrder > projectMilestones.Count + 1)
+                    return "Requested milestone order is greater than the next available milestone"; // Requested milestone order is greater than the next available milestone
 
-        //    // Check if the requested milestone order is valid
-        //    if (requestedMilestoneOrder > projectMilestones.Count + 1)
-        //        return false; // Requested milestone order is greater than the next available milestone
-
-        //    // Check the status of the previous milestones
-        //    for (int i = 0; i < requestedMilestoneOrder - 1; i++)
-        //    {
-        //        var previousMilestone = projectMilestones[i];
-        //        if (previousMilestone.Status != ProjectMilestoneStatus.Completed)
-        //            return false; // Previous milestone is not completed
-        //    }
-
-        //    return true; // All previous milestones are completed, so the requested milestone can be created
-        //}
+                // Check the status of the previous milestones
+                for (int i = 0; i < requestedMilestoneOrder - 1; i++)
+                {
+                    var previousMilestone = projectMilestones[i];
+                    if (previousMilestone.Status != ProjectMilestoneStatus.Completed)
+                        return "The previous milestones are not completed";
+                }
+                if ((projectMilestones[requestedMilestoneOrder].CreatedDate - projectMilestones[requestedMilestoneOrder - 1].EndDate).TotalDays > maxMilestoneExtend)
+                {
+                    return "Requested days betweeen each milestone must be within 10 days";
+                }
+            }
+            return null;
+        }
     }
 }
