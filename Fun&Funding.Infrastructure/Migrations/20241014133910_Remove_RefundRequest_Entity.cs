@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Fun_Funding.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class @new : Migration
+    public partial class Remove_RefundRequest_Entity : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -380,30 +380,6 @@ namespace Fun_Funding.Infrastructure.Migrations
                         principalTable: "Milestones",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "RefundRequest",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    RefundType = table.Column<int>(type: "int", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Status = table.Column<int>(type: "int", nullable: false),
-                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_RefundRequest", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_RefundRequest_Order_OrderId",
-                        column: x => x.OrderId,
-                        principalTable: "Order",
-                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -1042,11 +1018,6 @@ namespace Fun_Funding.Infrastructure.Migrations
                 column: "ProjectMilestoneRequirementId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_RefundRequest_OrderId",
-                table: "RefundRequest",
-                column: "OrderId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Requirements_MilestoneId",
                 table: "Requirements",
                 column: "MilestoneId");
@@ -1159,9 +1130,6 @@ namespace Fun_Funding.Infrastructure.Migrations
                 name: "ProjectRequirementFiles");
 
             migrationBuilder.DropTable(
-                name: "RefundRequest");
-
-            migrationBuilder.DropTable(
                 name: "RewardItem");
 
             migrationBuilder.DropTable(
@@ -1189,10 +1157,10 @@ namespace Fun_Funding.Infrastructure.Migrations
                 name: "DigitalKey");
 
             migrationBuilder.DropTable(
-                name: "ProjectMilestoneRequirements");
+                name: "Order");
 
             migrationBuilder.DropTable(
-                name: "Order");
+                name: "ProjectMilestoneRequirements");
 
             migrationBuilder.DropTable(
                 name: "Package");
