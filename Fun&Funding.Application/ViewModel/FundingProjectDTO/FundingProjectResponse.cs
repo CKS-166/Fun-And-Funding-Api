@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Fun_Funding.Application.ViewModel.UserDTO;
+using Fun_Funding.Application.ViewModel.CategoryDTO;
 
 namespace Fun_Funding.Application.ViewModel.FundingProjectDTO
 {
@@ -41,5 +42,7 @@ namespace Fun_Funding.Application.ViewModel.FundingProjectDTO
         public string Email { get; set; }
 
         public UserInfoResponse User { get; set; }
+
+        public List<CategoryResponse> Categories { get; set; }
     }
 }
