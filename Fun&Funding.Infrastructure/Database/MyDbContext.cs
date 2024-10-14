@@ -128,7 +128,6 @@ namespace Fun_Funding.Infrastructure.Database
         public DbSet<OrderDetail> OrderDetail { get; set; }
         public DbSet<Package> Package { get; set; }
         public DbSet<PackageBacker> PackageBacker { get; set; }
-        public DbSet<RefundRequest> RefundRequest { get; set; }
         public DbSet<RewardItem> RewardItem { get; set; }
         public DbSet<RewardTracking> RewardTracking { get; set; }
         public DbSet<Stage> Stage { get; set; }
