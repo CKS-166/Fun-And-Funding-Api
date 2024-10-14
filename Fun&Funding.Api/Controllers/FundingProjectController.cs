@@ -6,6 +6,8 @@ using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Domain.Enum;
 using Fun_Funding.Domain.Enum;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Fun_Funding.Domain.Constrain;
 
 namespace Fun_Funding.Api.Controllers
 {
@@ -23,6 +25,7 @@ namespace Fun_Funding.Api.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = Role.GameOwner)]
         public async Task<IActionResult> CreateProject([FromForm] FundingProjectAddRequest req)
         {
             var response = await _fundingProjectService.CreateFundingProject(req);
