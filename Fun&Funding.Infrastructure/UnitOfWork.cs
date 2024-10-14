@@ -31,7 +31,7 @@ namespace Fun_Funding.Infrastructure
         private IWalletRepository _walletRepository;
         private IWithdrawRequestRepository _withdrawRequestRepository;
         private ICommissionFeeRepository _commissionFeeRepository;
-
+        private IMarketplaceRepository _marketplaceRepository;
         private IProjectCouponRepository _projectCouponRepository;
         private IMilestoneRepository _milestoneRepository;
         private IProjectMilestoneBackerRepository _projectMilestoneBackerRepository;
@@ -216,6 +216,9 @@ namespace Fun_Funding.Infrastructure
 
         public IReportRepository ReportRepository =>
             _reportRepository ??= new ReportRepository(_mongoDBContext);
+
+        public IMarketplaceRepository MarketplaceRepository => 
+            _marketplaceRepository ??= new MarketplaceRepository(_dbContext);
 
 
         // Commit and rollback methods

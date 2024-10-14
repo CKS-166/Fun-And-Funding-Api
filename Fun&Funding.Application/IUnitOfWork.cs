@@ -27,12 +27,13 @@ namespace Fun_Funding.Application
         ICommissionFeeRepository CommissionFeeRepository { get; }
         IProjectCouponRepository ProjectCouponRepository { get; }
         IMilestoneRepository MilestoneRepository { get; }
+        IMarketplaceRepository MarketplaceRepository { get; }
         IProjectMilestoneBackerRepository ProjectMilestoneBackerRepository { get; }
         IProjectMilestoneRepository ProjectMilestoneRepository { get; }
         IRequirementRepository RequirementRepository { get; }
         IProjectMilestoneRequirementRepository ProjectMilestoneRequirementRepository { get; }
         IProjectRequirementFileRepository ProjectRequirementFileRepository { get; }
-
+        
         // Methods for committing and rolling back
         void Commit();
         Task CommitAsync();
