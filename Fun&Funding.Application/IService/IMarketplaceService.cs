@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Fun_Funding.Application.ViewModel;
+using Fun_Funding.Domain.Entity;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,5 +10,6 @@ namespace Fun_Funding.Application.IService
 {
     public interface IMarketplaceService
     {
+        Task<ResultDTO<PaginatedResponse<MarketplaceProject>>> GetAllMarketplaceProject(ListRequest request);
     }
 }

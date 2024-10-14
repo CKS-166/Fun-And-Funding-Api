@@ -20,7 +20,7 @@ namespace Fun_Funding.Api.Controllers
         {
             var result = await _milestoneService.GetListLastestMilestone();
             if (!result._isSuccess)
-                return BadRequest(result);
+                return Ok(StatusCode(result._statusCode, result));
             return Ok(result);
         }
         [HttpGet("get-by-verson-or-order")]
