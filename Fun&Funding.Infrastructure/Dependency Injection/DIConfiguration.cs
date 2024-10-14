@@ -7,6 +7,7 @@ using Fun_Funding.Application.ITokenService;
 using Fun_Funding.Application.Service;
 
 using Fun_Funding.Domain.Entity;
+using Fun_Funding.Infrastructure.BackgroundWorkerService;
 using Fun_Funding.Infrastructure.Database;
 using Fun_Funding.Infrastructure.Mapper;
 using Fun_Funding.Infrastructure.Repository;
@@ -128,6 +129,7 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             service.AddScoped<IRequirementService, RequirementService>();
             service.AddScoped<IMarketplaceService, MarketplaceService>();
             #endregion
+            service.AddHostedService<WorkerService>();
             return service;
 
         }
