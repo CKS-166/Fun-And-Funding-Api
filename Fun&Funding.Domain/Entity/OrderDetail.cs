@@ -10,11 +10,11 @@ namespace Fun_Funding.Domain.Entity
     public class OrderDetail : BaseEntity
     {
         [Required]
-        public Guid DigitalKeyID { get; set; }
-        public DigitalKey DigitalKey { get; set; }
+        public Guid? DigitalKeyID { get; set; }
+        public DigitalKey? DigitalKey { get; set; }
 
         [Required]
-        public Guid OrderId { get; set; }
-        public Order Order { get; set; }
+        public Guid? OrderId { get; set; }
+        public Order? Order { get; set; }
     }
 }
