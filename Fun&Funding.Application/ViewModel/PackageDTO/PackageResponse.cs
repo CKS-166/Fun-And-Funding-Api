@@ -14,6 +14,8 @@ namespace Fun_Funding.Application.ViewModel.PackageDTO
     {
         public Guid Id { get; set; }
         public string? Name { get; set; }
+
+        public string? Url { get; set; }
         public string? Description { get; set; }
         [Range(0, (double)decimal.MaxValue)]
         [Column(TypeName = "decimal(18, 2)")]

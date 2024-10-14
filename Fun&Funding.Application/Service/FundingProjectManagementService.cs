@@ -172,11 +172,12 @@ namespace Fun_Funding.Application.Service
         {
             try
             {
-                FundingProject project = _unitOfWork.FundingProjectRepository.GetQueryable()
+                var project = _unitOfWork.FundingProjectRepository.GetQueryable()
                     .Include(p => p.Packages).ThenInclude(pack => pack.RewardItems)
                     .Include(p => p.SourceFiles)
                     .Include(p=>p.BankAccount)
                     .Include(p => p.User)
+                    .Include(p => p.Categories)
                     .AsSplitQuery()
                     .FirstOrDefault(p => p.Id == id);
                 if (project is null)
