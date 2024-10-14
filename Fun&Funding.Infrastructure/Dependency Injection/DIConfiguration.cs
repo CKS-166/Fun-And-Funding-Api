@@ -98,6 +98,7 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             service.AddScoped<IFollowRepository, FollowRepository>();
             service.AddScoped<IProjectCouponRepository, ProjectCouponRepository>();
             service.AddScoped<IMilestoneRepository, MilestoneRepository>();
+            service.AddScoped<IMarketplaceRepository, MarketplaceRepository>();
             service.AddScoped<IProjectMilestoneBackerRepository, ProjectMilestoneBackerRepository>();
             service.AddScoped<IProjectMilestoneRepository, ProjectMilestoneRepository>();
             service.AddScoped<IRequirementRepository, RequirementRepository>();
