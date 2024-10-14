@@ -25,13 +25,13 @@ namespace Fun_Funding.Api.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        [HttpGet("get-all-liked-projects")]
+        [HttpGet("all")]
         public async Task<IActionResult> GetAll()
         {
             var result = await _likeService.GetAll();
             return Ok(result);
         }
-        [HttpPost("like-project")]
+        [HttpPost("like")]
         public async Task<IActionResult> likeProject([FromBody] LikeRequest likeRequest)
         {
             var result = await _likeService.LikeProject(likeRequest);
@@ -41,7 +41,7 @@ namespace Fun_Funding.Api.Controllers
             }
             return Ok(result);
         }
-        [HttpGet("get-like/{id}")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetProjectLike(Guid id)
         {
             try
@@ -54,7 +54,7 @@ namespace Fun_Funding.Api.Controllers
                 return BadRequest(ex.Message);
             }
         }
-        [HttpGet("check-user-like/{id}")]
+        [HttpGet("user-like/{id}")]
         [Authorize]
         public async Task<IActionResult> CheckUserLike(Guid id)
         {
