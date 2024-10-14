@@ -126,6 +126,7 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             service.AddScoped<IReportService, ReportService>();
             service.AddScoped<IMilestoneService, MilestoneService>();
             service.AddScoped<IRequirementService, RequirementService>();
+            service.AddScoped<IMarketplaceService, MarketplaceService>();
             #endregion
             return service;
 
