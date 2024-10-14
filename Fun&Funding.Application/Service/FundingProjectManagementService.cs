@@ -13,41 +13,55 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using System.Net;
+using System.Security.Claims;
 
 namespace Fun_Funding.Application.Service
 {
     public class FundingProjectManagementService : IFundingProjectService
     {
         public IUnitOfWork _unitOfWork;
+        private readonly ClaimsPrincipal _claimsPrincipal;
         public IMapper _mapper;
         public IAzureService _azureService;
         private int maxDays = 60;
         private int minDays = 1;
-        public FundingProjectManagementService(IUnitOfWork unitOfWork, IMapper mapper, IAzureService azureService)
+        public FundingProjectManagementService(IUnitOfWork unitOfWork, IMapper mapper, IAzureService azureService, IHttpContextAccessor httpContextAccessor)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _azureService = azureService;
+            _claimsPrincipal = httpContextAccessor.HttpContext.User;
         }
         public async Task<ResultDTO<FundingProjectResponse>> CreateFundingProject(FundingProjectAddRequest projectRequest)
         {
             try
             {
-                //map project
-                FundingProject project = _mapper.Map<FundingProject>(projectRequest);
-                //check owner
-                User owner = _unitOfWork.UserRepository.GetQueryable().FirstOrDefault(u => u.Email == projectRequest.Email);
+                //find authorize user
+                if (_claimsPrincipal == null || !_claimsPrincipal.Identity.IsAuthenticated)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.Unauthorized, "User not authenticated.");
+                }
+                var userEmailClaims = _claimsPrincipal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email);
+                if (userEmailClaims == null)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "User not found.");
+                }
+                var userEmail = userEmailClaims.Value;
+                User owner = await _unitOfWork.UserRepository.GetAsync(x => x.Email == userEmail);
                 if (owner == null)
                 {
-                    return ResultDTO<FundingProjectResponse>.Fail("Owner not found", 404);
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "Owner not found");
                 }
+               
+                //map project
+                FundingProject project = _mapper.Map<FundingProject>(projectRequest);
                 project.User = owner;
                 //validate category
                 foreach (CategoryProjectRequest cate in projectRequest.Categories)
                 {
                     Category category = _unitOfWork.CategoryRepository.GetById(cate.Id);
                     if (category == null) {
-                        return ResultDTO<FundingProjectResponse>.Fail("Category not found",404);
+                        throw new ExceptionError((int)HttpStatusCode.NotFound, "Category not found");
                     }
                     project.Categories.Add(category);
 
@@ -60,34 +74,34 @@ namespace Fun_Funding.Application.Service
                     // Check for duplicate package names
                     if (!packageNames.Add(pack.Name)) // Add will return false if the name already exists
                     {
-                        return ResultDTO<FundingProjectResponse>.Fail($"Duplicate package name found: {pack.Name}");
+                        throw new ExceptionError((int)HttpStatusCode.NotFound, $"Duplicate package name found: {pack.Name}");
                     }
                     if (pack.RequiredAmount < 5000)
                     {
-                        return ResultDTO<FundingProjectResponse>.Fail("Price for package must be at least 5000");
+                        throw new ExceptionError((int)HttpStatusCode.BadRequest, "Price for package must be at least 5000");
                     }
                     if (pack.RewardItems.Count < 1)
                     {
-                        return ResultDTO<FundingProjectResponse>.Fail("Each package must have at least 1 item");
+                        throw new ExceptionError((int)HttpStatusCode.BadRequest, "Each package must have at least 1 item");
                     }
                     if (pack.LimitQuantity < 1)
                     {
-                        return ResultDTO<FundingProjectResponse>.Fail("Each package must limit at least 1 quantity");
+                        throw new ExceptionError((int)HttpStatusCode.BadRequest, "Each package must limit at least 1 quantity");
                     }
                 }
                 //validate bank
                 if (projectRequest.BankAccount is null)
                 {
-                    return ResultDTO<FundingProjectResponse>.Fail("Project must config its bank account for payment");
+                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "Project must config its bank account for payment");
                 }
                 //validate startDate endDate info
                 if (project.StartDate < DateTime.Now)
                 {
-                    return ResultDTO<FundingProjectResponse>.Fail("Start date cannot be before today");
+                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "Start date cannot be before today");
                 }
                 if (project.EndDate <= project.StartDate)
                 {
-                    return ResultDTO<FundingProjectResponse>.Fail("End date must be greater that start date");
+                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "End date must be greater that start date");
                 }
                 if ((project.EndDate - project.StartDate).TotalDays < minDays || (project.EndDate - project.StartDate).TotalDays > maxDays)
                 {
@@ -116,7 +130,7 @@ namespace Fun_Funding.Application.Service
                         var res = _azureService.UploadUrlSingleFiles(req.URL);
                         if (res == null)
                         {
-                            return ResultDTO<FundingProjectResponse>.Fail("Fail to upload file");
+                            throw new ExceptionError((int)HttpStatusCode.BadRequest, "Fail to upload file");
                         }
                         FundingFile media = new FundingFile
                         {
@@ -164,7 +178,7 @@ namespace Fun_Funding.Application.Service
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message);
+                throw new ExceptionError((int)HttpStatusCode.BadRequest, ex.Message);
             }
         }
 
@@ -204,11 +218,11 @@ namespace Fun_Funding.Application.Service
                 // check status
                 if (existedProject == null)
                 {
-                    return ResultDTO<FundingProjectResponse>.Fail("Project not found", 404);
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "Project Not Found.");
                 }
                 if (existedProject.Status != ProjectStatus.Processing)
                 {
-                    return ResultDTO<FundingProjectResponse>.Fail("Project is not processing");
+                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "Project is not in processing status");
                 }
                 //update regulations for funding goals and end date
 
@@ -217,20 +231,21 @@ namespace Fun_Funding.Application.Service
                 {
                     if (pack.RequiredAmount < 5000)
                     {
-                        return ResultDTO<FundingProjectResponse>.Fail("Price for package must be at least 5000");
+                        throw new ExceptionError((int)HttpStatusCode.BadRequest, "Price for package must be at least 5000");
                     }
                     if (pack.RewardItems.Count < 1)
                     {
-                        return ResultDTO<FundingProjectResponse>.Fail("Each package must have at least 1 item");
+                        throw new ExceptionError((int)HttpStatusCode.BadRequest, "Each package must have at least 1 item");
+            
                     }
                     if (pack.LimitQuantity < 1)
                     {
-                        return ResultDTO<FundingProjectResponse>.Fail("Each package must limit at least 1 quantity");
+                        throw new ExceptionError((int)HttpStatusCode.BadRequest, "Each package must limit at least 1 quantity");
                     }
                 }
                 if (projectRequest.BankAccount is null)
                 {
-                    return ResultDTO<FundingProjectResponse>.Fail("Project must config its bank account for payment");
+                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "Project must config its bank account for payment");
                 }
 
                 existedProject.Name = projectRequest.Name;
@@ -357,7 +372,7 @@ namespace Fun_Funding.Application.Service
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message);
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError,ex.Message);
             }
         }
         public async Task<ResultDTO<PaginatedResponse<FundingProjectResponse>>> GetFundingProjects(ListRequest request, string? categoryName, ProjectStatus status, decimal? fromTarget, decimal? toTarget)
