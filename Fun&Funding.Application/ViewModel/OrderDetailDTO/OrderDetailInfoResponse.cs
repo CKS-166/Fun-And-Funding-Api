@@ -8,5 +8,6 @@ namespace Fun_Funding.Application.ViewModel.OrderDetailDTO
 {
     public class OrderDetailInfoResponse
     {
+
     }
 }
