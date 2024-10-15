@@ -35,7 +35,7 @@ namespace Fun_Funding.Application.Service
                     return ResultDTO<ProjectMilestoneResponse>.Fail("Project not found", 404);
                 }
                 //case project not funded successfully
-                if (project.Status != ProjectStatus.FundedSucessful) {
+                if (project.Status != ProjectStatus.FundedSuccessful) {
                     return ResultDTO<ProjectMilestoneResponse>.Fail("Project is not funded successfully", 500);
                 }
                 
@@ -53,7 +53,7 @@ namespace Fun_Funding.Application.Service
                     return ResultDTO<ProjectMilestoneResponse>.Fail("This milestone has already been added to the project.", 400);
                 }
                 //case request first
-                if ((request.CreatedDate - project.EndDate).TotalDays > maxExpireDay)
+                if (((request.CreatedDate - project.EndDate).TotalDays > maxExpireDay) && requestMilestone.MilestoneOrder == 1)
                 {
                     return ResultDTO<ProjectMilestoneResponse>.Fail("The milestone must begin within 30 days after the project's funding period ends.", 500);
                 }

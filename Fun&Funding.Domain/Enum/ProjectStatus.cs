@@ -5,7 +5,7 @@
         Deleted,
         Pending,
         Processing,
-        FundedSucessful,
+        FundedSuccessful,
         Successful,
         Failed,
         Rejected,

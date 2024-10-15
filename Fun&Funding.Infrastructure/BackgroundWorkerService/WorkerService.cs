@@ -1,4 +1,5 @@
-﻿using Fun_Funding.Infrastructure.Database;
+﻿using Fun_Funding.Application.IService;
+using Fun_Funding.Infrastructure.Database;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -24,13 +25,40 @@ namespace Fun_Funding.Infrastructure.BackgroundWorkerService
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            TestHello();
-            //await Task.Delay(2 * 3600 * 1000, stoppingToken);
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                try
+                {
+                    await ValidateFundingStatus();
+                }
+                catch (Exception ex)
+                {
+                    // Log any exceptions to prevent the loop from breaking.
+                    _logger.LogError(ex, "An error occurred while validating funding status.");
+                }
+
+                // Wait 10 seconds between each iteration.
+                await Task.Delay(TimeSpan.FromHours(6), stoppingToken);
+            }
         }
 
         public async Task TestHello()
         {
             _logger.LogInformation("Hello World at: {time}", DateTimeOffset.Now);
+        }
+
+        public async Task ValidateFundingStatus()
+        {
+            using (var scope = _serviceScopeFactory.CreateScope())
+            {
+                var fundingService = scope.ServiceProvider.GetRequiredService<IBackgroundProcessService>();
+
+                var test = fundingService.UpdateFundingStatus();
+                //_logger.LogInformation("Updating marketplace status at: {time}", test.Result);
+
+                // Call the UpdateStatus method (no parameters needed).
+                //marketplaceService.UpdateStatus();
+            }
         }
     }
 }
