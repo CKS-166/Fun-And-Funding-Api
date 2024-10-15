@@ -16,13 +16,13 @@ namespace Fun_Funding.Api.Controllers
         {
             _commentService = commentService;
         }
-        [HttpGet("get-all-comment-projects")]
+        [HttpGet("all")]
         public async Task<IActionResult> AllCommentProjects()
         {
             var result = await _commentService.GetAllComment();
             return Ok(result);
         }
-        [HttpPost("comment-project")]
+        [HttpPost]
         public async Task<IActionResult> commentProject([FromBody] CommentRequest request)
         {
             var result = await _commentService.CommentProject(request);
@@ -32,7 +32,7 @@ namespace Fun_Funding.Api.Controllers
             }
             return Ok(result);
         }
-        [HttpGet("get-comments/{id}")]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetProjecComment(Guid id)
         {
             try
@@ -45,7 +45,7 @@ namespace Fun_Funding.Api.Controllers
                 return BadRequest(ex.Message);
             }
         }
-        [HttpDelete("delete-comments/{id}")]
+        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteProjecComment(Guid id)
         {
             try

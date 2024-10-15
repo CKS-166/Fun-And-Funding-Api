@@ -8,11 +8,9 @@ using System.Threading.Tasks;
 
 namespace Fun_Funding.Application.ViewModel.OrderDTO
 {
-    public class OrderInfoResponse
+    public class OrderAddRequest
     {
-        public Guid OrderId { get; set; }
-        public DateTime CreatedDate { get; set; }
-        public UserInfoResponse? User {  get; set; }
+        public UserInfoResponse? User { get; set; }
         public OrderStatus OrderStatus { get; set; }
     }
 }

@@ -8,5 +8,7 @@ namespace Fun_Funding.Domain.Enum
 {
     public enum OrderStatus
     {
+        InCart,
+        Purchased,
     }
 }

@@ -15,7 +15,7 @@ namespace Fun_Funding.Api.Controllers
         {
             _milestoneService = milestoneService;
         }
-        [HttpGet("get-group-latest-milestone")]
+        [HttpGet("group-latest-milestone")]
         public async Task<IActionResult> GetAllMilestoneOrder()
         {
             var result = await _milestoneService.GetListLastestMilestone();
@@ -23,7 +23,7 @@ namespace Fun_Funding.Api.Controllers
                 return BadRequest(result);
             return Ok(result);
         }
-        [HttpGet("get-by-verson-or-order")]
+        [HttpGet("verson-or-order")]
         public async Task<IActionResult> GetMilestoneByVersionOrOrder([FromQuery] int? Order, int? Version)
         {
             var result = await _milestoneService.GetMilestoneByVersionAndOrder(Order,Version);
