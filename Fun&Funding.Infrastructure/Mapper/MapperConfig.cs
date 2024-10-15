@@ -1,6 +1,8 @@
 using AutoMapper;
+using Fun_Funding.Application;
 using Fun_Funding.Application.ViewModel.BankAccountDTO;
 using Fun_Funding.Application.ViewModel.CategoryDTO;
+using Fun_Funding.Application.ViewModel.ChatDTO;
 using Fun_Funding.Application.ViewModel.CommissionDTO;
 using Fun_Funding.Application.ViewModel.FundingFileDTO;
 using Fun_Funding.Application.ViewModel.FundingProjectDTO;
@@ -17,12 +19,17 @@ using Fun_Funding.Application.ViewModel.UserDTO;
 using Fun_Funding.Application.ViewModel.WalletDTO;
 using Fun_Funding.Application.ViewModel.WithdrawDTO;
 using Fun_Funding.Domain.Entity;
-using System.Security.Cryptography;
+using Fun_Funding.Domain.Entity.NoSqlEntities;
 
 namespace Fun_Funding.Infrastructure.Mapper
 {
     public class MapperConfig : Profile
     {
+        private readonly IUnitOfWork _unitOfWork;
+        public MapperConfig(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+        }
         public MapperConfig()
         {
             MappingFundingProject();
@@ -136,6 +143,17 @@ namespace Fun_Funding.Infrastructure.Mapper
             CreateMap<ProjectRequirementFile, ProjectRequirementFileUpdateRequest>().ReverseMap();
             CreateMap<ProjectMilestoneRequirement, ProjectMilestoneRequirementUpdateRequest>().ReverseMap();
 
+        }
+
+        public void MappingChat()
+        {
+            CreateMap<ChatResponse, Chat>().AfterMap((src, des) =>
+            {
+                src.SenderName = _unitOfWork.UserRepository.GetById(src.SenderId).FullName;
+                src.ReceiverName = _unitOfWork.UserRepository.GetById(src.ReceiverName).FullName;
+            }).ReverseMap();
+
+            CreateMap<Chat, ChatRequest>().ReverseMap();
         }
     }
 }

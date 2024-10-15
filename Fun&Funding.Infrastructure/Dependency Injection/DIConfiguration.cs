@@ -4,6 +4,7 @@ using Fun_Funding.Application.IRepository;
 using Fun_Funding.Application.IService;
 using Fun_Funding.Application.IStorageService;
 using Fun_Funding.Application.ITokenService;
+using Fun_Funding.Application.IWebSocketService;
 using Fun_Funding.Application.Service;
 
 using Fun_Funding.Domain.Entity;
@@ -13,6 +14,7 @@ using Fun_Funding.Infrastructure.Repository;
 using Fun_Funding.Infrastructure.SoftDeleteService;
 using Fun_Funding.Infrastructure.StorageService;
 using Fun_Funding.Infrastructure.TokenGeneratorService;
+using Fun_Funding.Infrastructure.WebSocketService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -103,6 +105,7 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             service.AddScoped<IRequirementRepository, RequirementRepository>();
             service.AddScoped<IProjectMilestoneRequirementRepository, ProjectMilestoneRequirementRepository>();
             service.AddScoped<IProjectRequirementFileRepository, ProjectRequirementFileRepository>();
+            service.AddScoped<IChatRepository, ChatRepository>();
             #endregion
             #region Sevices
             service.AddScoped<IAuthenticationService, AuthenticationService>();
@@ -124,6 +127,8 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             service.AddScoped<IFollowService, FollowService>();
             service.AddScoped<IReportService, ReportService>();
             service.AddScoped<IMilestoneService, MilestoneService>();
+            service.AddScoped<IChatService, ChatService>();
+            service.AddSingleton<IWebSocketManager, WebSocketManager>();
             #endregion
             return service;
 
