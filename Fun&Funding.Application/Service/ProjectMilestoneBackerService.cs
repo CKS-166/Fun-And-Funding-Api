@@ -2,6 +2,7 @@
 using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.ProjectMilestoneBackerDTO;
+using Fun_Funding.Application.ViewModel.ProjectMilestoneDTO;
 using Fun_Funding.Domain.Entity;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -77,7 +78,11 @@ namespace Fun_Funding.Application.Service
         {
             try
             {
-                var reviewList = await _unitOfWork.ProjectMilestoneBackerRepository.GetAllAsync();
+                var reviewList = await _unitOfWork.ProjectMilestoneBackerRepository
+                    .GetQueryable()
+                    .Include(pmb => pmb.ProjectMilestone)
+                    .Include(pmb => pmb.Backer)
+                    .ToListAsync();
 
                 var responseList = new List<ProjectMilestoneBackerResponse>();
 
