@@ -1,4 +1,5 @@
-﻿using Fun_Funding.Domain.Entity;
+﻿using Fun_Funding.Application.ViewModel.DigitalKeyDTO;
+using Fun_Funding.Domain.Entity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,8 @@ namespace Fun_Funding.Application.ViewModel.OrderDetailDTO
 {
     public class OrderDetailInfoResponse
     {
+        public Guid? OrderId { get; set; }
 
-        public DigitalKey? DigitalKey { get; set; }
+        public DigitalKeyInfoResponse? DigitalKey { get; set; }
     }
 }

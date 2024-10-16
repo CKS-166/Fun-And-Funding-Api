@@ -33,7 +33,8 @@ namespace Fun_Funding.Application
         IRequirementRepository RequirementRepository { get; }
         IProjectMilestoneRequirementRepository ProjectMilestoneRequirementRepository { get; }
         IProjectRequirementFileRepository ProjectRequirementFileRepository { get; }
-        
+        IDigitalKeyRepository DigitalKeyRepository { get; }
+
         // Methods for committing and rolling back
         void Commit();
         Task CommitAsync();

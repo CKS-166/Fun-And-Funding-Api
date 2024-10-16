@@ -130,6 +130,7 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             service.AddScoped<IMarketplaceService, MarketplaceService>();
             service.AddScoped<IBackgroundProcessService, BackgroundProcessService>();
             service.AddScoped<IOrderService, OrderService>();
+            service.AddScoped<IDigitalKeyService, DigitalKeyService>();
             #endregion
             service.AddHostedService<WorkerService>();
             return service;
