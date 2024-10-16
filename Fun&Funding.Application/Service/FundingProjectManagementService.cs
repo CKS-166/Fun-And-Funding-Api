@@ -188,7 +188,7 @@ namespace Fun_Funding.Application.Service
             {
                 var project = _unitOfWork.FundingProjectRepository.GetQueryable()
                     .Include(p => p.Packages).ThenInclude(pack => pack.RewardItems)
-                    .Include(p => p.SourceFiles)
+                    .Include(p => p.SourceFiles.Where(sf => sf.IsDeleted == true))
                     .Include(p=>p.BankAccount)
                     .Include(p => p.User)
                     .Include(p => p.Categories)
@@ -254,7 +254,7 @@ namespace Fun_Funding.Application.Service
                 existedProject.BankAccount = bank;
                 existedProject.Introduction = projectRequest.Introduction;
 
-                //update files 
+                //update if have new files 
                 if (projectRequest.FundingFiles?.Count > 0)
                 {
                     List<FundingFile> files = new List<FundingFile>();
@@ -272,9 +272,22 @@ namespace Fun_Funding.Application.Service
                             {
                                 Name = req.Name,
                                 URL = res.Result,
-                                Filetype = req.Filetype
+                                Filetype = req.Filetype,
+                                IsDeleted = false
                             };
                             files.Add(media);
+                        }
+                    }
+                    //update existing files
+                    if (projectRequest.ExistedFile?.Count > 0)
+                    {
+                        foreach (FundingFileResponse fp in projectRequest.ExistedFile)
+                        {
+                            FundingFile updatedFile = _unitOfWork.SourceFileRepository.GetQueryable().FirstOrDefault(f => f.Id == fp.Id);
+                            updatedFile.Filetype = fp.Filetype;
+                            updatedFile.IsDeleted = fp.IsDeleted;
+                            updatedFile.URL = fp.URL;
+                            _unitOfWork.SourceFileRepository.Update(updatedFile);
                         }
                     }
                     // Add each file from 'files' list to the 'SourceFiles' ICollection
@@ -287,7 +300,14 @@ namespace Fun_Funding.Application.Service
                 //add image into item 
                 foreach (var packageRequest in projectRequest.Packages)
                 {
+                    
                     var existedPack = existedProject.Packages.FirstOrDefault(p => p.Id == packageRequest.Id);
+                    //change image of package
+                    if (packageRequest.UpdatedImage != null)
+                    {
+                        var imageUploadResult = _azureService.UploadUrlSingleFiles(packageRequest.UpdatedImage);
+                        existedPack.Url = imageUploadResult.Result;
+                    }
                     if (existedPack != null)
                     {
                         existedPack.Name = packageRequest.Name;
