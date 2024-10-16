@@ -13,5 +13,6 @@ namespace Fun_Funding.Application.ViewModel.FundingFileDTO
         public string Name { get; set; }
         public string URL { get; set; }
         public FileType Filetype { get; set; }
+        public bool IsDeleted { get; set; }
     }
 }

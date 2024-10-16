@@ -55,7 +55,7 @@ namespace Fun_Funding.Application.Service
                         project.Status = ProjectStatus.FundedSuccessful;
                         statusChanged = true;
                     }
-                    else if (project.Status == ProjectStatus.Pending && project.StartDate >= present)
+                    else if (project.Status == ProjectStatus.Pending && project.StartDate <= present)
                     {
                         project.Status = ProjectStatus.Rejected;
                         statusChanged = true;

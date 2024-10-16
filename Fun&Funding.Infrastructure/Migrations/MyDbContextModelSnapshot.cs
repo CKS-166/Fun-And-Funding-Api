@@ -408,6 +408,7 @@ namespace Fun_Funding.Infrastructure.Migrations
                         .HasColumnType("datetimeoffset");
 
                     b.Property<Guid?>("DigitalKeyID")
+                        .IsRequired()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsDeleted")
@@ -1340,7 +1341,9 @@ namespace Fun_Funding.Infrastructure.Migrations
                 {
                     b.HasOne("Fun_Funding.Domain.Entity.DigitalKey", "DigitalKey")
                         .WithMany()
-                        .HasForeignKey("DigitalKeyID");
+                        .HasForeignKey("DigitalKeyID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Fun_Funding.Domain.Entity.Order", "Order")
                         .WithMany()
