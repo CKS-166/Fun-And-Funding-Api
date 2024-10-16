@@ -39,6 +39,7 @@ namespace Fun_Funding.Infrastructure
         private IRequirementRepository _requirementRepository;
         private IProjectMilestoneRequirementRepository _projectMilestoneRequirementRepository;
         private IProjectRequirementFileRepository _projectRequirementFileRepository;
+        private IDigitalKeyRepository _digitalKeyRepository;
 
         public UnitOfWork(MyDbContext dbContext, MongoDBContext mongoDBContext)
         {
@@ -187,6 +188,14 @@ namespace Fun_Funding.Infrastructure
             get
             {
                 return _commentRepository = _commentRepository ?? new CommentRepository(_mongoDBContext);
+            }
+        }
+
+        public IDigitalKeyRepository DigitalKeyRepository
+        {
+            get
+            {
+                return _digitalKeyRepository = _digitalKeyRepository ?? new DigitalKeyRepository(_dbContext);
             }
         }
 

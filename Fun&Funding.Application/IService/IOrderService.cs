@@ -11,12 +11,9 @@ namespace Fun_Funding.Application.IService
 {
     public interface IOrderService
     {
-        Task<ResultDTO<List<OrderInfoResponse>>> GetUserCart();
-        Task<ResultDTO<List<OrderInfoResponse>>> GetUserOrders();
-        Task<ResultDTO<string>> AddProjectToCart();
-        Task<ResultDTO<string>> DeleteProjectFromCart();
-        Task<ResultDTO<string>> ClearUserCart();
-        Task<ResultDTO<string>> CheckoutCart();
-        Task<ResultDTO<string>> GetAllPurchasedOrders();
+        Task<ResultDTO<PaginatedResponse<OrderInfoResponse>>> GetUserOrders(ListRequest request);
+        Task<ResultDTO<string>> CreateOrder(CreateOrderRequest createOrderRequest);
+        Task<ResultDTO<PaginatedResponse<OrderInfoResponse>>> GetAllOrders(ListRequest request);
+        Task<ResultDTO<OrderInfoResponse>> GetOrderById(Guid orderId);
     }
 }

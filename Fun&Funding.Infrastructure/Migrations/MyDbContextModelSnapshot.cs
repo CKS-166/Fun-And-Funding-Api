@@ -131,14 +131,16 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<DateTime>("ExpiredDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<string>("KeyString")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("MarketingProjectId")
+                    b.Property<Guid>("MarketplaceProjectId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Status")
@@ -146,7 +148,7 @@ namespace Fun_Funding.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MarketingProjectId");
+                    b.HasIndex("MarketplaceProjectId");
 
                     b.ToTable("DigitalKey");
                 });
@@ -382,8 +384,8 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<int>("OrderStatus")
-                        .HasColumnType("int");
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(18, 2)");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
@@ -407,14 +409,13 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<Guid?>("DigitalKeyID")
+                    b.Property<Guid>("DigitalKeyID")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<Guid?>("OrderId")
-                        .IsRequired()
+                    b.Property<Guid>("OrderId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
@@ -894,6 +895,9 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<Guid?>("OrderDetailId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid?>("OrderId")
                         .HasColumnType("uniqueidentifier");
 
@@ -1274,13 +1278,13 @@ namespace Fun_Funding.Infrastructure.Migrations
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.DigitalKey", b =>
                 {
-                    b.HasOne("Fun_Funding.Domain.Entity.MarketplaceProject", "MarketingProject")
+                    b.HasOne("Fun_Funding.Domain.Entity.MarketplaceProject", "MarketplaceProject")
                         .WithMany("DigitalKeys")
-                        .HasForeignKey("MarketingProjectId")
+                        .HasForeignKey("MarketplaceProjectId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("MarketingProject");
+                    b.Navigation("MarketplaceProject");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.FundingFile", b =>
@@ -1340,10 +1344,12 @@ namespace Fun_Funding.Infrastructure.Migrations
                 {
                     b.HasOne("Fun_Funding.Domain.Entity.DigitalKey", "DigitalKey")
                         .WithMany()
-                        .HasForeignKey("DigitalKeyID");
+                        .HasForeignKey("DigitalKeyID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Fun_Funding.Domain.Entity.Order", "Order")
-                        .WithMany()
+                        .WithMany("OrderDetails")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1504,7 +1510,7 @@ namespace Fun_Funding.Infrastructure.Migrations
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.Transaction", b =>
                 {
-                    b.HasOne("Fun_Funding.Domain.Entity.CommissionFee", "CommissionFees")
+                    b.HasOne("Fun_Funding.Domain.Entity.CommissionFee", "CommissionFee")
                         .WithMany("Transactions")
                         .HasForeignKey("CommissionFeeId");
 
@@ -1516,7 +1522,7 @@ namespace Fun_Funding.Infrastructure.Migrations
                         .WithMany("Transactions")
                         .HasForeignKey("WalletId");
 
-                    b.Navigation("CommissionFees");
+                    b.Navigation("CommissionFee");
 
                     b.Navigation("SystemWallet");
 
@@ -1652,6 +1658,11 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Navigation("ProjectMilestones");
 
                     b.Navigation("Requirements");
+                });
+
+            modelBuilder.Entity("Fun_Funding.Domain.Entity.Order", b =>
+                {
+                    b.Navigation("OrderDetails");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.Package", b =>

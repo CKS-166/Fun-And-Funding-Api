@@ -1,6 +1,7 @@
 ﻿using Fun_Funding.Application.IService;
 using Fun_Funding.Application.Service;
 using Fun_Funding.Application.ViewModel;
+using Fun_Funding.Application.ViewModel.OrderDTO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,46 +16,28 @@ namespace Fun_Funding.Api.Controllers
         {
             _orderService = orderService;
         }
-        [HttpGet("cart")]
-        public async Task<IActionResult> GetUserCart()
+        [HttpGet]
+        public async Task<IActionResult> GetUserOrders([FromQuery] ListRequest request)
         {
-            var response = await _orderService.GetUserCart();
+            var response = await _orderService.GetUserOrders(request);
             return Ok(response);
         }
-        [HttpGet("orders")]
-        public async Task<IActionResult> GetUserOrders()
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetOrderById([FromQuery] Guid orderId)
         {
-            var response = await _orderService.GetUserOrders();
+            var response = await _orderService.GetOrderById(orderId);
             return Ok(response);
         }
-        [HttpPost("cart")]
-        public async Task<IActionResult> AddProjectToCart()
+        [HttpPost]
+        public async Task<IActionResult> CreateOrder([FromForm] CreateOrderRequest createOrderRequest)
         {
-            var response = await _orderService.AddProjectToCart();
-            return Ok(response);
-        }
-        [HttpDelete("cart")]
-        public async Task<IActionResult> DeleteProjectFromCart()
-        {
-            var response = await _orderService.DeleteProjectFromCart();
-            return Ok(response);
-        }
-        [HttpDelete("cart/all")]
-        public async Task<IActionResult> ClearUserCart()
-        {
-            var response = await _orderService.ClearUserCart();
-            return Ok(response);
-        }
-        [HttpPatch("cart")]
-        public async Task<IActionResult> CheckoutCart()
-        {
-            var response = await _orderService.CheckoutCart();
+            var response = await _orderService.CreateOrder(createOrderRequest);
             return Ok(response);
         }
         [HttpGet("all-orders")]
-        public async Task<IActionResult> GetAllPurchasedOrders()
+        public async Task<IActionResult> GetAllOrders([FromQuery] ListRequest request)
         {
-            var response = await _orderService.GetAllPurchasedOrders();
+            var response = await _orderService.GetAllOrders(request);
             return Ok(response);
         }
     }
