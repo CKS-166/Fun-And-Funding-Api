@@ -15,6 +15,7 @@ namespace Fun_Funding.Application.IRepository
         void Update(Expression<Func<T, bool>> filter, UpdateDefinition<T> updateDefinition);
         public void SoftRemove(Expression<Func<T, bool>> filter, UpdateDefinition<T> updateDefinition);
         Task CreateAsync(T entity);
+        Task<List<T>> GetAllAsync(FilterDefinition<T>? filter = null);
     }
 
 }

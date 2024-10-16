@@ -96,6 +96,16 @@ namespace Fun_Funding.Infrastructure.Repository
         {
             await _collection.InsertOneAsync(entity);
         }
+
+        public async Task<List<T>> GetAllAsync(FilterDefinition<T>? filter = null)
+        {
+            if (filter == null)
+            {
+                filter = Builders<T>.Filter.Empty;
+            }
+            var documents = await _collection.Find(filter).ToListAsync();
+            return documents;
+        }
     }
 
 }

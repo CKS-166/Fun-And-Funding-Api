@@ -128,7 +128,7 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             service.AddScoped<IReportService, ReportService>();
             service.AddScoped<IMilestoneService, MilestoneService>();
             service.AddScoped<IChatService, ChatService>();
-            service.AddSingleton<IWebSocketManager, WebSocketManager>();
+            service.AddScoped<IWebSocketManager, WebSocketManager>();
             #endregion
             return service;
 
