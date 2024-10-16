@@ -105,6 +105,7 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             service.AddScoped<IRequirementRepository, RequirementRepository>();
             service.AddScoped<IProjectMilestoneRequirementRepository, ProjectMilestoneRequirementRepository>();
             service.AddScoped<IProjectRequirementFileRepository, ProjectRequirementFileRepository>();
+            service.AddScoped<IProjectCouponService, ProjectCouponService>();
             #endregion
             #region Sevices
             service.AddScoped<IAuthenticationService, AuthenticationService>();

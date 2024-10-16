@@ -33,21 +33,21 @@ namespace Fun_Funding.Api.Controllers
             var result = await _authService.LoginAsync(loginDTO);
             return Ok(result);
         }
-        [HttpPost("register-backer")]
+        [HttpPost("backer")]
         public async Task<ActionResult<string>> RegisterBacker(RegisterRequest registerModel)
         {
             var result = await _authService.RegisterUserAsync(registerModel, new List<string> { Role.Backer });
             return Ok(result);
         }
 
-        [HttpPost("register-admin")]
+        [HttpPost("admin")]
         public async Task<ActionResult<string>> RegisterAdmin(RegisterRequest registerModel)
         {
             var result = await _authService.RegisterUserAsync(registerModel, new List<string> { Role.Admin });
             return Ok(result);
         }
 
-        [HttpPost("register-game-owner")]
+        [HttpPost("game-owner")]
         public async Task<ActionResult<string>> RegisterProjectOwner(RegisterRequest registerModel)
         {
             var result = await _authService.RegisterUserAsync(registerModel, new List<string> { Role.GameOwner });
