@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel;
+using Fun_Funding.Application.ViewModel.ProjectMilestoneBackerDTO;
 using Fun_Funding.Application.ViewModel.ProjectMilestoneDTO;
 using Fun_Funding.Domain.Entity;
 using Fun_Funding.Domain.Enum;
@@ -9,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 
 namespace Fun_Funding.Application.Service
@@ -126,6 +128,58 @@ namespace Fun_Funding.Application.Service
                 }
             }
             return null;
+        }
+
+        public async Task<ResultDTO<List<ProjectMilestoneResponse>>> GetAllProjectMilestone()
+        {
+            try
+            {
+                var pmList = await _unitOfWork.ProjectMilestoneRepository
+                    .GetQueryable()
+                    .Include(pmb => pmb.Milestone)
+                        .ThenInclude(pm => pm.Requirements)
+                    .Include(pmb => pmb.FundingProject)
+                    .ToListAsync();
+
+                var responseList = new List<ProjectMilestoneResponse>();
+
+                foreach (var item in pmList)
+                {
+                    responseList.Add(_mapper.Map<ProjectMilestoneResponse>(item));
+                }
+
+                return ResultDTO<List<ProjectMilestoneResponse>>.Success(responseList);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<ResultDTO<string>> UpdateProjectMilestoneStatus(ProjectMilestoneStatusUpdateRequest request)
+        {
+            try
+            {
+                var projectMilestone = await _unitOfWork.ProjectMilestoneRepository.GetAsync(pm => pm.Id == request.ProjectMilestoneId);
+                if (projectMilestone == null) return ResultDTO<string>.Fail("The requested project milestone is not found!");
+
+                // check project milestone current status
+                // ...
+
+                // check project milestone incoming status
+                // ...
+
+                projectMilestone.Status = request.Status;
+                _unitOfWork.ProjectMilestoneRepository.Update(projectMilestone);
+
+                await _unitOfWork.CommitAsync();
+
+                return ResultDTO<string>.Success("Update successfully!");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
     }
 }
