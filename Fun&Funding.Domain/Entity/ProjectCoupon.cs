@@ -16,7 +16,7 @@ namespace Fun_Funding.Domain.Entity
         public string CouponName { get; set; }
         [Range(0, (double)decimal.MaxValue)]
         [Column(TypeName = "decimal(18, 2)")]
-        public decimal CommissionRate { get; set; }
+        public decimal DiscountRate { get; set; }
         public ProjectCouponStatus Status { get; set; }
         public DateTime ExpiredDate { get; set; }
 

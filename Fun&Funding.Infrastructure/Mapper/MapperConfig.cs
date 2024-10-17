@@ -186,6 +186,8 @@ namespace Fun_Funding.Infrastructure.Mapper
             }).ReverseMap();
 
             CreateMap<Chat, ChatRequest>().ReverseMap();
+            
+        }
         public void MappingProjectCoupon()
         {
             CreateMap<ProjectCoupon, CouponResponse>()

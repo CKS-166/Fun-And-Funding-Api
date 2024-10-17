@@ -19,8 +19,4 @@
     <ProjectReference Include="..\Fun&amp;Funding.Domain\Fun&amp;Funding.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="ViewModel\ProjectCouponDTO\" />
-  </ItemGroup>
-
 </Project>

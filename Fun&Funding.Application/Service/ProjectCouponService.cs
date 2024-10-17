@@ -113,7 +113,7 @@ namespace Fun_Funding.Application.Service
                                     Id = Guid.NewGuid(),
                                     CouponKey = row.GetCell(0)?.ToString() ?? string.Empty, // Check for null and provide a default value
                                     CouponName = row.GetCell(1)?.ToString() ?? string.Empty, // Check for null and provide a default value
-                                    CommissionRate = decimal.TryParse(row.GetCell(2)?.ToString(), out var commissionRate) ? commissionRate : 0, // Try parsing safely
+                                    DiscountRate = decimal.TryParse(row.GetCell(2)?.ToString(), out var commissionRate) ? commissionRate : 0, // Try parsing safely
                                     CreatedDate = DateTime.Now,
                                     ExpiredDate = DateTime.Now.AddDays(30),
                                     Status = Domain.Enum.ProjectCouponStatus.Enable,
