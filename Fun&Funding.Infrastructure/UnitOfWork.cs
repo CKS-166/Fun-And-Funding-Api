@@ -39,7 +39,7 @@ namespace Fun_Funding.Infrastructure
         private IRequirementRepository _requirementRepository;
         private IProjectMilestoneRequirementRepository _projectMilestoneRequirementRepository;
         private IProjectRequirementFileRepository _projectRequirementFileRepository;
-
+        private ICreatorContractRepository _creatorContractRepository;
         public UnitOfWork(MyDbContext dbContext, MongoDBContext mongoDBContext)
         {
             _dbContext = dbContext;
@@ -219,6 +219,9 @@ namespace Fun_Funding.Infrastructure
 
         public IMarketplaceRepository MarketplaceRepository => 
             _marketplaceRepository ??= new MarketplaceRepository(_dbContext);
+
+        public ICreatorContractRepository CreatorContractRepository =>
+            _creatorContractRepository ??= new CreatorContractRepository(_mongoDBContext);
 
 
         // Commit and rollback methods

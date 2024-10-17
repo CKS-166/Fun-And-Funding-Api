@@ -105,6 +105,7 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             service.AddScoped<IRequirementRepository, RequirementRepository>();
             service.AddScoped<IProjectMilestoneRequirementRepository, ProjectMilestoneRequirementRepository>();
             service.AddScoped<IProjectRequirementFileRepository, ProjectRequirementFileRepository>();
+            service.AddScoped<ICreatorContractRepository, CreatorContractRepository>();
             #endregion
             #region Sevices
             service.AddScoped<IAuthenticationService, AuthenticationService>();
@@ -130,6 +131,7 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             service.AddScoped<IMarketplaceService, MarketplaceService>();
             service.AddScoped<IBackgroundProcessService, BackgroundProcessService>();
             service.AddScoped<IOrderService, OrderService>();
+            service.AddScoped<ICreatorContractService,CreatorContractService>();
             #endregion
             service.AddHostedService<WorkerService>();
             return service;

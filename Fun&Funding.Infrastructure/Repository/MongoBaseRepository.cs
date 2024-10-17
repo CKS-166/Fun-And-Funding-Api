@@ -96,6 +96,11 @@ namespace Fun_Funding.Infrastructure.Repository
                 items: items
             );
         }
+
+        public IQueryable<T> GetQueryable()
+        {
+           return _collection.AsQueryable();
+        }
     }
 
 }

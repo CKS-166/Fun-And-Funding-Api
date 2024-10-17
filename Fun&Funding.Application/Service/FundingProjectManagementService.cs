@@ -178,6 +178,10 @@ namespace Fun_Funding.Application.Service
             }
             catch (Exception ex)
             {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
                 throw new ExceptionError((int)HttpStatusCode.BadRequest, ex.Message);
             }
         }
@@ -188,7 +192,7 @@ namespace Fun_Funding.Application.Service
             {
                 var project = _unitOfWork.FundingProjectRepository.GetQueryable()
                     .Include(p => p.Packages).ThenInclude(pack => pack.RewardItems)
-                    .Include(p => p.SourceFiles.Where(sf => sf.IsDeleted == true))
+                    .Include(p => p.SourceFiles.Where(sf => sf.IsDeleted == false))
                     .Include(p=>p.BankAccount)
                     .Include(p => p.User)
                     .Include(p => p.Categories)
@@ -203,6 +207,10 @@ namespace Fun_Funding.Application.Service
             }
             catch (Exception ex)
             {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
                 throw ex;
             }
         }
@@ -392,6 +400,10 @@ namespace Fun_Funding.Application.Service
             }
             catch (Exception ex)
             {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
                 throw new ExceptionError((int)HttpStatusCode.InternalServerError,ex.Message);
             }
         }

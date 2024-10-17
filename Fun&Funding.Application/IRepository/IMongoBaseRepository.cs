@@ -19,6 +19,8 @@ namespace Fun_Funding.Application.IRepository
         void Remove(Expression<Func<T, bool>> filter);
         void Update(Expression<Func<T, bool>> filter, UpdateDefinition<T> updateDefinition);
         public void SoftRemove(Expression<Func<T, bool>> filter, UpdateDefinition<T> updateDefinition);
+
+        IQueryable<T> GetQueryable();
     }
 
 }
