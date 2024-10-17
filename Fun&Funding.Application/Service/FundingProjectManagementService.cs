@@ -178,6 +178,10 @@ namespace Fun_Funding.Application.Service
             }
             catch (Exception ex)
             {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
                 throw new ExceptionError((int)HttpStatusCode.BadRequest, ex.Message);
             }
         }
@@ -203,6 +207,10 @@ namespace Fun_Funding.Application.Service
             }
             catch (Exception ex)
             {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
                 throw ex;
             }
         }
@@ -392,6 +400,10 @@ namespace Fun_Funding.Application.Service
             }
             catch (Exception ex)
             {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
                 throw new ExceptionError((int)HttpStatusCode.InternalServerError,ex.Message);
             }
         }

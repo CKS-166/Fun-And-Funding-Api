@@ -12,12 +12,12 @@ namespace Fun_Funding.Application.ViewModel.ProjectMilestoneDTO
 {
     public class ProjectMilestoneResponse
     {
+        public Guid Id { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime EndDate { get; set; }
         public ProjectMilestoneStatus Status { get; set; }
 
         public Guid MilestoneId { get; set; }
-        public MilestoneResponse Milestone { get; set; }
         public Guid FundingProjectId { get; set; }
         public List<ProjectMilestoneRequirementResponse> ProjectMilestoneRequirements { get; set; }
     }

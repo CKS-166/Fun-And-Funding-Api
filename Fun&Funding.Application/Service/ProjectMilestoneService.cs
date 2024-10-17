@@ -122,10 +122,14 @@ namespace Fun_Funding.Application.Service
                     if (previousMilestone.Status != ProjectMilestoneStatus.Completed)
                         return "The previous milestones are not completed";
                 }
-                if ((projectMilestones[requestedMilestoneOrder].CreatedDate - projectMilestones[requestedMilestoneOrder - 1].EndDate).TotalDays > maxMilestoneExtend)
+                if (requestedMilestoneOrder > 1)
                 {
-                    return "Requested days betweeen each milestone must be within 10 days";
+                    if ((projectMilestones[requestedMilestoneOrder].CreatedDate - projectMilestones[requestedMilestoneOrder - 1].EndDate).TotalDays > maxMilestoneExtend)
+                    {
+                        return "Requested days betweeen each milestone must be within 10 days";
+                    }
                 }
+                
             }
             return null;
         }

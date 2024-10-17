@@ -38,7 +38,7 @@ namespace Fun_Funding.Application.ViewModel.FundingProjectDTO
         public decimal Balance { get; set; }
 
         [Required]
-        public BankAccountRequest? BankAccount { get; set; }
+        public BankAccountRequest BankAccount { get; set; }
         //public virtual ICollection<Category> Categories { get; set; }
         [Required]
         public virtual ICollection<PackageAddRequest> Packages { get; set; }
