@@ -76,10 +76,7 @@ namespace Fun_Funding.Api
                 });
             builder.Services.AddTransient<IEmailService, EmailService>();
             builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
-            builder.Services.AddSignalR(hubOptions =>
-            {
-                hubOptions.EnableDetailedErrors = true;
-            });
+            
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -161,7 +158,7 @@ namespace Fun_Funding.Api
             app.UseHttpsRedirection();
             app.UseCors("MyCors");
             app.UseWebSockets();
-            app.MapHub<LikeHub>("/hubs/like");
+           
             app.UseAuthentication();
             app.UseAuthorization();
 

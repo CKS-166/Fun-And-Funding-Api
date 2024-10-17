@@ -21,5 +21,12 @@ namespace Fun_Funding.Api.Controllers
             if(!result._isSuccess) return BadRequest(result);
             return Ok(result);
         }
+        [HttpPatch]
+        public async Task<IActionResult> ChangeStatus(Guid couponId)
+        {
+            var result = await _couponService.ChangeStatus(couponId);
+            if(!result._isSuccess) return BadRequest(result);
+            return Ok(result);
+        }
     }
 }
