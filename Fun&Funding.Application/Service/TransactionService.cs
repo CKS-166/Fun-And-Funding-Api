@@ -26,6 +26,7 @@ namespace Fun_Funding.Application.Service
             Guid? packageId,
             Guid? systemWalletId = null,
             Guid? commissionFeeId = null,
+            Guid? orderDetailId = null,
             Guid? orderId = null
         )
         {
@@ -41,7 +42,8 @@ namespace Fun_Funding.Application.Service
                 SystemWalletId = systemWalletId,
                 CommissionFeeId = commissionFeeId,
                 OrderId = orderId,
-                CreatedDate = DateTime.UtcNow,
+                OrderDetailId = orderDetailId,
+                CreatedDate = DateTime.Now,
             };
 
             await _unitOfWork.TransactionRepository.AddAsync(transaction);

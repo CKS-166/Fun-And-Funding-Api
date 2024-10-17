@@ -17,7 +17,8 @@ namespace Fun_Funding.Application.IService
             Guid? packageId = null,
             Guid? systemWalletId = null,
             Guid? commissionFeeId = null,
-            Guid? orderId = null
+            Guid? orderId = null,
+            Guid? orderDetailId = null
         );
     }
 }

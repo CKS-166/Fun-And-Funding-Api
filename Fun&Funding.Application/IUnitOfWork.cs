@@ -9,6 +9,7 @@ namespace Fun_Funding.Application
         ICommentRepository CommentRepository { get; }
         IFollowRepository FollowRepository { get; }
         IReportRepository ReportRepository { get; }
+        IChatRepository ChatRepository { get; }
         IBankAccountRepository BankAccountRepository { get; }
         ICategoryRepository CategoryRepository { get; }
         IOrderDetailRepository OrderDetailRepository { get; }
@@ -33,9 +34,9 @@ namespace Fun_Funding.Application
         IRequirementRepository RequirementRepository { get; }
         IProjectMilestoneRequirementRepository ProjectMilestoneRequirementRepository { get; }
         IProjectRequirementFileRepository ProjectRequirementFileRepository { get; }
-
         ICreatorContractRepository CreatorContractRepository { get; }
-        
+        IDigitalKeyRepository DigitalKeyRepository { get; }
+
         // Methods for committing and rolling back
         void Commit();
         Task CommitAsync();

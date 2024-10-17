@@ -1,11 +1,6 @@
 ﻿using Fun_Funding.Application.ViewModel;
 using MongoDB.Driver;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fun_Funding.Application.IRepository
 {
@@ -19,8 +14,10 @@ namespace Fun_Funding.Application.IRepository
         void Remove(Expression<Func<T, bool>> filter);
         void Update(Expression<Func<T, bool>> filter, UpdateDefinition<T> updateDefinition);
         public void SoftRemove(Expression<Func<T, bool>> filter, UpdateDefinition<T> updateDefinition);
-
         IQueryable<T> GetQueryable();
+        Task CreateAsync(T entity);
+        Task<List<T>> GetAllAsync(FilterDefinition<T>? filter = null);
+
     }
 
 }

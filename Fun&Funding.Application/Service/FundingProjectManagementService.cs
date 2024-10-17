@@ -407,7 +407,7 @@ namespace Fun_Funding.Application.Service
                 throw new ExceptionError((int)HttpStatusCode.InternalServerError,ex.Message);
             }
         }
-        public async Task<ResultDTO<PaginatedResponse<FundingProjectResponse>>> GetFundingProjects(ListRequest request, string? categoryName, ProjectStatus status, decimal? fromTarget, decimal? toTarget)
+        public async Task<ResultDTO<PaginatedResponse<FundingProjectResponse>>> GetFundingProjects(ListRequest request, string? categoryName, ProjectStatus? status, decimal? fromTarget, decimal? toTarget)
         {
             try
             {
@@ -469,7 +469,7 @@ namespace Fun_Funding.Application.Service
                        pageIndex: request.PageIndex,
                        pageSize: request.PageSize,
                        includeProperties: "Categories,Packages,SourceFiles,Packages.RewardItems");
-                if (list != null && list.Count() > 0)
+                if (list != null && list.Count() >= 0)
                 {
                     var totalItems = _unitOfWork.FundingProjectRepository.GetAll(filter).Count();
                     var totalPages = (int)Math.Ceiling((double)totalItems / (int)request.PageSize);
