@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fun_Funding.Domain.Enum
+namespace Fun_Funding.Application.IService
 {
-    public enum OrderStatus
+    public interface IBackgroundProcessService
     {
+        Task UpdateFundingStatus();
     }
 }

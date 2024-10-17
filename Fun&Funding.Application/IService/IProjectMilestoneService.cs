@@ -12,5 +12,9 @@ namespace Fun_Funding.Application.IService
     {
         Task<ResultDTO<ProjectMilestoneResponse>> CreateProjectMilestoneRequest(ProjectMilestoneRequest request);
         Task<ResultDTO<ProjectMilestoneResponse>> GetProjectMilestoneRequest(Guid id);
+        Task<ResultDTO<List<ProjectMilestoneResponse>>> GetAllProjectMilestone();
+        Task<ResultDTO<string>> UpdateProjectMilestoneStatus(ProjectMilestoneStatusUpdateRequest request);
+
     }
 }
+

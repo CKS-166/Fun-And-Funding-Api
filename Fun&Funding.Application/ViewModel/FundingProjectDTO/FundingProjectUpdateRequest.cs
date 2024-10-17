@@ -28,5 +28,7 @@ namespace Fun_Funding.Application.ViewModel.FundingProjectDTO
 
         public List<FundingFileUpdateRequest>? FundingFiles { get; set; }
 
+        public List<FundingFileResponse>? ExistedFile { get; set; }
+
     }
 }

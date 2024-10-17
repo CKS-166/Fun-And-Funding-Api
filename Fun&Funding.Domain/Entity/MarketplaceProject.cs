@@ -19,8 +19,8 @@ namespace Fun_Funding.Domain.Entity
 
         public FundingProject FundingProject { get; set; }
         public Guid FundingProjectId { get; set; }
-        public virtual ICollection<DigitalKey> DigitalKeys { get; set; }
-        public virtual ICollection<MarketplaceFile> MarketingFiles { get; set; }
-        public virtual ICollection<ProjectCoupon> ProjectCoupons { get; set; }
+        public virtual ICollection<DigitalKey>? DigitalKeys { get; set; }
+        public virtual ICollection<MarketplaceFile>? MarketingFiles { get; set; }
+        public virtual ICollection<ProjectCoupon>? ProjectCoupons { get; set; }
     }
 }

@@ -4,9 +4,13 @@ using Fun_Funding.Application.ViewModel.BankAccountDTO;
 using Fun_Funding.Application.ViewModel.CategoryDTO;
 using Fun_Funding.Application.ViewModel.ChatDTO;
 using Fun_Funding.Application.ViewModel.CommissionDTO;
+using Fun_Funding.Application.ViewModel.DigitalKeyDTO;
 using Fun_Funding.Application.ViewModel.FundingFileDTO;
 using Fun_Funding.Application.ViewModel.FundingProjectDTO;
+using Fun_Funding.Application.ViewModel.MarketplaceProjectDTO;
 using Fun_Funding.Application.ViewModel.MilestoneDTO;
+using Fun_Funding.Application.ViewModel.OrderDetailDTO;
+using Fun_Funding.Application.ViewModel.OrderDTO;
 using Fun_Funding.Application.ViewModel.PackageDTO;
 using Fun_Funding.Application.ViewModel.ProjectMilestoneBackerDTO;
 using Fun_Funding.Application.ViewModel.ProjectMilestoneDTO;
@@ -142,7 +146,33 @@ namespace Fun_Funding.Infrastructure.Mapper
         {
             CreateMap<ProjectRequirementFile, ProjectRequirementFileUpdateRequest>().ReverseMap();
             CreateMap<ProjectMilestoneRequirement, ProjectMilestoneRequirementUpdateRequest>().ReverseMap();
+        }
 
+        public void MappingOrder()
+        {
+            CreateMap<Order, OrderInfoResponse>()
+                .ForMember(des => des.OrderDetails, src => src.MapFrom(x => x.OrderDetails))
+                .ReverseMap();
+        }
+
+        public void MappingOrderDetail()
+        {
+            CreateMap<OrderDetail, OrderDetailInfoResponse>()
+                .ForMember(des => des.DigitalKey, src => src.MapFrom(x => x.DigitalKey))
+                .ReverseMap();
+        }
+
+        public void MappingDigitalKey()
+        {
+            CreateMap<DigitalKey, DigitalKeyInfoResponse>()
+                .ForMember(des => des.MarketingProject, src => src.MapFrom(x => x.MarketplaceProject))
+                .ReverseMap();
+        }
+
+        public void MappingMarketingProject()
+        {
+            CreateMap<MarketplaceProject, MarketplaceProjectOrderResponse>()
+                .ReverseMap();
         }
 
         public void MappingChat()

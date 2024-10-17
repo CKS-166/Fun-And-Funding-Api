@@ -47,8 +47,6 @@ namespace Fun_Funding.Application.ViewModel.FundingProjectDTO
         //public List<IFormFile> Stories {  get; set; }
         [Required]
         public List<FundingFileRequest> FundingFiles { get; set; }
-        [Required]
-        public string Email { get; set; }
 
         public List<CategoryProjectRequest> Categories { get; set; }
 

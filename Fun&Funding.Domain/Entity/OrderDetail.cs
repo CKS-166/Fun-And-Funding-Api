@@ -11,10 +11,12 @@ namespace Fun_Funding.Domain.Entity
     {
         [Required]
         public Guid DigitalKeyID { get; set; }
+        [Required]
         public DigitalKey DigitalKey { get; set; }
 
         [Required]
         public Guid OrderId { get; set; }
+        [Required]
         public Order Order { get; set; }
     }
 }

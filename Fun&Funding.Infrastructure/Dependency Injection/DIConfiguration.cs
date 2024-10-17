@@ -8,6 +8,7 @@ using Fun_Funding.Application.IWebSocketService;
 using Fun_Funding.Application.Service;
 
 using Fun_Funding.Domain.Entity;
+using Fun_Funding.Infrastructure.BackgroundWorkerService;
 using Fun_Funding.Infrastructure.Database;
 using Fun_Funding.Infrastructure.Mapper;
 using Fun_Funding.Infrastructure.Repository;
@@ -100,12 +101,14 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             service.AddScoped<IFollowRepository, FollowRepository>();
             service.AddScoped<IProjectCouponRepository, ProjectCouponRepository>();
             service.AddScoped<IMilestoneRepository, MilestoneRepository>();
+            service.AddScoped<IMarketplaceRepository, MarketplaceRepository>();
             service.AddScoped<IProjectMilestoneBackerRepository, ProjectMilestoneBackerRepository>();
             service.AddScoped<IProjectMilestoneRepository, ProjectMilestoneRepository>();
             service.AddScoped<IRequirementRepository, RequirementRepository>();
             service.AddScoped<IProjectMilestoneRequirementRepository, ProjectMilestoneRequirementRepository>();
             service.AddScoped<IProjectRequirementFileRepository, ProjectRequirementFileRepository>();
             service.AddScoped<IChatRepository, ChatRepository>();
+            service.AddScoped<IProjectCouponService, ProjectCouponService>();
             #endregion
             #region Sevices
             service.AddScoped<IAuthenticationService, AuthenticationService>();
@@ -129,7 +132,13 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             service.AddScoped<IMilestoneService, MilestoneService>();
             service.AddScoped<IChatService, ChatService>();
             service.AddScoped<IWebSocketManager, WebSocketManager>();
+            service.AddScoped<IRequirementService, RequirementService>();
+            service.AddScoped<IMarketplaceService, MarketplaceService>();
+            service.AddScoped<IBackgroundProcessService, BackgroundProcessService>();
+            service.AddScoped<IOrderService, OrderService>();
+            service.AddScoped<IDigitalKeyService, DigitalKeyService>();
             #endregion
+            service.AddHostedService<WorkerService>();
             return service;
 
         }

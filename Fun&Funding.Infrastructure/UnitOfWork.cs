@@ -32,7 +32,7 @@ namespace Fun_Funding.Infrastructure
         private IWalletRepository _walletRepository;
         private IWithdrawRequestRepository _withdrawRequestRepository;
         private ICommissionFeeRepository _commissionFeeRepository;
-
+        private IMarketplaceRepository _marketplaceRepository;
         private IProjectCouponRepository _projectCouponRepository;
         private IMilestoneRepository _milestoneRepository;
         private IProjectMilestoneBackerRepository _projectMilestoneBackerRepository;
@@ -40,6 +40,7 @@ namespace Fun_Funding.Infrastructure
         private IRequirementRepository _requirementRepository;
         private IProjectMilestoneRequirementRepository _projectMilestoneRequirementRepository;
         private IProjectRequirementFileRepository _projectRequirementFileRepository;
+        private IDigitalKeyRepository _digitalKeyRepository;
 
         public UnitOfWork(MyDbContext dbContext, MongoDBContext mongoDBContext)
         {
@@ -192,6 +193,14 @@ namespace Fun_Funding.Infrastructure
             }
         }
 
+        public IDigitalKeyRepository DigitalKeyRepository
+        {
+            get
+            {
+                return _digitalKeyRepository = _digitalKeyRepository ?? new DigitalKeyRepository(_dbContext);
+            }
+        }
+
         public IProjectCouponRepository ProjectCouponRepository =>
        _projectCouponRepository ??= new ProjectCouponRepository(_dbContext);
 
@@ -221,6 +230,9 @@ namespace Fun_Funding.Infrastructure
 
         public IChatRepository ChatRepository =>
             _chatRepository ??= new ChatRepository(_mongoDBContext);
+
+        public IMarketplaceRepository MarketplaceRepository => 
+            _marketplaceRepository ??= new MarketplaceRepository(_dbContext);
 
 
         // Commit and rollback methods
