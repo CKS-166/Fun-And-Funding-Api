@@ -81,7 +81,21 @@ namespace Fun_Funding.Application.Service
                 decimal totalCost = 0;
                 foreach (var cartItem in createOrderRequest.CartItems)
                 {
-                    totalCost += cartItem.Price;
+                    var gamePrice = cartItem.Price;
+                    if (cartItem.AppliedCoupon != null)
+                    {
+                        ProjectCoupon projectCoupon = _unitOfWork.ProjectCouponRepository.GetById(cartItem.AppliedCoupon.Id);
+                        if (projectCoupon == null)
+                        {
+                            throw new ExceptionError((int)HttpStatusCode.NotFound, "Project Coupon Not Found.");
+                        }
+                        else if (projectCoupon.Status == ProjectCouponStatus.Disable)
+                        {
+                            throw new ExceptionError((int)HttpStatusCode.BadRequest, "Coupon Already Used.");
+                        }
+                        gamePrice = gamePrice * (1 - cartItem.AppliedCoupon.CommissionRate);
+                    }
+                    totalCost += gamePrice;
                 }
 
                 if (wallet.Balance < totalCost)
@@ -137,8 +151,24 @@ namespace Fun_Funding.Application.Service
                     }
                     else
                     {
+                        var recievedMoney = totalCost;
+                        if (cartItem.AppliedCoupon != null)
+                        {
+                            ProjectCoupon projectCoupon = _unitOfWork.ProjectCouponRepository.GetById(cartItem.AppliedCoupon.Id);
+                            if (projectCoupon == null)
+                            {
+                                throw new ExceptionError((int)HttpStatusCode.NotFound, "Project Coupon Not Found.");
+                            }
+                            else if (projectCoupon.Status == ProjectCouponStatus.Disable) 
+                            {
+                                throw new ExceptionError((int)HttpStatusCode.BadRequest, "Coupon Already Used.");
+                            }
+                            recievedMoney = recievedMoney * (1 - cartItem.AppliedCoupon.CommissionRate);
+                            projectCoupon.Status = ProjectCouponStatus.Disable;
+                            _unitOfWork.ProjectCouponRepository.Update(projectCoupon);
+                        }
                         decimal marketplaceCommissionRate = commissionFee.Rate;
-                        recieverWallet.Balance += (totalCost * (1 - marketplaceCommissionRate));
+                        recieverWallet.Balance += (recievedMoney * (1 - marketplaceCommissionRate));
                     }
 
                     Transaction recieveTransaction = new Transaction
