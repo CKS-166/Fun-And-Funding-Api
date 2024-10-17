@@ -93,7 +93,7 @@ namespace Fun_Funding.Application.Service
                         {
                             throw new ExceptionError((int)HttpStatusCode.BadRequest, "Coupon Already Used.");
                         }
-                        gamePrice = gamePrice * (1 - cartItem.AppliedCoupon.CommissionRate);
+                        gamePrice = gamePrice * (1 - cartItem.AppliedCoupon.DiscountRate);
                     }
                     totalCost += gamePrice;
                 }
@@ -163,7 +163,7 @@ namespace Fun_Funding.Application.Service
                             {
                                 throw new ExceptionError((int)HttpStatusCode.BadRequest, "Coupon Already Used.");
                             }
-                            recievedMoney = recievedMoney * (1 - cartItem.AppliedCoupon.CommissionRate);
+                            recievedMoney = recievedMoney * (1 - cartItem.AppliedCoupon.DiscountRate);
                             projectCoupon.Status = ProjectCouponStatus.Disable;
                             _unitOfWork.ProjectCouponRepository.Update(projectCoupon);
                         }
