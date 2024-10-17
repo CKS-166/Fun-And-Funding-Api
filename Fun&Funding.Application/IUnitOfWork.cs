@@ -9,6 +9,7 @@ namespace Fun_Funding.Application
         ICommentRepository CommentRepository { get; }
         IFollowRepository FollowRepository { get; }
         IReportRepository ReportRepository { get; }
+        IChatRepository ChatRepository { get; }
         IBankAccountRepository BankAccountRepository { get; }
         ICategoryRepository CategoryRepository { get; }
         IOrderDetailRepository OrderDetailRepository { get; }

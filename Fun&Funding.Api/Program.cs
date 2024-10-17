@@ -1,14 +1,16 @@
 using Fun_Funding.Api.Exception;
 using Fun_Funding.Application;
 using Fun_Funding.Application.IEmailServices;
+using Fun_Funding.Application.IService;
 using Fun_Funding.Domain.EmailModel;
 using Fun_Funding.Infrastructure;
 using Fun_Funding.Infrastructure.Dependency_Injection;
 using Fun_Funding.Infrastructure.EmailService;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.OpenApi.Models;
-using System.Net.Mail;
 using Net.payOS;
+using System.Net;
+using System.Net.Mail;
 using System.Security.Claims;
 
 namespace Fun_Funding.Api
@@ -37,7 +39,7 @@ namespace Fun_Funding.Api
                         return Task.CompletedTask;
                     };
 
-                }); 
+                });
 
             PayOS payOS = new PayOS(
                 builder.Configuration["PayOS:PAYOS_CLIENT_ID"] ?? throw new System.Exception("Cannot find environment"),
@@ -129,6 +131,24 @@ namespace Fun_Funding.Api
                 FileProvider = new PhysicalFileProvider(
         Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).FullName, "Fun&Funding.Infrastructure", "Media")),
                 RequestPath = "/Media"
+            });
+
+            app.UseWebSockets();
+
+            // WebSocket mapping
+            app.Map("/ws", async context =>
+            {
+                if (context.WebSockets.IsWebSocketRequest)
+                {
+                    var chatService = context.RequestServices.GetRequiredService<IChatService>();
+                    var senderId = context.Request.Query["SenderId"];
+                    using var webSocket = await context.WebSockets.AcceptWebSocketAsync();
+                    await chatService.HandleWebSocketConnectionAsync(webSocket, senderId);
+                }
+                else
+                {
+                    context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                }
             });
 
             // Configure the HTTP request pipeline.

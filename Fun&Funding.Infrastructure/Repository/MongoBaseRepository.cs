@@ -2,12 +2,7 @@
 using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Infrastructure.Database;
 using MongoDB.Driver;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fun_Funding.Infrastructure.Repository
 {
@@ -50,7 +45,7 @@ namespace Fun_Funding.Infrastructure.Repository
         public void Remove(Expression<Func<T, bool>> filter)
         {
             _collection.DeleteOne(filter);
-            
+
         }
 
         // Update a document based on a filter
@@ -95,6 +90,21 @@ namespace Fun_Funding.Infrastructure.Repository
                 totalPages: totalPages,
                 items: items
             );
+        }
+
+        public async Task CreateAsync(T entity)
+        {
+            await _collection.InsertOneAsync(entity);
+        }
+
+        public async Task<List<T>> GetAllAsync(FilterDefinition<T>? filter = null)
+        {
+            if (filter == null)
+            {
+                filter = Builders<T>.Filter.Empty;
+            }
+            var documents = await _collection.Find(filter).ToListAsync();
+            return documents;
         }
     }
 

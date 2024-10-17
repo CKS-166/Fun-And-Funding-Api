@@ -15,6 +15,7 @@ namespace Fun_Funding.Infrastructure
         private ICommentRepository _commentRepository;
         private IFollowRepository _followRepository;
         private IReportRepository _reportRepository;
+        private IChatRepository _chatRepository;
         private IBankAccountRepository _bankAccountRepository;
         private ICategoryRepository _categoryRepository;
         private IOrderDetailRepository _orderDetailRepository;
@@ -184,7 +185,8 @@ namespace Fun_Funding.Infrastructure
             }
         }
 
-        public ICommentRepository CommentRepository {
+        public ICommentRepository CommentRepository
+        {
             get
             {
                 return _commentRepository = _commentRepository ?? new CommentRepository(_mongoDBContext);
@@ -225,6 +227,9 @@ namespace Fun_Funding.Infrastructure
 
         public IReportRepository ReportRepository =>
             _reportRepository ??= new ReportRepository(_mongoDBContext);
+
+        public IChatRepository ChatRepository =>
+            _chatRepository ??= new ChatRepository(_mongoDBContext);
 
         public IMarketplaceRepository MarketplaceRepository => 
             _marketplaceRepository ??= new MarketplaceRepository(_dbContext);
