@@ -45,6 +45,7 @@ namespace Fun_Funding.Infrastructure.Mapper
             MappingProjectMilestone();
             MappingMilestone();
             MappingProjectMilestoneRequirement();
+            MappingChat();
         }
         public void MappingFundingProject()
         {
@@ -177,10 +178,14 @@ namespace Fun_Funding.Infrastructure.Mapper
 
         public void MappingChat()
         {
-            CreateMap<ChatResponse, Chat>().AfterMap((src, des) =>
+            CreateMap<Chat, ChatResponse>().AfterMap(async (src, des) =>
             {
-                src.SenderName = _unitOfWork.UserRepository.GetById(src.SenderId).FullName;
-                src.ReceiverName = _unitOfWork.UserRepository.GetById(src.ReceiverName).FullName;
+                var sender = await _unitOfWork.UserRepository.GetByIdAsync(src.SenderId);
+                var receiver = await _unitOfWork.UserRepository.GetByIdAsync(src.ReceiverId);
+
+                // If sender or receiver are null, we'll use a default value or an empty string
+                des.SenderName = sender?.FullName ?? "Unknown Sender";
+                des.ReceiverName = receiver?.FullName ?? "Unknown Receiver";
             }).ReverseMap();
 
             CreateMap<Chat, ChatRequest>().ReverseMap();
