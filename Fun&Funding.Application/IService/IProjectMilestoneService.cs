@@ -1,5 +1,6 @@
 ﻿using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.ProjectMilestoneDTO;
+using Fun_Funding.Domain.Enum;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +15,10 @@ namespace Fun_Funding.Application.IService
         Task<ResultDTO<ProjectMilestoneResponse>> GetProjectMilestoneRequest(Guid id);
         Task<ResultDTO<List<ProjectMilestoneResponse>>> GetAllProjectMilestone();
         Task<ResultDTO<string>> UpdateProjectMilestoneStatus(ProjectMilestoneStatusUpdateRequest request);
-
+        Task<ResultDTO<PaginatedResponse<ProjectMilestoneResponse>>> GetProjectMilestones(
+             ListRequest request,
+             ProjectMilestoneStatus? status,
+             Guid? fundingProjectId);
     }
 }
 

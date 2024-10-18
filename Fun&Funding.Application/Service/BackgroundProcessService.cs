@@ -1,4 +1,5 @@
-﻿using Fun_Funding.Application.IService;
+﻿using Fun_Funding.Application.IEmailServices;
+using Fun_Funding.Application.IService;
 using Fun_Funding.Domain.Entity;
 using Fun_Funding.Domain.Enum;
 using Microsoft.EntityFrameworkCore;
@@ -14,10 +15,11 @@ namespace Fun_Funding.Application.Service
     {
         private readonly IUnitOfWork _unitOfWork;
         private DateTime present = DateTime.Now;
-
-        public BackgroundProcessService(IUnitOfWork unitOfWork)
+        private IEmailService _emailService;
+        public BackgroundProcessService(IUnitOfWork unitOfWork, IEmailService emailService)
         {
             _unitOfWork = unitOfWork;
+            _emailService = emailService;
         }
         public async Task UpdateFundingStatus()
         {
@@ -73,7 +75,43 @@ namespace Fun_Funding.Application.Service
             }
         }
 
+        public async Task UpdateProjectMilestoneStatus()
+        {
+            try
+            {
+                var projectMilestones = _unitOfWork.ProjectMilestoneRepository
+                    .GetQueryable()
+                    .Where(p => p.Status == ProjectMilestoneStatus.Pending 
+                    || p.Status == ProjectMilestoneStatus.Processing 
+                    || p.Status == ProjectMilestoneStatus.Warning).ToList();
+                foreach (var projectMilestone in projectMilestones) {
+                    bool statusChanged = false;
+                    if (projectMilestone.Status == ProjectMilestoneStatus.Pending && (projectMilestone.CreatedDate - present).TotalDays == 0)
+                    {
+                        projectMilestone.Status = ProjectMilestoneStatus.Processing;
+                        statusChanged = true;
+                    }else if (projectMilestone.Status == ProjectMilestoneStatus.Warning && (projectMilestone.EndDate - present).TotalDays == 0)
+                    {
+                        projectMilestone.Status = ProjectMilestoneStatus.Failed;
+                        statusChanged = true;
+                    }
+                    if (statusChanged) { 
+                        _unitOfWork.ProjectMilestoneRepository.Update(projectMilestone);
+                    }
+                }
+                _unitOfWork.Commit();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
 
-        
+        //public User GetUserByProjectMilestoneId(Guid mileId)
+        //{
+        //    FundingProject project = _unitOfWork.
+        //    User user = null;
+        //    return user;
+        //}
     }
 }

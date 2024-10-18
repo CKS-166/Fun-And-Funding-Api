@@ -99,12 +99,12 @@ namespace Fun_Funding.Application.Service
 
         public async Task<ResultDTO<List<MilestoneResponse>>> GetListLastestMilestone()
         {
-            var user = _userService.GetUserInfo().Result;
-            User exitUser = _mapper.Map<User>(user._data);
-            if (user is null)
-            {
-                return ResultDTO<List<MilestoneResponse>>.Fail("can not found user");
-            }
+            //var user = _userService.GetUserInfo().Result;
+            //User exitUser = _mapper.Map<User>(user._data);
+            //if (user is null)
+            //{
+            //    return ResultDTO<List<MilestoneResponse>>.Fail("can not found user");
+            //}
             try
             {
                 var latestGroupMilestones = _unitOfWork.MilestoneRepository.GetQueryable()
