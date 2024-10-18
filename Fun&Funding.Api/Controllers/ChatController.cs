@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Fun_Funding.Api.Controllers
 {
-    [Route("api/chat")]
+    [Route("api/chats")]
     [ApiController]
     public class ChatController : ControllerBase
     {

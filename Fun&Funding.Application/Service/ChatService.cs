@@ -3,7 +3,6 @@ using Fun_Funding.Application.ExceptionHandler;
 using Fun_Funding.Application.IService;
 using Fun_Funding.Application.IWebSocketService;
 using Fun_Funding.Application.ViewModel;
-using Fun_Funding.Application.ViewModel.ChatDTO;
 using Fun_Funding.Domain.Entity.NoSqlEntities;
 using MongoDB.Driver;
 using System.Net;
@@ -24,7 +23,7 @@ namespace Fun_Funding.Application.Service
             _mapper = mapper;
         }
 
-        public async Task<ResultDTO<IEnumerable<ChatResponse>>> GetChatConversation(Guid senderId, Guid receiverId)
+        public async Task<ResultDTO<IEnumerable<Chat>>> GetChatConversation(Guid senderId, Guid receiverId)
         {
             try
             {
@@ -38,9 +37,9 @@ namespace Fun_Funding.Application.Service
 
                 var chatMessages = await _unitOfWork.ChatRepository.GetAllAsync(filter);
 
-                var response = _mapper.Map<IEnumerable<ChatResponse>>(chatMessages);
+                /*var response = _mapper.Map<IEnumerable<ChatResponse>>(chatMessages);*/
 
-                return ResultDTO<IEnumerable<ChatResponse>>.Success(response);
+                return ResultDTO<IEnumerable<Chat>>.Success(chatMessages);
             }
             catch (Exception ex)
             {
