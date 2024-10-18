@@ -19,13 +19,13 @@ namespace Fun_Funding.Api.Controllers
     {
         private readonly ILikeService _likeService;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IHubContext<LikeHub> _hubContext;
+        
 
-        public LikeController(ILikeService likeService,IUnitOfWork unitOfWork, IHubContext<LikeHub> hubContext)
+        public LikeController(ILikeService likeService,IUnitOfWork unitOfWork)
         {
             _likeService = likeService;
             _unitOfWork = unitOfWork;
-            _hubContext = hubContext;
+            
         }
 
         [HttpGet("all")]
@@ -42,8 +42,6 @@ namespace Fun_Funding.Api.Controllers
             {
                 return BadRequest(result._message);
             }
-            // Send a real-time notification through SignalR
-            await _hubContext.Clients.All.SendAsync("receivelikenotification", $"Project {likeRequest.ProjectId} received a like!");
             return Ok(result);
         }
         [HttpGet("{id}")]

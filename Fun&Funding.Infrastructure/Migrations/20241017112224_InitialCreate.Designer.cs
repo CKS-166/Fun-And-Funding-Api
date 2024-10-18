@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fun_Funding.Infrastructure.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20241016172748_Add-Transation-OrderDetailId")]
-    partial class AddTransationOrderDetailId
+    [Migration("20241017112224_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -518,9 +518,6 @@ namespace Fun_Funding.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<decimal>("CommissionRate")
-                        .HasColumnType("decimal(18, 2)");
-
                     b.Property<string>("CouponKey")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -535,10 +532,16 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<decimal>("DiscountRate")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.Property<DateTime>("ExpiredDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<Guid>("MarketplaceProjectId")
+                    b.Property<Guid?>("MarketplaceProjectId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Status")
@@ -1396,9 +1399,7 @@ namespace Fun_Funding.Infrastructure.Migrations
                 {
                     b.HasOne("Fun_Funding.Domain.Entity.MarketplaceProject", "MarketplaceProject")
                         .WithMany("ProjectCoupons")
-                        .HasForeignKey("MarketplaceProjectId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("MarketplaceProjectId");
 
                     b.Navigation("MarketplaceProject");
                 });

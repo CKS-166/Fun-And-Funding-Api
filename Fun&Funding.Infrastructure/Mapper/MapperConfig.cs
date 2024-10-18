@@ -4,6 +4,7 @@ using Fun_Funding.Application.ViewModel.BankAccountDTO;
 using Fun_Funding.Application.ViewModel.CategoryDTO;
 using Fun_Funding.Application.ViewModel.ChatDTO;
 using Fun_Funding.Application.ViewModel.CommissionDTO;
+using Fun_Funding.Application.ViewModel.CouponDTO;
 using Fun_Funding.Application.ViewModel.DigitalKeyDTO;
 using Fun_Funding.Application.ViewModel.FundingFileDTO;
 using Fun_Funding.Application.ViewModel.FundingProjectDTO;
@@ -46,6 +47,7 @@ namespace Fun_Funding.Infrastructure.Mapper
             MappingMilestone();
             MappingProjectMilestoneRequirement();
             MappingChat();
+            MappingProjectCoupon();
         }
         public void MappingFundingProject()
         {
@@ -189,6 +191,12 @@ namespace Fun_Funding.Infrastructure.Mapper
             }).ReverseMap();
 
             CreateMap<Chat, ChatRequest>().ReverseMap();
+            
+        }
+        public void MappingProjectCoupon()
+        {
+            CreateMap<ProjectCoupon, CouponResponse>()
+                .ReverseMap();
         }
     }
 }

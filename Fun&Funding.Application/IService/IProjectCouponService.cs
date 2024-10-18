@@ -1,4 +1,5 @@
 ﻿using Fun_Funding.Application.ViewModel;
+using Fun_Funding.Application.ViewModel.CouponDTO;
 using Fun_Funding.Domain.Entity;
 using Microsoft.AspNetCore.Http;
 using System;
@@ -11,6 +12,8 @@ namespace Fun_Funding.Application.IService
 {
     public interface IProjectCouponService
     {
-        public Task<ResultDTO<List<ProjectCoupon>>> ImportFile(IFormFile formFile, Guid projectId);
+        public List<ProjectCoupon> CheckDuplicateCouponCode(Guid? marketplaceId, List<ProjectCoupon> list);
+        public Task<ResultDTO<ListCouponResponse>> ImportFile(IFormFile formFile, Guid projectId);
+        public Task<ResultDTO<ProjectCoupon>> ChangeStatus(Guid couponId);
     }
 }

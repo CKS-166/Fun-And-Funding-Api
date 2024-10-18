@@ -92,6 +92,10 @@ namespace Fun_Funding.Infrastructure.Repository
             );
         }
 
+        public IQueryable<T> GetQueryable()
+        {
+           return _collection.AsQueryable();
+        }
         public async Task CreateAsync(T entity)
         {
             await _collection.InsertOneAsync(entity);

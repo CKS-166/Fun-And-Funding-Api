@@ -5,6 +5,7 @@ using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.MilestoneDTO;
 using Fun_Funding.Domain.Constrain;
 using Fun_Funding.Domain.Entity;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -89,8 +90,6 @@ namespace Fun_Funding.Application.Service
                     var response = _mapper.Map<MilestoneResponse>(milestone);
                     return ResultDTO<MilestoneResponse>.Success(response, "Success");
                 }
-
-
             }
             catch (Exception ex)
             {
@@ -100,15 +99,16 @@ namespace Fun_Funding.Application.Service
 
         public async Task<ResultDTO<List<MilestoneResponse>>> GetListLastestMilestone()
         {
-            var user = _userService.GetUserInfo().Result;
-            User exitUser = _mapper.Map<User>(user._data);
-            if (user is null)
-            {
-                return ResultDTO<List<MilestoneResponse>>.Fail("can not found user");
-            }
+            //var user = _userService.GetUserInfo().Result;
+            //User exitUser = _mapper.Map<User>(user._data);
+            //if (user is null)
+            //{
+            //    return ResultDTO<List<MilestoneResponse>>.Fail("can not found user");
+            //}
             try
             {
                 var latestGroupMilestones = _unitOfWork.MilestoneRepository.GetQueryable()
+                    .Include(x => x.Requirements)
                     .GroupBy(x => x.MilestoneOrder)
                     .Select(g => g.OrderByDescending(x => x.Version).FirstOrDefault())
                     .ToList();
