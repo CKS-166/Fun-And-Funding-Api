@@ -9,5 +9,7 @@ namespace Fun_Funding.Application.IService
     public interface IBackgroundProcessService
     {
         Task UpdateFundingStatus();
+
+        Task UpdateProjectMilestoneStatus();
     }
 }

@@ -29,7 +29,8 @@ namespace Fun_Funding.Infrastructure.BackgroundWorkerService
             {
                 try
                 {
-                    await ValidateFundingStatus();
+                    var validateFundingTask = RunValidationLoop(stoppingToken, TimeSpan.FromHours(6), ValidateFundingStatus);
+                    await Task.WhenAll(validateFundingTask);
                 }
                 catch (Exception ex)
                 {
@@ -39,6 +40,24 @@ namespace Fun_Funding.Infrastructure.BackgroundWorkerService
 
                 // Wait 10 seconds between each iteration.
                 await Task.Delay(TimeSpan.FromHours(6), stoppingToken);
+            }
+        }
+
+        private async Task RunValidationLoop(CancellationToken stoppingToken, TimeSpan delay, Func<Task> action)
+        {
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                try
+                {
+                    await action();
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "An error occurred while executing {MethodName}.", action.Method.Name);
+                }
+
+                // Wait the specified amount of time between iterations.
+                await Task.Delay(delay, stoppingToken);
             }
         }
 

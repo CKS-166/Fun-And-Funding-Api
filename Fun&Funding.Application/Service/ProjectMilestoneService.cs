@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Fun_Funding.Application.ExceptionHandler;
 using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.ProjectMilestoneBackerDTO;
@@ -9,6 +10,8 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Net;
 using System.Text;
 using System.Threading.Channels;
 using System.Threading.Tasks;
@@ -55,10 +58,18 @@ namespace Fun_Funding.Application.Service
                     return ResultDTO<ProjectMilestoneResponse>.Fail("This milestone has already been added to the project.", 400);
                 }
                 //case request first
-                if (((request.CreatedDate - project.EndDate).TotalDays > maxExpireDay) && requestMilestone.MilestoneOrder == 1)
+                if (request.CreatedDate >= project.EndDate && requestMilestone.MilestoneOrder == 1)
                 {
-                    return ResultDTO<ProjectMilestoneResponse>.Fail("The milestone must begin within 30 days after the project's funding period ends.", 500);
+                    if ((request.CreatedDate - project.EndDate).TotalDays > maxExpireDay)
+                    {
+                        return ResultDTO<ProjectMilestoneResponse>.Fail("The milestone must begin within 30 days after the project's funding period ends.", 500);
+                    }
                 }
+                else
+                {
+                    throw new ExceptionHandler.ExceptionError((int)HttpStatusCode.BadRequest, "First milestone requested date must be after the date project funded successfully");
+                }
+                
                 var checkValidateMilstone = CanCreateProjectMilestone(project, requestMilestone.MilestoneOrder);
                 if (checkValidateMilstone != null)
                 {
@@ -80,6 +91,10 @@ namespace Fun_Funding.Application.Service
 
                 }
             catch (Exception ex) {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
                 throw new Exception(ex.Message);
             }
         }
@@ -169,20 +184,143 @@ namespace Fun_Funding.Application.Service
 
                 // check project milestone current status
                 // ...
-
+                var pendingStatusList = new List<ProjectMilestoneStatus>() { ProjectMilestoneStatus.Processing };
+                var approvedStatusList = new List<ProjectMilestoneStatus>() 
+                { 
+                    ProjectMilestoneStatus.Completed ,
+                    ProjectMilestoneStatus.Warning
+                };
+                var warnStatusList = new List<ProjectMilestoneStatus>()
+                {
+                    ProjectMilestoneStatus.Completed,
+                    ProjectMilestoneStatus.Failed
+                };
                 // check project milestone incoming status
                 // ...
+                bool statusChanged = false;
+                if (projectMilestone.Status == ProjectMilestoneStatus.Pending && pendingStatusList.Contains(request.Status))
+                {
+                    projectMilestone.Status = request.Status;
+                    statusChanged = true;
+                }else if (projectMilestone.Status == ProjectMilestoneStatus.Processing && approvedStatusList.Contains(request.Status))
+                {
+                    projectMilestone.Status = request.Status;
+                    statusChanged = true;
+                }else if (projectMilestone.Status == ProjectMilestoneStatus.Warning && warnStatusList.Contains(request.Status))
+                {
+                    projectMilestone.Status = request.Status;
+                    statusChanged = true;
+                }
+                if (statusChanged)
+                {
+                    _unitOfWork.ProjectMilestoneRepository.Update(projectMilestone);
 
-                projectMilestone.Status = request.Status;
-                _unitOfWork.ProjectMilestoneRepository.Update(projectMilestone);
-
-                await _unitOfWork.CommitAsync();
+                    await _unitOfWork.CommitAsync();
+                }
+                else throw new ExceptionHandler.ExceptionError(
+                       (int)HttpStatusCode.BadRequest,
+                       $"Milestone with status {projectMilestone.Status} cannot be changed to {request.Status}.");
 
                 return ResultDTO<string>.Success("Update successfully!");
             }
             catch (Exception ex)
             {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
                 throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<ResultDTO<PaginatedResponse<ProjectMilestoneResponse>>> GetProjectMilestones(
+            ListRequest request,
+            ProjectMilestoneStatus? status,
+            Guid? fundingProjectId)
+        {
+            try
+            {
+                // Initialize the filter with a default condition that always evaluates to true.
+                Expression<Func<ProjectMilestone, bool>> filter = u => true;
+
+
+                // Apply status filter.
+                if (status != null)
+                {
+                    filter = u => u.Status == status;
+                }
+
+                // Apply FundingProjectId filter.
+                if (fundingProjectId != null)
+                {
+                    filter = u => u.FundingProjectId == fundingProjectId;
+                }
+
+                // Apply date filters.
+                if (request.From is DateTime fromDate)
+                {
+                    filter = u => u.CreatedDate >= fromDate;
+                }
+
+                if (request.To is DateTime toDate)
+                {
+                    filter = u => u.EndDate <= toDate;
+                }
+
+                // Define the orderBy expression.
+                Expression<Func<ProjectMilestone, object>> orderBy = u => u.CreatedDate;
+                if (!string.IsNullOrEmpty(request.OrderBy))
+                {
+                    switch (request.OrderBy.ToLower())
+                    {
+                        case "enddate":
+                            orderBy = u => u.EndDate;
+                            break;
+                        case "status":
+                            orderBy = u => u.Status;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                // Retrieve the paginated list of milestones.
+                var list = await _unitOfWork.ProjectMilestoneRepository.GetAllAsync(
+                    filter: filter,
+                    orderBy: orderBy,
+                    isAscending: request.IsAscending ?? true,
+                    pageIndex: request.PageIndex ?? 1,
+                    pageSize: request.PageSize ?? 10,
+                    includeProperties: "Milestone,ProjectMilestoneRequirements"
+                );
+
+                if (list != null && list.Any())
+                {
+                    var totalItems = _unitOfWork.ProjectMilestoneRepository.GetAll(filter).Count();
+                    var totalPages = (int)Math.Ceiling((double)totalItems / (request.PageSize ?? 10));
+
+                    // Map to the response DTO.
+                    var responseItems = _mapper.Map<IEnumerable<ProjectMilestoneResponse>>(list);
+
+                    var response = new PaginatedResponse<ProjectMilestoneResponse>
+                    {
+                        PageSize = request.PageSize ?? 10,
+                        PageIndex = request.PageIndex ?? 1,
+                        TotalItems = totalItems,
+                        TotalPages = totalPages,
+                        Items = responseItems
+                    };
+
+                    return ResultDTO<PaginatedResponse<ProjectMilestoneResponse>>.Success(response);
+                }
+                else
+                {
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "No project milestones found.");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
             }
         }
     }
