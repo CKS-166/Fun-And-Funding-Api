@@ -76,7 +76,7 @@ namespace Fun_Funding.Api
                 });
             builder.Services.AddTransient<IEmailService, EmailService>();
             builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
-            
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
@@ -130,7 +130,10 @@ namespace Fun_Funding.Api
                 RequestPath = "/Media"
             });
 
-            app.UseWebSockets();
+            app.UseWebSockets(new WebSocketOptions
+            {
+                KeepAliveInterval = TimeSpan.FromMinutes(2)
+            });
 
             // WebSocket mapping
             app.Map("/ws", async context =>
@@ -138,7 +141,19 @@ namespace Fun_Funding.Api
                 if (context.WebSockets.IsWebSocketRequest)
                 {
                     var chatService = context.RequestServices.GetRequiredService<IChatService>();
-                    var senderId = context.Request.Query["SenderId"];
+
+                    if (!context.Request.Query.TryGetValue("SenderId", out var senderIdValues) ||
+                        string.IsNullOrEmpty(senderIdValues.FirstOrDefault()))
+                    {
+                        context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                        await context.Response.WriteAsync("SenderId is required");
+                        return;
+                    }
+
+                    var senderId = senderIdValues.First();
+
+                    Console.WriteLine($"WebSocket connection request from SenderId: {senderId}");
+
                     using var webSocket = await context.WebSockets.AcceptWebSocketAsync();
                     await chatService.HandleWebSocketConnectionAsync(webSocket, senderId);
                 }
@@ -157,8 +172,7 @@ namespace Fun_Funding.Api
 
             app.UseHttpsRedirection();
             app.UseCors("MyCors");
-            app.UseWebSockets();
-           
+
             app.UseAuthentication();
             app.UseAuthorization();
 

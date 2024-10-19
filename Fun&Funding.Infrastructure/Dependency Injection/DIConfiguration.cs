@@ -131,13 +131,13 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             service.AddScoped<IFollowService, FollowService>();
             service.AddScoped<IReportService, ReportService>();
             service.AddScoped<IMilestoneService, MilestoneService>();
-            service.AddScoped<IChatService, ChatService>();
-            service.AddScoped<IWebSocketManager, WebSocketManager>();
+            service.AddSingleton<IChatService, ChatService>();
+            service.AddSingleton<IWebSocketManager, WebSocketManager>();
             service.AddScoped<IRequirementService, RequirementService>();
             service.AddScoped<IMarketplaceService, MarketplaceService>();
             service.AddScoped<IBackgroundProcessService, BackgroundProcessService>();
             service.AddScoped<IOrderService, OrderService>();
-            service.AddScoped<ICreatorContractService,CreatorContractService>();
+            service.AddScoped<ICreatorContractService, CreatorContractService>();
             service.AddScoped<IDigitalKeyService, DigitalKeyService>();
 
             #endregion
