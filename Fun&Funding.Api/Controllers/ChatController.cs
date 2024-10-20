@@ -21,5 +21,12 @@ namespace Fun_Funding.Api.Controllers
             var response = await _chatService.GetChatConversation(senderId, receiverId);
             return Ok(response);
         }
+
+        [HttpGet("users/{id}")]
+        public async Task<IActionResult> GetContactedUsers([FromRoute] Guid id)
+        {
+            var response = await _chatService.GetContactedUsers(id);
+            return Ok(response);
+        }
     }
 }
