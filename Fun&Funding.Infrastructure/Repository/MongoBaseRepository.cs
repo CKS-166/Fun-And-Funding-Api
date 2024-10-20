@@ -94,21 +94,22 @@ namespace Fun_Funding.Infrastructure.Repository
 
         public IQueryable<T> GetQueryable()
         {
-           return _collection.AsQueryable();
+            return _collection.AsQueryable();
         }
         public async Task CreateAsync(T entity)
         {
             await _collection.InsertOneAsync(entity);
         }
 
-        public async Task<List<T>> GetAllAsync(FilterDefinition<T>? filter = null)
+        public async Task<List<T>> GetAllAsync(FilterDefinition<T>? filter = null, SortDefinition<T>? sort = null)
         {
             if (filter == null)
             {
                 filter = Builders<T>.Filter.Empty;
             }
-            var documents = await _collection.Find(filter).ToListAsync();
-            return documents;
+            if (sort == null) return await _collection.Find(filter).ToListAsync();
+
+            return await _collection.Find(filter).Sort(sort).ToListAsync();
         }
     }
 

@@ -13,7 +13,7 @@ namespace Fun_Funding.Infrastructure.WebSocketService
 {
     public class WebSocketManager : IWebSocketManager
     {
-        private readonly ConcurrentDictionary<WebSocket, string> _connections = new();
+        private readonly ConcurrentDictionary<WebSocket, (string SenderId, string ReceiverId)> _connections = new();
         private readonly IMapper _mapper;
         private readonly IServiceScopeFactory _scopeFactory;  // Use IServiceScopeFactory for scoped DbContext
 
@@ -23,23 +23,26 @@ namespace Fun_Funding.Infrastructure.WebSocketService
             _mapper = mapper;
         }
 
-        public async Task HandleConnectionAsync(WebSocket webSocket, string senderId)
+        public async Task HandleConnectionAsync(WebSocket webSocket, string senderId, string receiverId)
         {
-            _connections.TryAdd(webSocket, senderId);
-            await BroadcastMessage($"{senderId} joined the room");
-            await BroadcastMessage($"{_connections.Count} users connected");
+            if (!_connections.ContainsKey(webSocket))
+            {
+                _connections.TryAdd(webSocket, (senderId, receiverId));
+            }
+            await BroadcastMessage($"{senderId} joined the room", senderId, receiverId);
+            await BroadcastMessage($"{_connections.Count} users connected", senderId, receiverId);
 
             await ReceiveMessagesAsync(webSocket, async (result, messageJson) =>
             {
                 var messageObject = JsonSerializer.Deserialize<ChatRequest>(messageJson);
                 await SaveMessageToDatabase(messageObject);  // Save message
                 var responseJson = JsonSerializer.Serialize(messageObject);
-                await BroadcastMessage(responseJson);
+                await BroadcastMessage(responseJson, senderId, receiverId);
             });
 
             _connections.TryRemove(webSocket, out _);
-            await BroadcastMessage($"{senderId} left the room");
-            await BroadcastMessage($"{_connections.Count} users connected");
+            await BroadcastMessage($"{senderId} left the room", senderId, receiverId);
+            await BroadcastMessage($"{_connections.Count} users connected", senderId, receiverId);
         }
 
         private async Task ReceiveMessagesAsync(WebSocket socket, Func<WebSocketReceiveResult, string, Task> handleMessage)
@@ -105,15 +108,19 @@ namespace Fun_Funding.Infrastructure.WebSocketService
             }
         }
 
-        public async Task BroadcastMessage(string message)
+        public async Task BroadcastMessage(string message, string senderId, string receiverId)
         {
             var bytes = Encoding.UTF8.GetBytes(message);
-            var tasks = _connections.Keys
-                .Where(socket => socket.State == WebSocketState.Open)
-                .Select(socket =>
+            var tasks = _connections
+                .Where(connection =>
+        ((connection.Value.SenderId == senderId) ||
+                // Or if this connection belongs to the receiver
+                (connection.Value.SenderId == receiverId)) &&
+        connection.Key.State == WebSocketState.Open)
+                .Select(connection =>
                 {
                     var arraySegment = new ArraySegment<byte>(bytes, 0, bytes.Length);
-                    return socket.SendAsync(arraySegment, WebSocketMessageType.Text, true, CancellationToken.None);
+                    return connection.Key.SendAsync(arraySegment, WebSocketMessageType.Text, true, CancellationToken.None);
                 });
 
             await Task.WhenAll(tasks);

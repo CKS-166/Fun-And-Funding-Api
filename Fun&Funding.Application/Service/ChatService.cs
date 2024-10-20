@@ -3,6 +3,7 @@ using Fun_Funding.Application.ExceptionHandler;
 using Fun_Funding.Application.IService;
 using Fun_Funding.Application.IWebSocketService;
 using Fun_Funding.Application.ViewModel;
+using Fun_Funding.Application.ViewModel.ChatDTO;
 using Fun_Funding.Domain.Entity.NoSqlEntities;
 using Microsoft.Extensions.DependencyInjection;  // Import for IServiceScopeFactory
 using MongoDB.Driver;
@@ -40,7 +41,9 @@ namespace Fun_Funding.Application.Service
                             Builders<Chat>.Filter.Eq(m => m.SenderId, receiverId),
                             Builders<Chat>.Filter.Eq(m => m.ReceiverId, senderId)));
 
-                    var chatMessages = await unitOfWork.ChatRepository.GetAllAsync(filter);
+                    var sort = Builders<Chat>.Sort.Descending(m => m.CreatedDate);
+
+                    var chatMessages = await unitOfWork.ChatRepository.GetAllAsync(filter, sort);
 
                     return ResultDTO<IEnumerable<Chat>>.Success(chatMessages);
                 }
@@ -56,11 +59,63 @@ namespace Fun_Funding.Application.Service
             }
         }
 
-        public async Task HandleWebSocketConnectionAsync(WebSocket webSocket, string senderId)
+        public async Task<ResultDTO<IEnumerable<ContactedUserResponse>>> GetContactedUsers(Guid userId)
         {
             try
             {
-                await _webSocketManager.HandleConnectionAsync(webSocket, senderId);
+                using (var scope = _scopeFactory.CreateScope())
+                {
+                    var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+
+                    var chats = await unitOfWork.ChatRepository.GetAllAsync(
+                        Builders<Chat>.Filter.Or(
+                            Builders<Chat>.Filter.Eq(chat => chat.SenderId, userId),
+                            Builders<Chat>.Filter.Eq(chat => chat.ReceiverId, userId)
+                        ));
+
+                    var userIds = chats.Select(chat => chat.SenderId != userId ? chat.SenderId : chat.ReceiverId)
+                        .Distinct();
+
+                    var users = unitOfWork.UserRepository
+                        .GetAll(user => userIds.Contains(user.Id));
+
+                    var contactedUsers = new List<ContactedUserResponse>();
+
+                    foreach (var user in users)
+                    {
+                        var chat = GetChatConversation(userId, user.Id).Result._data.First();
+
+                        var contactedUser = new ContactedUserResponse
+                        {
+                            UserId = user.Id,
+                            LatestMessage = chat.Message,
+                            CreatedDate = chat.CreatedDate,
+                            Name = !string.IsNullOrEmpty(user.FullName) ? user.FullName : user.UserName,
+                            Avatar = user.File != null ? user.File.URL : ""
+                        };
+
+                        contactedUsers.Add(contactedUser);
+                    }
+
+                    return ResultDTO<IEnumerable<ContactedUserResponse>>.Success(contactedUsers);
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
+
+        public async Task HandleWebSocketConnectionAsync(WebSocket webSocket, string senderId, string receiverId)
+        {
+            try
+            {
+                await _webSocketManager.HandleConnectionAsync(webSocket, senderId, receiverId);
             }
             catch (Exception ex)
             {
