@@ -147,6 +147,7 @@ namespace Fun_Funding.Infrastructure.Mapper
 
         public void MappingProjectMilestoneRequirement()
         {
+            CreateMap<ProjectRequirementFile, ProjectRequirementFileResponse>().ReverseMap();
             CreateMap<ProjectRequirementFile, ProjectRequirementFileUpdateRequest>().ReverseMap();
             CreateMap<ProjectMilestoneRequirement, ProjectMilestoneRequirementUpdateRequest>().ReverseMap();
         }
