@@ -11,7 +11,7 @@ namespace Fun_Funding.Application.IService
 {
     public interface IProjectMilestoneRequirementService
     {
-        Task<ResultDTO<string>> CreateMilestoneRequirements(List<ProjectMilestoneRequirementRequest> request);
+        Task<ResultDTO<ProjectMilestoneResponse>> CreateMilestoneRequirements(List<ProjectMilestoneRequirementRequest> request);
         Task<ResultDTO<string>> UpdateMilestoneRequirements(List<ProjectMilestoneRequirementUpdateRequest> request);
     }
 }

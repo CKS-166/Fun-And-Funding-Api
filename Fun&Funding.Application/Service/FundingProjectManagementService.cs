@@ -493,6 +493,11 @@ namespace Fun_Funding.Application.Service
             }
             catch (Exception ex)
             {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+
                 throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
             }
         }

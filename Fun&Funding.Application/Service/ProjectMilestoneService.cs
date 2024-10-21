@@ -67,7 +67,7 @@ namespace Fun_Funding.Application.Service
                 }
                 else
                 {
-                    throw new ExceptionHandler.ExceptionError((int)HttpStatusCode.BadRequest, "First milestone requested date must be after the date project funded successfully");
+                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "First milestone requested date must be after the date project funded successfully");
                 }
                 
                 var checkValidateMilstone = CanCreateProjectMilestone(project, requestMilestone.MilestoneOrder);
@@ -82,7 +82,8 @@ namespace Fun_Funding.Application.Service
                     MilestoneId = request.MilestoneId,
                     FundingProjectId = project.Id,
                     CreatedDate = request.CreatedDate,
-                    IsDeleted = false
+                    IsDeleted = false,
+                    
                 };
 
                 await _unitOfWork.ProjectMilestoneRepository.AddAsync(projectMilestone);
@@ -95,7 +96,7 @@ namespace Fun_Funding.Application.Service
                 {
                     throw exceptionError;
                 }
-                throw new Exception(ex.Message);
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
             }
         }
 
@@ -107,6 +108,8 @@ namespace Fun_Funding.Application.Service
                     .GetQueryable()
                     .Include(pm => pm.Milestone)
                     .ThenInclude(pmr => pmr.Requirements)
+                    .Include(pmr => pmr.ProjectMilestoneRequirements)
+                    .ThenInclude(pmr => pmr.RequirementFiles)
                     .FirstOrDefault(pm => pm.Id == id);
                 if (projectMilestone == null) {
                     return ResultDTO<ProjectMilestoneResponse>.Fail("Not found", 404);
@@ -115,6 +118,11 @@ namespace Fun_Funding.Application.Service
                 return ResultDTO<ProjectMilestoneResponse>.Success(result);
             }
             catch (Exception ex) {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+
                 throw new Exception(ex.Message);
             }
         }
@@ -171,6 +179,11 @@ namespace Fun_Funding.Application.Service
             }
             catch (Exception ex)
             {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+
                 throw new Exception(ex.Message);
             }
         }
@@ -236,7 +249,8 @@ namespace Fun_Funding.Application.Service
         public async Task<ResultDTO<PaginatedResponse<ProjectMilestoneResponse>>> GetProjectMilestones(
             ListRequest request,
             ProjectMilestoneStatus? status,
-            Guid? fundingProjectId)
+            Guid? fundingProjectId,
+            Guid? milestoneId)
         {
             try
             {
@@ -255,7 +269,11 @@ namespace Fun_Funding.Application.Service
                 {
                     filter = u => u.FundingProjectId == fundingProjectId;
                 }
-
+                //Apply milestoneId
+                if (milestoneId != null)
+                {
+                    filter = u => u.MilestoneId == milestoneId;
+                }
                 // Apply date filters.
                 if (request.From is DateTime fromDate)
                 {
@@ -291,7 +309,7 @@ namespace Fun_Funding.Application.Service
                     isAscending: request.IsAscending ?? true,
                     pageIndex: request.PageIndex ?? 1,
                     pageSize: request.PageSize ?? 10,
-                    includeProperties: "Milestone,ProjectMilestoneRequirements"
+                    includeProperties: "Milestone,ProjectMilestoneRequirements.RequirementFiles"
                 );
 
                 if (list != null && list.Any())
@@ -320,6 +338,11 @@ namespace Fun_Funding.Application.Service
             }
             catch (Exception ex)
             {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+
                 throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
             }
         }
