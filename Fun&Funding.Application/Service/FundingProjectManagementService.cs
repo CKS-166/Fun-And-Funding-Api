@@ -271,7 +271,7 @@ namespace Fun_Funding.Application.Service
                     {
                         if (req.URL.Length > 0)
                         {
-                            var res = _azureService.UploadUrlSingleFiles(req.URL);
+                            var res = _azureService.UploadUrlSingleFiles(req.UrlFile);
                             if (res == null)
                             {
                                 return ResultDTO<FundingProjectResponse>.Fail("Fail to upload file");
