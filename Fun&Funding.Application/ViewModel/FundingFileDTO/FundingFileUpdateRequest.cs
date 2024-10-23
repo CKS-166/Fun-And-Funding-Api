@@ -14,7 +14,7 @@ namespace Fun_Funding.Application.ViewModel.FundingFileDTO
         [Required]
         public Guid Id { get; set; }
         public string Name { get; set; }
-        public IFormFile URL { get; set; }
+        public IFormFile UrlFile { get; set; }
         public FileType Filetype { get; set; }
 
         public bool IsDeleted { get; set; }

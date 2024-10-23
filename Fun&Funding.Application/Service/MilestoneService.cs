@@ -29,16 +29,16 @@ namespace Fun_Funding.Application.Service
 
         public async Task<ResultDTO<MilestoneResponse>> CreateMilestone(AddMilestoneRequest request)
         {
-            var user = _userService.GetUserInfo().Result;
-            User exitUser = _mapper.Map<User>(user._data);
-            if (user is null)
-            {
-                return ResultDTO<MilestoneResponse>.Fail("can not found user");
-            }
-            if (_userService.CheckUserRole(exitUser).Result.ToString() == Role.Admin)
-            {
-                return ResultDTO<MilestoneResponse>.Fail("user is not admin");
-            }
+            //var user = _userService.GetUserInfo().Result;
+            //User exitUser = _mapper.Map<User>(user._data);
+            //if (user is null)
+            //{
+            //    return ResultDTO<MilestoneResponse>.Fail("can not found user");
+            //}
+            //if (_userService.CheckUserRole(exitUser).Result.ToString() == Role.Admin)
+            //{
+            //    return ResultDTO<MilestoneResponse>.Fail("user is not admin");
+            //}
             var latestMilestone = _unitOfWork.MilestoneRepository.GetQueryable()
                     .Where(x => x.MilestoneOrder.Equals(request.MilestoneOrder))
                     .OrderByDescending(x => x.Version)

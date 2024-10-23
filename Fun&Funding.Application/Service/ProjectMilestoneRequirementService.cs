@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Fun_Funding.Application.ExceptionHandler;
 using Fun_Funding.Application.IService;
 using Fun_Funding.Application.IStorageService;
 using Fun_Funding.Application.ViewModel;
@@ -19,20 +20,24 @@ namespace Fun_Funding.Application.Service
         private IUnitOfWork _unitOfWork;
         private IMapper _mapper;
         private IAzureService _azureService;
-        public ProjectMilestoneRequirementService(IUnitOfWork unitOfWork, IMapper mapper, IAzureService azureService)
+        private IProjectMilestoneService _projectMilestoneService;
+        public ProjectMilestoneRequirementService(IUnitOfWork unitOfWork, IMapper mapper, IAzureService azureService, IProjectMilestoneService projectMilestoneService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _azureService = azureService;
+            _projectMilestoneService = projectMilestoneService;
         }
-        public async Task<ResultDTO<string>> CreateMilestoneRequirements(List<ProjectMilestoneRequirementRequest> request)
+        public async Task<ResultDTO<ProjectMilestoneResponse>> CreateMilestoneRequirements(List<ProjectMilestoneRequirementRequest> request)
         {
             try
             {
+                var projectMilestone = _unitOfWork.ProjectMilestoneRepository.GetQueryable()
+                    .FirstOrDefault(pm => pm.FundingProjectId == request[0].FundingProjectId && pm.MilestoneId == request[0].MilestoneId);
                 foreach (var requestItem in request) {
                     ProjectMilestoneRequirement req = new ProjectMilestoneRequirement
                     {
-                        ProjectMilestoneId = requestItem.ProjectMilestoneId,
+                        ProjectMilestoneId = projectMilestone.Id,
                         Content = requestItem.Content,
                         RequirementId = requestItem.RequirementId
                     };
@@ -59,11 +64,16 @@ namespace Fun_Funding.Application.Service
                     _unitOfWork.ProjectMilestoneRequirementRepository.Add(req);
 
                 }
-                 _unitOfWork.Commit();
-
-                return ResultDTO<string>.Success("ok");
+                 await _unitOfWork.CommitAsync();
+                var response = await _projectMilestoneService.GetProjectMilestoneRequest(projectMilestone.Id);
+                return response;
             }
             catch (Exception ex) {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+
                 throw new Exception(ex.Message);
             }
         }
@@ -116,6 +126,11 @@ namespace Fun_Funding.Application.Service
             }
             catch (Exception ex)
             {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+
                 throw new Exception($"Could not update {ex.Message}");
             }
         }

@@ -18,7 +18,8 @@ namespace Fun_Funding.Application.IService
         Task<ResultDTO<PaginatedResponse<ProjectMilestoneResponse>>> GetProjectMilestones(
              ListRequest request,
              ProjectMilestoneStatus? status,
-             Guid? fundingProjectId);
+             Guid? fundingProjectId,
+             Guid? milestoneId);
     }
 }
 

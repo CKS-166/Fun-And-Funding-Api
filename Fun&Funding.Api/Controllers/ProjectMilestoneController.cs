@@ -19,11 +19,11 @@ namespace Fun_Funding.Api.Controllers
         }
         //api create milestone request
         [HttpPost]
-        public IActionResult CreateMilestoneRequest([FromBody]ProjectMilestoneRequest request)
+        public async Task<IActionResult> CreateMilestoneRequest([FromBody]ProjectMilestoneRequest request)
         {
             try
             {
-                var res = _projectMilestoneService.CreateProjectMilestoneRequest(request);
+                var res = await _projectMilestoneService.CreateProjectMilestoneRequest(request);
                 return Ok(res);
             }
             catch(ExceptionError ex)
@@ -35,18 +35,10 @@ namespace Fun_Funding.Api.Controllers
 
         // api get list projectmilestone
         [HttpGet]
-        public async Task<IActionResult> GetMilestones([FromQuery] ListRequest request , ProjectMilestoneStatus? status, Guid? projectId)
+        public async Task<IActionResult> GetMilestones([FromQuery] ListRequest request , ProjectMilestoneStatus? status, Guid? projectId, Guid? milestoneId)
         {
-            try
-            {
-                var res = await _projectMilestoneService.GetProjectMilestones(request, status, projectId);
+                var res = await _projectMilestoneService.GetProjectMilestones(request, status, projectId, milestoneId);
                 return Ok(res);
-            }
-            catch (ExceptionError ex)
-            {
-                return Ok(ex.InnerException);
-            }
-            
         }
 
         // api update status projectmilestone

@@ -154,8 +154,19 @@ namespace Fun_Funding.Api
 
                     Console.WriteLine($"WebSocket connection request from SenderId: {senderId}");
 
+                    // Retrieve ReceiverId from the query
+                    if (!context.Request.Query.TryGetValue("ReceiverId", out var receiverIdValues) ||
+                        string.IsNullOrEmpty(receiverIdValues.FirstOrDefault()))
+                    {
+                        context.Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                        await context.Response.WriteAsync("ReceiverId is required");
+                        return;
+                    }
+
+                    var receiverId = receiverIdValues.First();
+
                     using var webSocket = await context.WebSockets.AcceptWebSocketAsync();
-                    await chatService.HandleWebSocketConnectionAsync(webSocket, senderId);
+                    await chatService.HandleWebSocketConnectionAsync(webSocket, senderId, receiverId);
                 }
                 else
                 {
