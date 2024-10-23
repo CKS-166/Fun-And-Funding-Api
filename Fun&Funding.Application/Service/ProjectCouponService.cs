@@ -115,7 +115,6 @@ namespace Fun_Funding.Application.Service
                                     CouponName = row.GetCell(1)?.ToString() ?? string.Empty, // Check for null and provide a default value
                                     DiscountRate = decimal.TryParse(row.GetCell(2)?.ToString(), out var commissionRate) ? commissionRate : 0, // Try parsing safely
                                     CreatedDate = DateTime.Now,
-                                    ExpiredDate = DateTime.Now.AddDays(30),
                                     Status = Domain.Enum.ProjectCouponStatus.Enable,
                                     IsDeleted = false,
                                     MarketplaceProjectId = projectId,

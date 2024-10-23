@@ -24,7 +24,7 @@ namespace Fun_Funding.Domain.Entity
         public decimal Balance { get; set; }    
         public ProjectStatus Status { get; set; }
 
-        public BankAccount? BankAccount { get; set; }
+        public Wallet? Wallet { get; set; }
         public MarketplaceProject? MarketingProject { get; set; }
         public User User { get; set; }
         public Guid UserId { get; set; }

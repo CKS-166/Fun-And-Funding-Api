@@ -32,596 +32,591 @@ namespace Fun_Funding.Application.Service
             _azureService = azureService;
             _claimsPrincipal = httpContextAccessor.HttpContext.User;
         }
-        public async Task<ResultDTO<FundingProjectResponse>> CreateFundingProject(FundingProjectAddRequest projectRequest)
-        {
-            try
-            {
-                //find authorize user
-                if (_claimsPrincipal == null || !_claimsPrincipal.Identity.IsAuthenticated)
-                {
-                    throw new ExceptionError((int)HttpStatusCode.Unauthorized, "User not authenticated.");
-                }
-                var userEmailClaims = _claimsPrincipal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email);
-                if (userEmailClaims == null)
-                {
-                    throw new ExceptionError((int)HttpStatusCode.NotFound, "User not found.");
-                }
-                var userEmail = userEmailClaims.Value;
-                User owner = await _unitOfWork.UserRepository.GetAsync(x => x.Email == userEmail);
-                if (owner == null)
-                {
-                    throw new ExceptionError((int)HttpStatusCode.NotFound, "Owner not found");
-                }
-               
-                //map project
-                FundingProject project = _mapper.Map<FundingProject>(projectRequest);
-                project.User = owner;
-                //validate category
-                foreach (CategoryProjectRequest cate in projectRequest.Categories)
-                {
-                    Category category = _unitOfWork.CategoryRepository.GetById(cate.Id);
-                    if (category == null) {
-                        throw new ExceptionError((int)HttpStatusCode.NotFound, "Category not found");
-                    }
-                    project.Categories.Add(category);
+        //    public async Task<ResultDTO<FundingProjectResponse>> CreateFundingProject(FundingProjectAddRequest projectRequest)
+        //    {
+        //        try
+        //        {
+        //            //find authorize user
+        //            if (_claimsPrincipal == null || !_claimsPrincipal.Identity.IsAuthenticated)
+        //            {
+        //                throw new ExceptionError((int)HttpStatusCode.Unauthorized, "User not authenticated.");
+        //            }
+        //            var userEmailClaims = _claimsPrincipal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email);
+        //            if (userEmailClaims == null)
+        //            {
+        //                throw new ExceptionError((int)HttpStatusCode.NotFound, "User not found.");
+        //            }
+        //            var userEmail = userEmailClaims.Value;
+        //            User owner = await _unitOfWork.UserRepository.GetAsync(x => x.Email == userEmail);
+        //            if (owner == null)
+        //            {
+        //                throw new ExceptionError((int)HttpStatusCode.NotFound, "Owner not found");
+        //            }
+
+        //            //map project
+        //            FundingProject project = _mapper.Map<FundingProject>(projectRequest);
+        //            project.User = owner;
+        //            //validate category
+        //            foreach (CategoryProjectRequest cate in projectRequest.Categories)
+        //            {
+        //                Category category = _unitOfWork.CategoryRepository.GetById(cate.Id);
+        //                if (category == null) {
+        //                    throw new ExceptionError((int)HttpStatusCode.NotFound, "Category not found");
+        //                }
+        //                project.Categories.Add(category);
 
 
-                }
-                //validate package amount
-                var packageNames = new HashSet<string>();
-                foreach (PackageAddRequest pack in projectRequest.Packages)
-                {
-                    // Check for duplicate package names
-                    if (!packageNames.Add(pack.Name)) // Add will return false if the name already exists
-                    {
-                        throw new ExceptionError((int)HttpStatusCode.NotFound, $"Duplicate package name found: {pack.Name}");
-                    }
-                    if (pack.RequiredAmount < 5000)
-                    {
-                        throw new ExceptionError((int)HttpStatusCode.BadRequest, "Price for package must be at least 5000");
-                    }
-                    if (pack.RewardItems.Count < 1)
-                    {
-                        throw new ExceptionError((int)HttpStatusCode.BadRequest, "Each package must have at least 1 item");
-                    }
-                    if (pack.LimitQuantity < 1)
-                    {
-                        throw new ExceptionError((int)HttpStatusCode.BadRequest, "Each package must limit at least 1 quantity");
-                    }
-                }
-                //validate bank
-                if (projectRequest.BankAccount is null)
-                {
-                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "Project must config its bank account for payment");
-                }
-                //validate startDate endDate info
-                if (project.StartDate < DateTime.Now)
-                {
-                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "Start date cannot be before today");
-                }
-                if (project.EndDate <= project.StartDate)
-                {
-                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "End date must be greater that start date");
-                }
-                if ((project.EndDate - project.StartDate).TotalDays < minDays || (project.EndDate - project.StartDate).TotalDays > maxDays)
-                {
-                    return ResultDTO<FundingProjectResponse>.Fail("Funding campaign length must be at least 1 day and maximum 60 days");
-                }
-                project.CreatedDate = DateTime.Now;
-                project.Status = ProjectStatus.Pending;
-                //free package
-                Package freePack = new Package
-                {
-                    Name = "Non-package support",
-                    Description = "We offer the \"Non-Package Support\" option, allowing you to contribute any amount you choose. This flexible choice doesn’t include rewards " +
-                    "but greatly supports our project. Any amount given is greatly appreciated!",
-                    PackageTypes = PackageType.Free,
-                    CreatedDate = DateTime.Now,
-                    RequiredAmount = 0
-                };
+        //            }
+        //            //validate package amount
+        //            var packageNames = new HashSet<string>();
+        //            foreach (PackageAddRequest pack in projectRequest.Packages)
+        //            {
+        //                // Check for duplicate package names
+        //                if (!packageNames.Add(pack.Name)) // Add will return false if the name already exists
+        //                {
+        //                    throw new ExceptionError((int)HttpStatusCode.NotFound, $"Duplicate package name found: {pack.Name}");
+        //                }
+        //                if (pack.RequiredAmount < 5000)
+        //                {
+        //                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "Price for package must be at least 5000");
+        //                }
+        //                if (pack.RewardItems.Count < 1)
+        //                {
+        //                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "Each package must have at least 1 item");
+        //                }
+        //                if (pack.LimitQuantity < 1)
+        //                {
+        //                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "Each package must limit at least 1 quantity");
+        //                }
+        //            }
+        //            //validate bank
+        //            if (projectRequest.BankAccount is null)
+        //            {
+        //                throw new ExceptionError((int)HttpStatusCode.BadRequest, "Project must config its bank account for payment");
+        //            }
+        //            //validate startDate endDate info
+        //            if (project.StartDate < DateTime.Now)
+        //            {
+        //                throw new ExceptionError((int)HttpStatusCode.BadRequest, "Start date cannot be before today");
+        //            }
+        //            if (project.EndDate <= project.StartDate)
+        //            {
+        //                throw new ExceptionError((int)HttpStatusCode.BadRequest, "End date must be greater that start date");
+        //            }
+        //            if ((project.EndDate - project.StartDate).TotalDays < minDays || (project.EndDate - project.StartDate).TotalDays > maxDays)
+        //            {
+        //                return ResultDTO<FundingProjectResponse>.Fail("Funding campaign length must be at least 1 day and maximum 60 days");
+        //            }
+        //            project.CreatedDate = DateTime.Now;
+        //            project.Status = ProjectStatus.Pending;
+        //            //free package
+        //            Package freePack = new Package
+        //            {
+        //                Name = "Non-package support",
+        //                Description = "We offer the \"Non-Package Support\" option, allowing you to contribute any amount you choose. This flexible choice doesn’t include rewards " +
+        //                "but greatly supports our project. Any amount given is greatly appreciated!",
+        //                PackageTypes = PackageType.Free,
+        //                CreatedDate = DateTime.Now,
+        //                RequiredAmount = 0
+        //            };
 
-                //add files 
-                List<FundingFile> files = new List<FundingFile>();
+        //            //add files 
+        //            List<FundingFile> files = new List<FundingFile>();
 
-                foreach (FundingFileRequest req in projectRequest.FundingFiles)
-                {
-                    if (req.URL.Length > 0)
-                    {
-                        var res = _azureService.UploadUrlSingleFiles(req.URL);
-                        if (res == null)
-                        {
-                            throw new ExceptionError((int)HttpStatusCode.BadRequest, "Fail to upload file");
-                        }
-                        FundingFile media = new FundingFile
-                        {
-                            Name = req.Name,
-                            URL = res.Result,
-                            Filetype = req.Filetype
-                        };
-                        files.Add(media);
-                    }
-                }
-                //add iamge into item 
-                foreach (var package in project.Packages)
-                {
-                    var pack = projectRequest.Packages
-                            .FirstOrDefault(p => p.Name == package.Name);
-                    if (pack?.ImageFile != null)
-                    {
-                        var packageImage = _azureService.UploadUrlSingleFiles(pack.ImageFile);
-                        package.Url = packageImage.Result;
-                    }
+        //            foreach (FundingFileRequest req in projectRequest.FundingFiles)
+        //            {
+        //                if (req.URL.Length > 0)
+        //                {
+        //                    var res = _azureService.UploadUrlSingleFiles(req.URL);
+        //                    if (res == null)
+        //                    {
+        //                        throw new ExceptionError((int)HttpStatusCode.BadRequest, "Fail to upload file");
+        //                    }
+        //                    FundingFile media = new FundingFile
+        //                    {
+        //                        Name = req.Name,
+        //                        URL = res.Result,
+        //                        Filetype = req.Filetype
+        //                    };
+        //                    files.Add(media);
+        //                }
+        //            }
+        //            //add iamge into item 
+        //            foreach (var package in project.Packages)
+        //            {
+        //                var pack = projectRequest.Packages
+        //                        .FirstOrDefault(p => p.Name == package.Name);
+        //                if (pack?.ImageFile != null)
+        //                {
+        //                    var packageImage = _azureService.UploadUrlSingleFiles(pack.ImageFile);
+        //                    package.Url = packageImage.Result;
+        //                }
 
-                    foreach (var rewardItem in package.RewardItems)
-                    {
-                        // Find the corresponding reward item in the request to get its ImageFile
-                        var rewardRequest = projectRequest.Packages
-                            .FirstOrDefault(p => p.Name == package.Name)?
-                            .RewardItems.FirstOrDefault(r => r.Name == rewardItem.Name);
+        //                foreach (var rewardItem in package.RewardItems)
+        //                {
+        //                    // Find the corresponding reward item in the request to get its ImageFile
+        //                    var rewardRequest = projectRequest.Packages
+        //                        .FirstOrDefault(p => p.Name == package.Name)?
+        //                        .RewardItems.FirstOrDefault(r => r.Name == rewardItem.Name);
 
-                        // If ImageFile is present, upload it and set the ImageUrl
-                        if (rewardRequest?.ImageFile != null)
-                        {
-                            var uploadResult = _azureService.UploadUrlSingleFiles(rewardRequest.ImageFile);
-                            rewardItem.ImageUrl = uploadResult.Result; // Append the uploaded URL to the mapped reward item
-                        }
-                    }
-                    package.CreatedDate = DateTime.Now;
-                    package.PackageTypes = PackageType.FixedPackage;
-                }
+        //                    // If ImageFile is present, upload it and set the ImageUrl
+        //                    if (rewardRequest?.ImageFile != null)
+        //                    {
+        //                        var uploadResult = _azureService.UploadUrlSingleFiles(rewardRequest.ImageFile);
+        //                        rewardItem.ImageUrl = uploadResult.Result; // Append the uploaded URL to the mapped reward item
+        //                    }
+        //                }
+        //                package.CreatedDate = DateTime.Now;
+        //                package.PackageTypes = PackageType.FixedPackage;
+        //            }
 
-                project.SourceFiles = files;
-                project.Packages.Add(freePack);
-                _unitOfWork.FundingProjectRepository.Add(project);
-                _unitOfWork.Commit();
-                return GetProjectById(project.Id).Result;
-            }
-            catch (Exception ex)
-            {
-                if (ex is ExceptionError exceptionError)
-                {
-                    throw exceptionError;
-                }
-                throw new ExceptionError((int)HttpStatusCode.BadRequest, ex.Message);
-            }
-        }
+        //            project.SourceFiles = files;
+        //            project.Packages.Add(freePack);
+        //            _unitOfWork.FundingProjectRepository.Add(project);
+        //            _unitOfWork.Commit();
+        //            return GetProjectById(project.Id).Result;
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            if (ex is ExceptionError exceptionError)
+        //            {
+        //                throw exceptionError;
+        //            }
+        //            throw new ExceptionError((int)HttpStatusCode.BadRequest, ex.Message);
+        //        }
+        //    }
 
-        public async Task<ResultDTO<FundingProjectResponse>> GetProjectById(Guid id)
-        {
-            try
-            {
-                var project = _unitOfWork.FundingProjectRepository.GetQueryable()
-                    .Include(p => p.Packages).ThenInclude(pack => pack.RewardItems)
-                    .Include(p => p.SourceFiles.Where(sf => sf.IsDeleted == false))
-                    .Include(p=>p.BankAccount)
-                    .Include(p => p.User)
-                    .Include(p => p.Categories)
-                    .AsSplitQuery()
-                    .FirstOrDefault(p => p.Id == id);
-                if (project is null)
-                {
-                    return ResultDTO<FundingProjectResponse>.Fail("Project not found", 404);
-                }
-                FundingProjectResponse result = _mapper.Map<FundingProjectResponse>(project);
-                return ResultDTO<FundingProjectResponse>.Success(result);
-            }
-            catch (Exception ex)
-            {
-                if (ex is ExceptionError exceptionError)
-                {
-                    throw exceptionError;
-                }
-                throw ex;
-            }
-        }
+        //    public async Task<ResultDTO<FundingProjectResponse>> GetProjectById(Guid id)
+        //    {
+        //        try
+        //        {
+        //            var project = _unitOfWork.FundingProjectRepository.GetQueryable()
+        //                .Include(p => p.Packages).ThenInclude(pack => pack.RewardItems)
+        //                .Include(p => p.SourceFiles.Where(sf => sf.IsDeleted == false))
+        //                .Include(p=>p.BankAccount)
+        //                .Include(p => p.User)
+        //                .Include(p => p.Categories)
+        //                .AsSplitQuery()
+        //                .FirstOrDefault(p => p.Id == id);
+        //            if (project is null)
+        //            {
+        //                return ResultDTO<FundingProjectResponse>.Fail("Project not found", 404);
+        //            }
+        //            FundingProjectResponse result = _mapper.Map<FundingProjectResponse>(project);
+        //            return ResultDTO<FundingProjectResponse>.Success(result);
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            if (ex is ExceptionError exceptionError)
+        //            {
+        //                throw exceptionError;
+        //            }
+        //            throw ex;
+        //        }
+        //    }
 
-        public async Task<ResultDTO<FundingProjectResponse>> UpdateFundingProject(FundingProjectUpdateRequest projectRequest)
-        {
-            try
-            {
-                var existedProject = _unitOfWork.FundingProjectRepository.GetQueryable()
-                .Include(p => p.SourceFiles)
-                .Include(p => p.Packages).ThenInclude(pack => pack.RewardItems)
-                .FirstOrDefault(o => o.Id == projectRequest.Id);
-                // check status
-                if (existedProject == null)
-                {
-                    throw new ExceptionError((int)HttpStatusCode.NotFound, "Project Not Found.");
-                }
-                if (existedProject.Status != ProjectStatus.Processing)
-                {
-                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "Project is not in processing status");
-                }
-                //update regulations for funding goals and end date
+        //    public async Task<ResultDTO<FundingProjectResponse>> UpdateFundingProject(FundingProjectUpdateRequest projectRequest)
+        //    {
+        //        try
+        //        {
+        //            var existedProject = _unitOfWork.FundingProjectRepository.GetQueryable()
+        //            .Include(p => p.SourceFiles)
+        //            .Include(p => p.Packages).ThenInclude(pack => pack.RewardItems)
+        //            .FirstOrDefault(o => o.Id == projectRequest.Id);
+        //            // check status
+        //            if (existedProject == null)
+        //            {
+        //                throw new ExceptionError((int)HttpStatusCode.NotFound, "Project Not Found.");
+        //            }
+        //            if (existedProject.Status != ProjectStatus.Processing)
+        //            {
+        //                throw new ExceptionError((int)HttpStatusCode.BadRequest, "Project is not in processing status");
+        //            }
+        //            //update regulations for funding goals and end date
 
-                //validate bank and package amount
-                foreach (PackageUpdateRequest pack in projectRequest.Packages)
-                {
-                    if (pack.RequiredAmount < 5000)
-                    {
-                        throw new ExceptionError((int)HttpStatusCode.BadRequest, "Price for package must be at least 5000");
-                    }
-                    if (pack.RewardItems.Count < 1)
-                    {
-                        throw new ExceptionError((int)HttpStatusCode.BadRequest, "Each package must have at least 1 item");
-            
-                    }
-                    if (pack.LimitQuantity < 1)
-                    {
-                        throw new ExceptionError((int)HttpStatusCode.BadRequest, "Each package must limit at least 1 quantity");
-                    }
-                }
-                if (projectRequest.BankAccount is null)
-                {
-                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "Project must config its bank account for payment");
-                }
+        //            //validate bank and package amount
+        //            foreach (PackageUpdateRequest pack in projectRequest.Packages)
+        //            {
+        //                if (pack.RequiredAmount < 5000)
+        //                {
+        //                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "Price for package must be at least 5000");
+        //                }
+        //                if (pack.RewardItems.Count < 1)
+        //                {
+        //                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "Each package must have at least 1 item");
 
-                existedProject.Name = projectRequest.Name;
-                existedProject.Description = projectRequest.Description;
-                BankAccount bank = _mapper.Map<BankAccount>(projectRequest.BankAccount);
-                existedProject.BankAccount = bank;
-                existedProject.Introduction = projectRequest.Introduction;
+        //                }
+        //                if (pack.LimitQuantity < 1)
+        //                {
+        //                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "Each package must limit at least 1 quantity");
+        //                }
+        //            }
+        //            if (projectRequest.BankAccount is null)
+        //            {
+        //                throw new ExceptionError((int)HttpStatusCode.BadRequest, "Project must config its bank account for payment");
+        //            }
 
-                //update if have new files 
-                if (projectRequest.FundingFiles?.Count > 0)
-                {
-                    List<FundingFile> files = new List<FundingFile>();
+        //            existedProject.Name = projectRequest.Name;
+        //            existedProject.Description = projectRequest.Description;
+        //            BankAccount bank = _mapper.Map<BankAccount>(projectRequest.BankAccount);
+        //            existedProject.BankAccount = bank;
+        //            existedProject.Introduction = projectRequest.Introduction;
 
-                    foreach (FundingFileUpdateRequest req in projectRequest.FundingFiles)
-                    {
-                        if (req.URL.Length > 0)
-                        {
-                            var res = _azureService.UploadUrlSingleFiles(req.UrlFile);
-                            if (res == null)
-                            {
-                                return ResultDTO<FundingProjectResponse>.Fail("Fail to upload file");
-                            }
-                            FundingFile media = new FundingFile
-                            {
-                                Name = req.Name,
-                                URL = res.Result,
-                                Filetype = req.Filetype,
-                                IsDeleted = false
-                            };
-                            files.Add(media);
-                        }
-                    }
-                    //update existing files
-                    if (projectRequest.ExistedFile?.Count > 0)
-                    {
-                        foreach (FundingFileResponse fp in projectRequest.ExistedFile)
-                        {
-                            FundingFile updatedFile = _unitOfWork.SourceFileRepository.GetQueryable().FirstOrDefault(f => f.Id == fp.Id);
-                            updatedFile.Filetype = fp.Filetype;
-                            updatedFile.IsDeleted = fp.IsDeleted;
-                            updatedFile.URL = fp.URL;
-                            _unitOfWork.SourceFileRepository.Update(updatedFile);
-                        }
-                    }
-                    // Add each file from 'files' list to the 'SourceFiles' ICollection
-                    foreach (var file in files)
-                    {
-                        existedProject.SourceFiles.Add(file);
-                    }
-                }
-                List<Package> packageList = new List<Package>();
-                //add image into item 
-                foreach (var packageRequest in projectRequest.Packages)
-                {
-                    
-                    var existedPack = existedProject.Packages.FirstOrDefault(p => p.Id == packageRequest.Id);
-                    //change image of package
-                    if (packageRequest.UpdatedImage != null)
-                    {
-                        var imageUploadResult = _azureService.UploadUrlSingleFiles(packageRequest.UpdatedImage);
-                        existedPack.Url = imageUploadResult.Result;
-                    }
-                    if (existedPack != null)
-                    {
-                        existedPack.Name = packageRequest.Name;
-                        existedPack.RequiredAmount = packageRequest.RequiredAmount;
-                        existedPack.LimitQuantity = packageRequest.LimitQuantity;
-                        existedPack.PackageTypes = PackageType.FixedPackage;
-                        //Handle change image of existing item
-                        foreach (var rewardItemRequest in packageRequest.RewardItems)
-                        {
-                            var existedRewardItem = _unitOfWork.RewardItemRepository.GetQueryable().FirstOrDefault(r => r.Id == rewardItemRequest.Id);
-                            if (existedRewardItem != null)
-                            {
-                                // Update existing reward item
-                                existedRewardItem.Name = rewardItemRequest.Name;
-                                existedRewardItem.Description = rewardItemRequest.Description;
-                                existedRewardItem.Quantity = rewardItemRequest.Quantity;
+        //            //update if have new files 
+        //            if (projectRequest.FundingFiles?.Count > 0)
+        //            {
+        //                List<FundingFile> files = new List<FundingFile>();
 
-                                // Handle image upload for reward item
-                                if (rewardItemRequest.ImageFile != null && rewardItemRequest.ImageFile is IFormFile)
-                                {
-                                    var imageUploadResult = _azureService.UploadUrlSingleFiles(rewardItemRequest.ImageFile);
-                                    existedRewardItem.ImageUrl = imageUploadResult.Result;
-                                }
-                            }
-                            else
-                            {
-                                // Handle adding new reward items if necessary
-                                RewardItem newRewardItem = new RewardItem
-                                {
-                                    Name = rewardItemRequest.Name,
-                                    Description = rewardItemRequest.Description,
-                                    // Handle image upload for new reward item
-                                };
-                                if (rewardItemRequest.ImageFile != null && rewardItemRequest.ImageFile is IFormFile)
-                                {
-                                    var imageUploadResult = _azureService.UploadUrlSingleFiles(rewardItemRequest.ImageFile);
-                                    newRewardItem.ImageUrl = imageUploadResult.Result;
-                                }
-                                existedPack.RewardItems.Add(newRewardItem);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        Package newPackage = new Package
-                        {
-                            Name = packageRequest.Name,
-                            RequiredAmount = packageRequest.RequiredAmount,
-                            LimitQuantity = packageRequest.LimitQuantity,
-                            PackageTypes = PackageType.FixedPackage,
-                            RewardItems = new List<RewardItem>()
-                        };
-                        // Add reward items to the new package
-                        foreach (var rewardItemRequest in packageRequest.RewardItems)
-                        {
-                            RewardItem newRewardItem = new RewardItem
-                            {
-                                Name = rewardItemRequest.Name,
-                                Description = rewardItemRequest.Description,
-                                Quantity = rewardItemRequest.Quantity,
-                            };
+        //                foreach (FundingFileUpdateRequest req in projectRequest.FundingFiles)
+        //                {
+        //                    if (req.URL.Length > 0)
+        //                    {
+        //                        var res = _azureService.UploadUrlSingleFiles(req.URL);
+        //                        if (res == null)
+        //                        {
+        //                            return ResultDTO<FundingProjectResponse>.Fail("Fail to upload file");
+        //                        }
+        //                        FundingFile media = new FundingFile
+        //                        {
+        //                            Name = req.Name,
+        //                            URL = res.Result,
+        //                            Filetype = req.Filetype,
+        //                            IsDeleted = false
+        //                        };
+        //                        files.Add(media);
+        //                    }
+        //                }
+        //                //update existing files
+        //                if (projectRequest.ExistedFile?.Count > 0)
+        //                {
+        //                    foreach (FundingFileResponse fp in projectRequest.ExistedFile)
+        //                    {
+        //                        FundingFile updatedFile = _unitOfWork.SourceFileRepository.GetQueryable().FirstOrDefault(f => f.Id == fp.Id);
+        //                        updatedFile.Filetype = fp.Filetype;
+        //                        updatedFile.IsDeleted = fp.IsDeleted;
+        //                        updatedFile.URL = fp.URL;
+        //                        _unitOfWork.SourceFileRepository.Update(updatedFile);
+        //                    }
+        //                }
+        //                // Add each file from 'files' list to the 'SourceFiles' ICollection
+        //                foreach (var file in files)
+        //                {
+        //                    existedProject.SourceFiles.Add(file);
+        //                }
+        //            }
+        //            List<Package> packageList = new List<Package>();
+        //            //add image into item 
+        //            foreach (var packageRequest in projectRequest.Packages)
+        //            {
 
-                            // Handle image upload for new reward item
-                            if (rewardItemRequest.ImageFile != null && rewardItemRequest.ImageFile is IFormFile)
-                            {
-                                var imageUploadResult = _azureService.UploadUrlSingleFiles(rewardItemRequest.ImageFile);
-                                newRewardItem.ImageUrl = imageUploadResult.Result;
-                            }
+        //                var existedPack = existedProject.Packages.FirstOrDefault(p => p.Id == packageRequest.Id);
+        //                //change image of package
+        //                if (packageRequest.UpdatedImage != null)
+        //                {
+        //                    var imageUploadResult = _azureService.UploadUrlSingleFiles(packageRequest.UpdatedImage);
+        //                    existedPack.Url = imageUploadResult.Result;
+        //                }
+        //                if (existedPack != null)
+        //                {
+        //                    existedPack.Name = packageRequest.Name;
+        //                    existedPack.RequiredAmount = packageRequest.RequiredAmount;
+        //                    existedPack.LimitQuantity = packageRequest.LimitQuantity;
+        //                    existedPack.PackageTypes = PackageType.FixedPackage;
+        //                    //Handle change image of existing item
+        //                    foreach (var rewardItemRequest in packageRequest.RewardItems)
+        //                    {
+        //                        var existedRewardItem = _unitOfWork.RewardItemRepository.GetQueryable().FirstOrDefault(r => r.Id == rewardItemRequest.Id);
+        //                        if (existedRewardItem != null)
+        //                        {
+        //                            // Update existing reward item
+        //                            existedRewardItem.Name = rewardItemRequest.Name;
+        //                            existedRewardItem.Description = rewardItemRequest.Description;
+        //                            existedRewardItem.Quantity = rewardItemRequest.Quantity;
 
-                            newPackage.RewardItems.Add(newRewardItem);
-                        }
-                        // Add the new package to the project's packages
-                        existedProject.Packages.Add(newPackage);
-                    }
-                }
+        //                            // Handle image upload for reward item
+        //                            if (rewardItemRequest.ImageFile != null && rewardItemRequest.ImageFile is IFormFile)
+        //                            {
+        //                                var imageUploadResult = _azureService.UploadUrlSingleFiles(rewardItemRequest.ImageFile);
+        //                                existedRewardItem.ImageUrl = imageUploadResult.Result;
+        //                            }
+        //                        }
+        //                        else
+        //                        {
+        //                            // Handle adding new reward items if necessary
+        //                            RewardItem newRewardItem = new RewardItem
+        //                            {
+        //                                Name = rewardItemRequest.Name,
+        //                                Description = rewardItemRequest.Description,
+        //                                // Handle image upload for new reward item
+        //                            };
+        //                            if (rewardItemRequest.ImageFile != null && rewardItemRequest.ImageFile is IFormFile)
+        //                            {
+        //                                var imageUploadResult = _azureService.UploadUrlSingleFiles(rewardItemRequest.ImageFile);
+        //                                newRewardItem.ImageUrl = imageUploadResult.Result;
+        //                            }
+        //                            existedPack.RewardItems.Add(newRewardItem);
+        //                        }
+        //                    }
+        //                }
+        //                else
+        //                {
+        //                    Package newPackage = new Package
+        //                    {
+        //                        Name = packageRequest.Name,
+        //                        RequiredAmount = packageRequest.RequiredAmount,
+        //                        LimitQuantity = packageRequest.LimitQuantity,
+        //                        PackageTypes = PackageType.FixedPackage,
+        //                        RewardItems = new List<RewardItem>()
+        //                    };
+        //                    // Add reward items to the new package
+        //                    foreach (var rewardItemRequest in packageRequest.RewardItems)
+        //                    {
+        //                        RewardItem newRewardItem = new RewardItem
+        //                        {
+        //                            Name = rewardItemRequest.Name,
+        //                            Description = rewardItemRequest.Description,
+        //                            Quantity = rewardItemRequest.Quantity,
+        //                        };
 
-                _unitOfWork.FundingProjectRepository.Update(existedProject);
+        //                        // Handle image upload for new reward item
+        //                        if (rewardItemRequest.ImageFile != null && rewardItemRequest.ImageFile is IFormFile)
+        //                        {
+        //                            var imageUploadResult = _azureService.UploadUrlSingleFiles(rewardItemRequest.ImageFile);
+        //                            newRewardItem.ImageUrl = imageUploadResult.Result;
+        //                        }
 
-                _unitOfWork.Commit();
-                FundingProjectResponse result = _mapper.Map<FundingProjectResponse>(existedProject);
-                return ResultDTO<FundingProjectResponse>.Success(result);
-            }
-            catch (Exception ex)
-            {
-                if (ex is ExceptionError exceptionError)
-                {
-                    throw exceptionError;
-                }
-                throw new ExceptionError((int)HttpStatusCode.InternalServerError,ex.Message);
-            }
-        }
-        public async Task<ResultDTO<PaginatedResponse<FundingProjectResponse>>> GetFundingProjects(ListRequest request, string? categoryName, ProjectStatus? status, decimal? fromTarget, decimal? toTarget)
-        {
-            try
-            {
-                Expression<Func<FundingProject, bool>> filter = null;
-                Expression<Func<FundingProject, object>> orderBy = u => u.CreatedDate;
+        //                        newPackage.RewardItems.Add(newRewardItem);
+        //                    }
+        //                    // Add the new package to the project's packages
+        //                    existedProject.Packages.Add(newPackage);
+        //                }
+        //            }
 
-                if (!string.IsNullOrEmpty(request.SearchValue))
-                {
-                    string searchLower = request.SearchValue.ToLower();
-                    filter = u =>
-                        (u.Name != null && u.Name.ToLower().Contains(searchLower));
-                }
-                if (!string.IsNullOrEmpty(request.OrderBy))
-                {
-                    switch (request.OrderBy.ToLower())
-                    {
-                        case "balance":
-                            orderBy = u => u.Balance;
-                            break;
-                        case "target":
-                            orderBy = u => u.Target;
-                            break;
-                        default:
-                            break;
-                    }
-                }
-                if (!string.IsNullOrEmpty(categoryName))
-                {
-                    filter = c => c.Name.ToLower().Contains(categoryName);
-                }
-                if (request.From != null)
-                {
-                    filter = c => c.StartDate >= (DateTime)request.From;
-                }
-                if (request.To != null)
-                {
-                    filter = c => c.EndDate >= (DateTime)request.To;
-                }
-                if (status != null)
-                {
-                    filter = c => c.Status.Equals(status);
-                }
-                else
-                {
-                    filter = c => c.Status.Equals(ProjectStatus.Processing);
-                }
-                if (fromTarget != null)
-                {
-                    filter = c => c.Target >= fromTarget;
-                }
-                if (toTarget != null)
-                {
-                    filter = c => c.Target <= toTarget;
-                }
-                var list = await _unitOfWork.FundingProjectRepository.GetAllAsync(
-                       filter: filter,
-                       orderBy: orderBy,
-                       isAscending: request.IsAscending.Value,
-                       pageIndex: request.PageIndex,
-                       pageSize: request.PageSize,
-                       includeProperties: "Categories,Packages,SourceFiles,Packages.RewardItems");
-                if (list != null && list.Count() >= 0)
-                {
-                    var totalItems = _unitOfWork.FundingProjectRepository.GetAll(filter).Count();
-                    var totalPages = (int)Math.Ceiling((double)totalItems / (int)request.PageSize);
-                    IEnumerable<FundingProjectResponse> categories = _mapper.Map<IEnumerable<FundingProjectResponse>>(list);
+        //            _unitOfWork.FundingProjectRepository.Update(existedProject);
 
-                    PaginatedResponse<FundingProjectResponse> response = new PaginatedResponse<FundingProjectResponse>
-                    {
-                        PageSize = request.PageSize.Value,
-                        PageIndex = request.PageIndex.Value,
-                        TotalItems = totalItems,
-                        TotalPages = totalPages,
-                        Items = categories
-                    };
+        //            _unitOfWork.Commit();
+        //            FundingProjectResponse result = _mapper.Map<FundingProjectResponse>(existedProject);
+        //            return ResultDTO<FundingProjectResponse>.Success(result);
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            if (ex is ExceptionError exceptionError)
+        //            {
+        //                throw exceptionError;
+        //            }
+        //            throw new ExceptionError((int)HttpStatusCode.InternalServerError,ex.Message);
+        //        }
+        //    }
+        //    public async Task<ResultDTO<PaginatedResponse<FundingProjectResponse>>> GetFundingProjects(ListRequest request, string? categoryName, ProjectStatus? status, decimal? fromTarget, decimal? toTarget)
+        //    {
+        //        try
+        //        {
+        //            Expression<Func<FundingProject, bool>> filter = null;
+        //            Expression<Func<FundingProject, object>> orderBy = u => u.CreatedDate;
 
-                    return ResultDTO<PaginatedResponse<FundingProjectResponse>>.Success(response);
-                }
-                else
-                {
-                    throw new ExceptionError((int)HttpStatusCode.NotFound, "Project Not Found.");
-                }
-            }
-            catch (Exception ex)
-            {
-                if (ex is ExceptionError exceptionError)
-                {
-                    throw exceptionError;
-                }
+        //            if (!string.IsNullOrEmpty(request.SearchValue))
+        //            {
+        //                string searchLower = request.SearchValue.ToLower();
+        //                filter = u =>
+        //                    (u.Name != null && u.Name.ToLower().Contains(searchLower));
+        //            }
+        //            if (!string.IsNullOrEmpty(request.OrderBy))
+        //            {
+        //                switch (request.OrderBy.ToLower())
+        //                {
+        //                    case "balance":
+        //                        orderBy = u => u.Balance;
+        //                        break;
+        //                    case "target":
+        //                        orderBy = u => u.Target;
+        //                        break;
+        //                    default:
+        //                        break;
+        //                }
+        //            }
+        //            if (!string.IsNullOrEmpty(categoryName))
+        //            {
+        //                filter = c => c.Name.ToLower().Contains(categoryName);
+        //            }
+        //            if (request.From != null)
+        //            {
+        //                filter = c => c.StartDate >= (DateTime)request.From;
+        //            }
+        //            if (request.To != null)
+        //            {
+        //                filter = c => c.EndDate >= (DateTime)request.To;
+        //            }
+        //            if (status != null)
+        //            {
+        //                filter = c => c.Status.Equals(status);
+        //            }
+        //            else
+        //            {
+        //                filter = c => c.Status.Equals(ProjectStatus.Processing);
+        //            }
+        //            if (fromTarget != null)
+        //            {
+        //                filter = c => c.Target >= fromTarget;
+        //            }
+        //            if (toTarget != null)
+        //            {
+        //                filter = c => c.Target <= toTarget;
+        //            }
+        //            var list = await _unitOfWork.FundingProjectRepository.GetAllAsync(
+        //                   filter: filter,
+        //                   orderBy: orderBy,
+        //                   isAscending: request.IsAscending.Value,
+        //                   pageIndex: request.PageIndex,
+        //                   pageSize: request.PageSize,
+        //                   includeProperties: "Categories,Packages,SourceFiles,Packages.RewardItems");
+        //            if (list != null && list.Count() >= 0)
+        //            {
+        //                var totalItems = _unitOfWork.FundingProjectRepository.GetAll(filter).Count();
+        //                var totalPages = (int)Math.Ceiling((double)totalItems / (int)request.PageSize);
+        //                IEnumerable<FundingProjectResponse> categories = _mapper.Map<IEnumerable<FundingProjectResponse>>(list);
 
-                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
-            }
-        }
+        //                PaginatedResponse<FundingProjectResponse> response = new PaginatedResponse<FundingProjectResponse>
+        //                {
+        //                    PageSize = request.PageSize.Value,
+        //                    PageIndex = request.PageIndex.Value,
+        //                    TotalItems = totalItems,
+        //                    TotalPages = totalPages,
+        //                    Items = categories
+        //                };
 
-        public async Task<ResultDTO<FundingProjectResponse>> UpdateFundingProjectStatus(Guid id, ProjectStatus status)
-        {
-            try
-            {
-                var project = await _unitOfWork.FundingProjectRepository.GetQueryable()
-                    .Include(p => p.SourceFiles)
-                    .Include(p => p.Packages)
-                    .Include(p => p.User)
-                    .Include(p => p.BankAccount)
-                    .FirstOrDefaultAsync(p => p.Id == id);
+        //                return ResultDTO<PaginatedResponse<FundingProjectResponse>>.Success(response);
+        //            }
+        //            else
+        //            {
+        //                throw new ExceptionError((int)HttpStatusCode.NotFound, "Project Not Found.");
+        //            }
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+        //        }
+        //    }
 
-                //pending status change list
-                List<ProjectStatus> pendingChangelist = new List<ProjectStatus>()
-                {
-                    ProjectStatus.Approved,
-                    ProjectStatus.Rejected,
-                    ProjectStatus.Deleted
-                };
+        //    public async Task<ResultDTO<FundingProjectResponse>> UpdateFundingProjectStatus(Guid id, ProjectStatus status)
+        //    {
+        //        try
+        //        {
+        //            var project = await _unitOfWork.FundingProjectRepository.GetQueryable()
+        //                .Include(p => p.SourceFiles)
+        //                .Include(p => p.Packages)
+        //                .Include(p => p.User)
+        //                .Include(p => p.BankAccount)
+        //                .FirstOrDefaultAsync(p => p.Id == id);
 
-                //approved status change list
-                List<ProjectStatus> approvedChangelist = new List<ProjectStatus>()
-                {
-                    ProjectStatus.Processing,
-                    ProjectStatus.Deleted
-                };
+        //            //pending status change list
+        //            List<ProjectStatus> pendingChangelist = new List<ProjectStatus>()
+        //            {
+        //                ProjectStatus.Approved,
+        //                ProjectStatus.Rejected,
+        //                ProjectStatus.Deleted
+        //            };
 
-                //rejected status change list
-                List<ProjectStatus> rejectedChangelist = new List<ProjectStatus>()
-                {
-                    ProjectStatus.Deleted
-                };
+        //            //approved status change list
+        //            List<ProjectStatus> approvedChangelist = new List<ProjectStatus>()
+        //            {
+        //                ProjectStatus.Processing,
+        //                ProjectStatus.Deleted
+        //            };
 
-                //successful status change list
-                List<ProjectStatus> successfulChangelist = new List<ProjectStatus>()
-                {
-                    ProjectStatus.Withdrawed
-                };
+        //            //rejected status change list
+        //            List<ProjectStatus> rejectedChangelist = new List<ProjectStatus>()
+        //            {
+        //                ProjectStatus.Deleted
+        //            };
+
+        //            //successful status change list
+        //            List<ProjectStatus> successfulChangelist = new List<ProjectStatus>()
+        //            {
+        //                ProjectStatus.Withdrawed
+        //            };
 
 
-                //processing status change list
-                List<ProjectStatus> processingChangelist = new List<ProjectStatus>()
-                {
-                    ProjectStatus.Successful,
-                    ProjectStatus.Failed
-                };
+        //            //processing status change list
+        //            List<ProjectStatus> processingChangelist = new List<ProjectStatus>()
+        //            {
+        //                ProjectStatus.Successful,
+        //                ProjectStatus.Failed
+        //            };
 
-                //failed status change list
-                List<ProjectStatus> failedChangelist = new List<ProjectStatus>()
-                {
-                    ProjectStatus.Deleted,
-                    ProjectStatus.Refunded
-                };
+        //            //failed status change list
+        //            List<ProjectStatus> failedChangelist = new List<ProjectStatus>()
+        //            {
+        //                ProjectStatus.Deleted,
+        //                ProjectStatus.Refunded
+        //            };
 
-                bool isChanged = false;
+        //            bool isChanged = false;
 
-                if (project != null)
-                {
-                    //change status from pending
-                    if (project.Status == ProjectStatus.Pending && pendingChangelist.Contains(status))
-                    {
-                        project.Status = status;
-                        isChanged = true;
-                    }
-                    //change status from approved
-                    else if (project.Status == ProjectStatus.Approved && approvedChangelist.Contains(status))
-                    {
-                        project.Status = status;
-                        isChanged = true;
-                    }
-                    //change status from rejected
-                    else if (project.Status == ProjectStatus.Rejected && rejectedChangelist.Contains(status))
-                    {
-                        project.Status = status;
-                        isChanged = true;
-                    }
-                    //change status from processing
-                    else if (project.Status == ProjectStatus.Processing && processingChangelist.Contains(status))
-                    {
-                        project.Status = status;
-                        isChanged = true;
-                    }
-                    //change status from successful
-                    else if (project.Status == ProjectStatus.Successful && successfulChangelist.Contains(status))
-                    {
-                        project.Status = status;
-                        isChanged = true;
-                    }
-                    //change status from failed
-                    else if (project.Status == ProjectStatus.Failed && failedChangelist.Contains(status))
-                    {
-                        project.Status = status;
-                        isChanged = true;
-                    }
+        //            if (project != null)
+        //            {
+        //                //change status from pending
+        //                if (project.Status == ProjectStatus.Pending && pendingChangelist.Contains(status))
+        //                {
+        //                    project.Status = status;
+        //                    isChanged = true;
+        //                }
+        //                //change status from approved
+        //                else if (project.Status == ProjectStatus.Approved && approvedChangelist.Contains(status))
+        //                {
+        //                    project.Status = status;
+        //                    isChanged = true;
+        //                }
+        //                //change status from rejected
+        //                else if (project.Status == ProjectStatus.Rejected && rejectedChangelist.Contains(status))
+        //                {
+        //                    project.Status = status;
+        //                    isChanged = true;
+        //                }
+        //                //change status from processing
+        //                else if (project.Status == ProjectStatus.Processing && processingChangelist.Contains(status))
+        //                {
+        //                    project.Status = status;
+        //                    isChanged = true;
+        //                }
+        //                //change status from successful
+        //                else if (project.Status == ProjectStatus.Successful && successfulChangelist.Contains(status))
+        //                {
+        //                    project.Status = status;
+        //                    isChanged = true;
+        //                }
+        //                //change status from failed
+        //                else if (project.Status == ProjectStatus.Failed && failedChangelist.Contains(status))
+        //                {
+        //                    project.Status = status;
+        //                    isChanged = true;
+        //                }
 
-                    if (isChanged)
-                    {
-                        _unitOfWork.FundingProjectRepository.Update(project);
-                        await _unitOfWork.CommitAsync();
+        //                if (isChanged)
+        //                {
+        //                    _unitOfWork.FundingProjectRepository.Update(project);
+        //                    await _unitOfWork.CommitAsync();
 
-                        var response = _mapper.Map<FundingProject, FundingProjectResponse>(project);
+        //                    var response = _mapper.Map<FundingProject, FundingProjectResponse>(project);
 
-                        return ResultDTO<FundingProjectResponse>.Success(response);
-                    }
-                    else throw new ExceptionHandler.ExceptionError(
-                        (int)HttpStatusCode.BadRequest,
-                        $"Funding Project with status {project.Status} cannot be changed to {status}.");
-                }
-                else
-                {
-                    throw new ExceptionHandler.ExceptionError((int)HttpStatusCode.NotFound, "Funding Project Not Found.");
-                }
-            }
-            catch (Exception ex)
-            {
-                if (ex is ExceptionError exceptionError)
-                {
-                    throw exceptionError;
-                }
-                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
-            }
-        }
+        //                    return ResultDTO<FundingProjectResponse>.Success(response);
+        //                }
+        //                else throw new ExceptionHandler.ExceptionError(
+        //                    (int)HttpStatusCode.BadRequest,
+        //                    $"Funding Project with status {project.Status} cannot be changed to {status}.");
+        //            }
+        //            else
+        //            {
+        //                throw new ExceptionHandler.ExceptionError((int)HttpStatusCode.NotFound, "Funding Project Not Found.");
+        //            }
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            if (ex is ExceptionError exceptionError)
+        //            {
+        //                throw exceptionError;
+        //            }
+        //            throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+        //        }
+        //    }
     }
 }

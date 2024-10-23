@@ -15,7 +15,11 @@ namespace Fun_Funding.Domain.Entity
         public decimal Balance { get; set; }
 
         [ForeignKey("BackerId")]
-        public User Backer { get; set; }
+        public User? Backer { get; set; }
+        [ForeignKey("FundingProjectId")]
+        public FundingProject? FundingProject { get; set; }
+        [ForeignKey("MarketplaceProjectId")]
+        public MarketplaceProject? MarketplaceProject { get; set; }
         [ForeignKey(nameof(BankAccount))]
         public Guid BankAccountId { get; set; }
         public ICollection<Transaction>? Transactions { get; set; }

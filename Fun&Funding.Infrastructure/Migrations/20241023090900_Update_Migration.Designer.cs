@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fun_Funding.Infrastructure.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20241017112224_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20241023090900_Update_Migration")]
+    partial class Update_Migration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -201,9 +201,6 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Property<decimal>("Balance")
                         .HasColumnType("decimal(18, 2)");
 
-                    b.Property<Guid?>("BankAccountId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
@@ -241,8 +238,6 @@ namespace Fun_Funding.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("BankAccountId");
 
                     b.HasIndex("UserId");
 
@@ -387,7 +382,7 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<decimal>("TotalAmount")
+                    b.Property<decimal>("TotalPrice")
                         .HasColumnType("decimal(18, 2)");
 
                     b.Property<Guid>("UserId")
@@ -421,11 +416,21 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Property<Guid>("OrderId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("ProjectCouponId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("decimal(18, 2)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("DigitalKeyID");
 
                     b.HasIndex("OrderId");
+
+                    b.HasIndex("ProjectCouponId")
+                        .IsUnique()
+                        .HasFilter("[ProjectCouponId] IS NOT NULL");
 
                     b.ToTable("OrderDetail");
                 });
@@ -535,14 +540,14 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Property<decimal>("DiscountRate")
                         .HasColumnType("decimal(18, 2)");
 
-                    b.Property<DateTime>("ExpiredDate")
-                        .HasColumnType("datetime2");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<Guid?>("MarketplaceProjectId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Quantity")
+                        .HasColumnType("decimal(18, 2)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -910,6 +915,9 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Property<Guid?>("PackageId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("ProjectMilestoneId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid?>("SystemWalletId")
                         .HasColumnType("uniqueidentifier");
 
@@ -925,6 +933,8 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CommissionFeeId");
+
+                    b.HasIndex("ProjectMilestoneId");
 
                     b.HasIndex("SystemWalletId");
 
@@ -1062,7 +1072,7 @@ namespace Fun_Funding.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("BackerId")
+                    b.Property<Guid?>("BackerId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("Balance")
@@ -1077,16 +1087,29 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<Guid?>("FundingProjectId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
+
+                    b.Property<Guid?>("MarketplaceProjectId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
                     b.HasIndex("BackerId")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[BackerId] IS NOT NULL");
 
                     b.HasIndex("BankAccountId")
                         .IsUnique();
+
+                    b.HasIndex("FundingProjectId")
+                        .IsUnique()
+                        .HasFilter("[FundingProjectId] IS NOT NULL");
+
+                    b.HasIndex("MarketplaceProjectId");
 
                     b.ToTable("Wallet");
                 });
@@ -1109,14 +1132,14 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Property<DateTime>("ExpiredDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid?>("FundingProjectId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
                     b.Property<bool>("IsFinished")
                         .HasColumnType("bit");
-
-                    b.Property<Guid?>("ProjectId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("RequestType")
                         .HasColumnType("int");
@@ -1129,7 +1152,7 @@ namespace Fun_Funding.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ProjectId");
+                    b.HasIndex("FundingProjectId");
 
                     b.HasIndex("WalletId");
 
@@ -1302,17 +1325,11 @@ namespace Fun_Funding.Infrastructure.Migrations
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.FundingProject", b =>
                 {
-                    b.HasOne("Fun_Funding.Domain.Entity.BankAccount", "BankAccount")
-                        .WithMany()
-                        .HasForeignKey("BankAccountId");
-
                     b.HasOne("Fun_Funding.Domain.Entity.User", "User")
                         .WithMany("FundingProjects")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("BankAccount");
 
                     b.Navigation("User");
                 });
@@ -1360,9 +1377,15 @@ namespace Fun_Funding.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Fun_Funding.Domain.Entity.ProjectCoupon", "ProjectCoupon")
+                        .WithOne("OrderDetail")
+                        .HasForeignKey("Fun_Funding.Domain.Entity.OrderDetail", "ProjectCouponId");
+
                     b.Navigation("DigitalKey");
 
                     b.Navigation("Order");
+
+                    b.Navigation("ProjectCoupon");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.Package", b =>
@@ -1518,6 +1541,10 @@ namespace Fun_Funding.Infrastructure.Migrations
                         .WithMany("Transactions")
                         .HasForeignKey("CommissionFeeId");
 
+                    b.HasOne("Fun_Funding.Domain.Entity.ProjectMilestone", null)
+                        .WithMany("Transactions")
+                        .HasForeignKey("ProjectMilestoneId");
+
                     b.HasOne("Fun_Funding.Domain.Entity.SystemWallet", "SystemWallet")
                         .WithMany("Transactions")
                         .HasForeignKey("SystemWalletId");
@@ -1544,9 +1571,7 @@ namespace Fun_Funding.Infrastructure.Migrations
                 {
                     b.HasOne("Fun_Funding.Domain.Entity.User", "Backer")
                         .WithOne("Wallet")
-                        .HasForeignKey("Fun_Funding.Domain.Entity.Wallet", "BackerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("Fun_Funding.Domain.Entity.Wallet", "BackerId");
 
                     b.HasOne("Fun_Funding.Domain.Entity.BankAccount", null)
                         .WithOne("Wallet")
@@ -1554,20 +1579,30 @@ namespace Fun_Funding.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Fun_Funding.Domain.Entity.FundingProject", "FundingProject")
+                        .WithOne("Wallet")
+                        .HasForeignKey("Fun_Funding.Domain.Entity.Wallet", "FundingProjectId");
+
+                    b.HasOne("Fun_Funding.Domain.Entity.MarketplaceProject", "MarketplaceProject")
+                        .WithMany()
+                        .HasForeignKey("MarketplaceProjectId");
+
                     b.Navigation("Backer");
+
+                    b.Navigation("FundingProject");
+
+                    b.Navigation("MarketplaceProject");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.WithdrawRequest", b =>
                 {
-                    b.HasOne("Fun_Funding.Domain.Entity.FundingProject", "Project")
+                    b.HasOne("Fun_Funding.Domain.Entity.FundingProject", null)
                         .WithMany("WithdrawRequests")
-                        .HasForeignKey("ProjectId");
+                        .HasForeignKey("FundingProjectId");
 
                     b.HasOne("Fun_Funding.Domain.Entity.Wallet", "Wallet")
                         .WithMany("WithdrawRequests")
                         .HasForeignKey("WalletId");
-
-                    b.Navigation("Project");
 
                     b.Navigation("Wallet");
                 });
@@ -1645,6 +1680,8 @@ namespace Fun_Funding.Infrastructure.Migrations
 
                     b.Navigation("Stages");
 
+                    b.Navigation("Wallet");
+
                     b.Navigation("WithdrawRequests");
                 });
 
@@ -1678,11 +1715,18 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Navigation("RewardTrackings");
                 });
 
+            modelBuilder.Entity("Fun_Funding.Domain.Entity.ProjectCoupon", b =>
+                {
+                    b.Navigation("OrderDetail");
+                });
+
             modelBuilder.Entity("Fun_Funding.Domain.Entity.ProjectMilestone", b =>
                 {
                     b.Navigation("ProjectMilestoneBackers");
 
                     b.Navigation("ProjectMilestoneRequirements");
+
+                    b.Navigation("Transactions");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.ProjectMilestoneRequirement", b =>
