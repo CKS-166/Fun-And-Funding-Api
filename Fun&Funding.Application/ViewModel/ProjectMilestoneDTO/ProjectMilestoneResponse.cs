@@ -13,6 +13,8 @@ namespace Fun_Funding.Application.ViewModel.ProjectMilestoneDTO
     public class ProjectMilestoneResponse
     {
         public Guid Id { get; set; }
+        public string MilestoneName { get; set; }
+        public string Description { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime EndDate { get; set; }
         public ProjectMilestoneStatus Status { get; set; }

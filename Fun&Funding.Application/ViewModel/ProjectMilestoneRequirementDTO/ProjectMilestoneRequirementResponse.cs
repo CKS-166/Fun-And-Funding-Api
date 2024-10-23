@@ -16,6 +16,7 @@ namespace Fun_Funding.Application.ViewModel.ProjectMilestoneRequirementDTO
         public string Content { get; set; }
         public Guid RequirementId { get; set; }
         public Guid ProjectMilestoneId { get; set; }
+        public string Description { get; set; }
 
         public List<ProjectRequirementFileResponse> RequirementFiles { get; set; }
     }
