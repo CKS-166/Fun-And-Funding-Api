@@ -10,6 +10,5 @@ namespace Fun_Funding.Domain.Enum
     {
         Disable,
         Enable
-
     }
 }

@@ -1,5 +1,5 @@
 ﻿using Fun_Funding.Application.IService;
-using Fun_Funding.Application.Service;
+using Fun_Funding.Application.Services.EntityServices;
 using Fun_Funding.Application.ViewModel.RequirementDTO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

@@ -1,5 +1,5 @@
-﻿using Fun_Funding.Application.IService;
-using Fun_Funding.Application.IStorageService;
+﻿using Fun_Funding.Application.Interfaces.IExternalServices;
+using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.UserDTO;
 using Fun_Funding.Domain.Constrain;

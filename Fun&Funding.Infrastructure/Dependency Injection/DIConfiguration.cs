@@ -1,21 +1,15 @@
 ﻿using Fun_Funding.Application;
+using Fun_Funding.Application.Interfaces.IExternalServices;
 using Fun_Funding.Application.IRepository;
-
 using Fun_Funding.Application.IService;
-using Fun_Funding.Application.IStorageService;
-using Fun_Funding.Application.ITokenService;
-using Fun_Funding.Application.IWebSocketService;
-using Fun_Funding.Application.Service;
-
+using Fun_Funding.Application.Services.EntityServices;
 using Fun_Funding.Domain.Entity;
-using Fun_Funding.Infrastructure.BackgroundWorkerService;
-using Fun_Funding.Infrastructure.Database;
+using Fun_Funding.Infrastructure.ExternalServices.BackgroundWorkerService;
+using Fun_Funding.Infrastructure.ExternalServices.StorageService;
+using Fun_Funding.Application.Services.ExternalServices;
 using Fun_Funding.Infrastructure.Mapper;
-using Fun_Funding.Infrastructure.Repository;
-using Fun_Funding.Infrastructure.SoftDeleteService;
-using Fun_Funding.Infrastructure.StorageService;
-using Fun_Funding.Infrastructure.TokenGeneratorService;
-using Fun_Funding.Infrastructure.WebSocketService;
+using Fun_Funding.Infrastructure.Persistence.Database;
+using Fun_Funding.Infrastructure.Persistence.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -23,6 +17,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Fun_Funding.Application.ExternalServices.SoftDeleteService;
 
 namespace Fun_Funding.Infrastructure.Dependency_Injection
 {
@@ -30,6 +25,7 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection service, IConfiguration configuration)
         {
+            #region Db_Context
             //DBContext
             service.AddDbContext<MyDbContext>(options =>
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"),
@@ -37,17 +33,16 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             .AddInterceptors(new SoftDeleteInterceptor()), ServiceLifetime.Scoped);
             // MongoDb
             service.AddScoped<MongoDBContext>();
+            #endregion
 
-            // Register NoSQL repositories
-            service.AddScoped<ILikeRepository, LikeRepository>();
-
-
+            #region Identity
             //Identity
             service.AddIdentity<User, IdentityRole<Guid>>()
                 .AddEntityFrameworkStores<MyDbContext>()
                 .AddDefaultTokenProviders();
+            #endregion
 
-
+            #region Authenticaton
             //Authentication
             service.AddAuthentication(option =>
             {
@@ -70,16 +65,10 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
                     (Encoding.UTF8.GetBytes(configuration["Jwt:key"]!))
                 };
             });
+            #endregion
 
-
-
-            //BaseRepository          
-            service.AddTransient(typeof(IBaseRepository<>), typeof(BaseRepository<>));
-            service.AddScoped(typeof(IMongoBaseRepository<>), typeof(MongoBaseRepository<>));
-            // Register the UnitOfWork
-            service.AddScoped<IUnitOfWork, UnitOfWork>();
-            service.AddAutoMapper(typeof(MapperConfig).Assembly);
             #region Repositories
+            service.AddScoped<ILikeRepository, LikeRepository>();
             service.AddScoped<IBankAccountRepository, BankAccountRepository>();
             service.AddScoped<ICategoryRepository, CategoryRepository>();
             service.AddScoped<IOrderDetailRepository, OrderDetailRepository>();
@@ -111,6 +100,7 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             service.AddScoped<IChatRepository, ChatRepository>();
             service.AddScoped<IProjectCouponService, ProjectCouponService>();
             #endregion
+
             #region Sevices
             service.AddScoped<IAuthenticationService, AuthenticationService>();
             service.AddScoped<ITokenGenerator, TokenGenerator>();
@@ -141,6 +131,14 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             service.AddScoped<IDigitalKeyService, DigitalKeyService>();
 
             #endregion
+
+            //BaseRepository          
+            service.AddTransient(typeof(IBaseRepository<>), typeof(BaseRepository<>));
+            service.AddScoped(typeof(IMongoBaseRepository<>), typeof(MongoBaseRepository<>));
+
+            // Register the UnitOfWork
+            service.AddScoped<IUnitOfWork, UnitOfWork>();
+            service.AddAutoMapper(typeof(MapperConfig).Assembly);
             service.AddHostedService<WorkerService>();
             return service;
 
