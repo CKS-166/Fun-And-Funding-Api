@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Fun_Funding.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class Update_Migration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -250,12 +250,41 @@ namespace Fun_Funding.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "FundingProject",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Introduction = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Target = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Balance = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FundingProject", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_FundingProject_AspNetUsers_UserId",
+                        column: x => x.UserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Order",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    TotalPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
@@ -292,70 +321,6 @@ namespace Fun_Funding.Infrastructure.Migrations
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
                         principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "FundingProject",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Introduction = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Target = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Balance = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false),
-                    BankAccountId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_FundingProject", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_FundingProject_AspNetUsers_UserId",
-                        column: x => x.UserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_FundingProject_BankAccount_BankAccountId",
-                        column: x => x.BankAccountId,
-                        principalTable: "BankAccount",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Wallet",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Balance = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    BackerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    BankAccountId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Wallet", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Wallet_AspNetUsers_BackerId",
-                        column: x => x.BackerId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Wallet_BankAccount_BankAccountId",
-                        column: x => x.BankAccountId,
-                        principalTable: "BankAccount",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -535,75 +500,6 @@ namespace Fun_Funding.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Transaction",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    TransactionType = table.Column<int>(type: "int", nullable: false),
-                    PackageId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    OrderDetailId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    WalletId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    SystemWalletId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CommissionFeeId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Transaction", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Transaction_CommissionFee_CommissionFeeId",
-                        column: x => x.CommissionFeeId,
-                        principalTable: "CommissionFee",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Transaction_SystemWallet_SystemWalletId",
-                        column: x => x.SystemWalletId,
-                        principalTable: "SystemWallet",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_Transaction_Wallet_WalletId",
-                        column: x => x.WalletId,
-                        principalTable: "Wallet",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "WithdrawRequest",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    IsFinished = table.Column<bool>(type: "bit", nullable: false),
-                    RequestType = table.Column<int>(type: "int", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false),
-                    ExpiredDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    WalletId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    ProjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_WithdrawRequest", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_WithdrawRequest_FundingProject_ProjectId",
-                        column: x => x.ProjectId,
-                        principalTable: "FundingProject",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_WithdrawRequest_Wallet_WalletId",
-                        column: x => x.WalletId,
-                        principalTable: "Wallet",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "DigitalKey",
                 columns: table => new
                 {
@@ -660,7 +556,7 @@ namespace Fun_Funding.Infrastructure.Migrations
                     CouponName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DiscountRate = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
-                    ExpiredDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Quantity = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     MarketplaceProjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
@@ -671,6 +567,46 @@ namespace Fun_Funding.Infrastructure.Migrations
                     table.PrimaryKey("PK_ProjectCoupon", x => x.Id);
                     table.ForeignKey(
                         name: "FK_ProjectCoupon_MarketplaceProject_MarketplaceProjectId",
+                        column: x => x.MarketplaceProjectId,
+                        principalTable: "MarketplaceProject",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Wallet",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Balance = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    BackerId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    FundingProjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    MarketplaceProjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    BankAccountId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Wallet", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Wallet_AspNetUsers_BackerId",
+                        column: x => x.BackerId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Wallet_BankAccount_BankAccountId",
+                        column: x => x.BankAccountId,
+                        principalTable: "BankAccount",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Wallet_FundingProject_FundingProjectId",
+                        column: x => x.FundingProjectId,
+                        principalTable: "FundingProject",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Wallet_MarketplaceProject_MarketplaceProjectId",
                         column: x => x.MarketplaceProjectId,
                         principalTable: "MarketplaceProject",
                         principalColumn: "Id");
@@ -827,8 +763,10 @@ namespace Fun_Funding.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    UnitPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     DigitalKeyID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ProjectCouponId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
@@ -848,6 +786,86 @@ namespace Fun_Funding.Infrastructure.Migrations
                         principalTable: "Order",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_OrderDetail_ProjectCoupon_ProjectCouponId",
+                        column: x => x.ProjectCouponId,
+                        principalTable: "ProjectCoupon",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Transaction",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    TransactionType = table.Column<int>(type: "int", nullable: false),
+                    PackageId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    OrderDetailId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    ProjectMilestoneId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    WalletId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    SystemWalletId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CommissionFeeId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Transaction", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Transaction_CommissionFee_CommissionFeeId",
+                        column: x => x.CommissionFeeId,
+                        principalTable: "CommissionFee",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Transaction_ProjectMilestones_ProjectMilestoneId",
+                        column: x => x.ProjectMilestoneId,
+                        principalTable: "ProjectMilestones",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Transaction_SystemWallet_SystemWalletId",
+                        column: x => x.SystemWalletId,
+                        principalTable: "SystemWallet",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Transaction_Wallet_WalletId",
+                        column: x => x.WalletId,
+                        principalTable: "Wallet",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "WithdrawRequest",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    IsFinished = table.Column<bool>(type: "bit", nullable: false),
+                    RequestType = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    ExpiredDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    WalletId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    FundingProjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_WithdrawRequest", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_WithdrawRequest_FundingProject_FundingProjectId",
+                        column: x => x.FundingProjectId,
+                        principalTable: "FundingProject",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_WithdrawRequest_Wallet_WalletId",
+                        column: x => x.WalletId,
+                        principalTable: "Wallet",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -929,11 +947,6 @@ namespace Fun_Funding.Infrastructure.Migrations
                 column: "FundingProjectId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_FundingProject_BankAccountId",
-                table: "FundingProject",
-                column: "BankAccountId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_FundingProject_UserId",
                 table: "FundingProject",
                 column: "UserId");
@@ -963,6 +976,13 @@ namespace Fun_Funding.Infrastructure.Migrations
                 name: "IX_OrderDetail_OrderId",
                 table: "OrderDetail",
                 column: "OrderId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OrderDetail_ProjectCouponId",
+                table: "OrderDetail",
+                column: "ProjectCouponId",
+                unique: true,
+                filter: "[ProjectCouponId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Package_ProjectId",
@@ -1050,6 +1070,11 @@ namespace Fun_Funding.Infrastructure.Migrations
                 column: "CommissionFeeId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Transaction_ProjectMilestoneId",
+                table: "Transaction",
+                column: "ProjectMilestoneId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Transaction_SystemWalletId",
                 table: "Transaction",
                 column: "SystemWalletId");
@@ -1070,7 +1095,8 @@ namespace Fun_Funding.Infrastructure.Migrations
                 name: "IX_Wallet_BackerId",
                 table: "Wallet",
                 column: "BackerId",
-                unique: true);
+                unique: true,
+                filter: "[BackerId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Wallet_BankAccountId",
@@ -1079,9 +1105,21 @@ namespace Fun_Funding.Infrastructure.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_WithdrawRequest_ProjectId",
+                name: "IX_Wallet_FundingProjectId",
+                table: "Wallet",
+                column: "FundingProjectId",
+                unique: true,
+                filter: "[FundingProjectId] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Wallet_MarketplaceProjectId",
+                table: "Wallet",
+                column: "MarketplaceProjectId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_WithdrawRequest_FundingProjectId",
                 table: "WithdrawRequest",
-                column: "ProjectId");
+                column: "FundingProjectId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_WithdrawRequest_WalletId",
@@ -1123,9 +1161,6 @@ namespace Fun_Funding.Infrastructure.Migrations
                 name: "PackageBacker");
 
             migrationBuilder.DropTable(
-                name: "ProjectCoupon");
-
-            migrationBuilder.DropTable(
                 name: "ProjectMilestoneBacker");
 
             migrationBuilder.DropTable(
@@ -1162,6 +1197,9 @@ namespace Fun_Funding.Infrastructure.Migrations
                 name: "Order");
 
             migrationBuilder.DropTable(
+                name: "ProjectCoupon");
+
+            migrationBuilder.DropTable(
                 name: "ProjectMilestoneRequirements");
 
             migrationBuilder.DropTable(
@@ -1177,25 +1215,25 @@ namespace Fun_Funding.Infrastructure.Migrations
                 name: "Wallet");
 
             migrationBuilder.DropTable(
-                name: "MarketplaceProject");
-
-            migrationBuilder.DropTable(
                 name: "ProjectMilestones");
 
             migrationBuilder.DropTable(
                 name: "Requirements");
 
             migrationBuilder.DropTable(
-                name: "FundingProject");
+                name: "BankAccount");
+
+            migrationBuilder.DropTable(
+                name: "MarketplaceProject");
 
             migrationBuilder.DropTable(
                 name: "Milestones");
 
             migrationBuilder.DropTable(
-                name: "AspNetUsers");
+                name: "FundingProject");
 
             migrationBuilder.DropTable(
-                name: "BankAccount");
+                name: "AspNetUsers");
         }
     }
 }

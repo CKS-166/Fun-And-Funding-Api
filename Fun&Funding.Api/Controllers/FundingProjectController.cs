@@ -24,40 +24,40 @@ namespace Fun_Funding.Api.Controllers
             _fundingProjectService = fundingProjectService;
         }
 
-        [HttpPost]
-        [Authorize(Roles = Role.GameOwner)]
-        public async Task<IActionResult> CreateProject([FromForm] FundingProjectAddRequest req)
-        {
-            var response = await _fundingProjectService.CreateFundingProject(req);
-            return Ok(response);
-        }
+        //[HttpPost]
+        //[Authorize(Roles = Role.GameOwner)]
+        //public async Task<IActionResult> CreateProject([FromForm] FundingProjectAddRequest req)
+        //{
+        //    var response = await _fundingProjectService.CreateFundingProject(req);
+        //    return Ok(response);
+        //}
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetProjectById(Guid id)
-        {
-            var response = await _fundingProjectService.GetProjectById(id);
-            return Ok(response);
-        }
+        //[HttpGet("{id}")]
+        //public async Task<IActionResult> GetProjectById(Guid id)
+        //{
+        //    var response = await _fundingProjectService.GetProjectById(id);
+        //    return Ok(response);
+        //}
 
-        [HttpPut]
-        public async Task<IActionResult> UpdateProject([FromForm] FundingProjectUpdateRequest req)
-        {
-            var response = await _fundingProjectService.UpdateFundingProject(req);
-            return Ok(response);
-        }
+        //[HttpPut]
+        //public async Task<IActionResult> UpdateProject([FromForm] FundingProjectUpdateRequest req)
+        //{
+        //    var response = await _fundingProjectService.UpdateFundingProject(req);
+        //    return Ok(response);
+        //}
 
-        [HttpGet]
-        public async Task<IActionResult> GetFundingProjects([FromQuery] ListRequest request, string? categoryName, ProjectStatus? status, decimal? fromTarget, decimal? toTarget)
-        {
-            var response = await _fundingProjectService.GetFundingProjects(request, categoryName, status, fromTarget, toTarget);
-            return Ok(response);
-        }
+        //[HttpGet]
+        //public async Task<IActionResult> GetFundingProjects([FromQuery] ListRequest request, string? categoryName, ProjectStatus? status, decimal? fromTarget, decimal? toTarget)
+        //{
+        //    var response = await _fundingProjectService.GetFundingProjects(request, categoryName, status, fromTarget, toTarget);
+        //    return Ok(response);
+        //}
 
-        [HttpPut("{id}/status")]
-        public async Task<IActionResult> UpdateProjectStatus([FromRoute] Guid id, [FromQuery] ProjectStatus status)
-        {
-            var response = await _fundingProjectService.UpdateFundingProjectStatus(id, status);
-            return Ok(response);
-        }
+        //[HttpPut("{id}/status")]
+        //public async Task<IActionResult> UpdateProjectStatus([FromRoute] Guid id, [FromQuery] ProjectStatus status)
+        //{
+        //    var response = await _fundingProjectService.UpdateFundingProjectStatus(id, status);
+        //    return Ok(response);
+        //}
     }
 }

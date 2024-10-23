@@ -109,7 +109,7 @@ namespace Fun_Funding.Application.Service
                 {
                     Id = Guid.NewGuid(),
                     User = user,
-                    TotalAmount = totalCost,
+                    TotalPrice = totalCost,
                     CreatedDate = DateTime.Now,
                     OrderDetails = new List<OrderDetail>()
                 };
@@ -216,7 +216,7 @@ namespace Fun_Funding.Application.Service
                     switch (request.OrderBy.ToLower())
                     {
                         case "amount":
-                            orderBy = u => u.TotalAmount;
+                            orderBy = u => u.TotalPrice;
                             break;
                         default:
                             orderBy = u => u.CreatedDate;
@@ -346,7 +346,7 @@ namespace Fun_Funding.Application.Service
                     switch (request.OrderBy.ToLower())
                     {
                         case "amount":
-                            orderBy = u => u.TotalAmount;
+                            orderBy = u => u.TotalPrice;
                             break;
                         default:
                             orderBy = u => u.CreatedDate;

@@ -11,11 +11,11 @@ namespace Fun_Funding.Domain.Entity
     {
         public DateTime EndDate { get; set; }
         public ProjectMilestoneStatus Status { get; set; }
-
         public Guid MilestoneId { get; set; }
-        public Milestone Milestone { get; set; }  
+        public Milestone Milestone { get; set; }
         public Guid FundingProjectId { get; set; }
         public FundingProject FundingProject { get; set; }
+        public virtual ICollection<Transaction> Transactions { get; set; }
         public virtual ICollection<ProjectMilestoneBacker> ProjectMilestoneBackers { get; set; }
         public virtual ICollection<ProjectMilestoneRequirement> ProjectMilestoneRequirements { get; set; }
     }
