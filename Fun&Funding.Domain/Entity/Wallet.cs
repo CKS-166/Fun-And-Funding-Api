@@ -22,6 +22,8 @@ namespace Fun_Funding.Domain.Entity
         public MarketplaceProject? MarketplaceProject { get; set; }
         [ForeignKey(nameof(BankAccount))]
         public Guid BankAccountId { get; set; }
+
+        public BankAccount? BankAccount { get; set; }
         public ICollection<Transaction>? Transactions { get; set; }
         public ICollection<WithdrawRequest>? WithdrawRequests { get; set; }
     }

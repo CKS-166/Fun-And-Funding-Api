@@ -39,12 +39,9 @@ namespace Fun_Funding.Application.ViewModel.FundingProjectDTO
 
         [Required]
         public BankAccountRequest BankAccount { get; set; }
-        //public virtual ICollection<Category> Categories { get; set; }
         [Required]
         public virtual ICollection<PackageAddRequest> Packages { get; set; }
-        //public IFormFile ThumbnailFile { get; set; }
 
-        //public List<IFormFile> Stories {  get; set; }
         [Required]
         public List<FundingFileRequest> FundingFiles { get; set; }
 
