@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Fun_Funding.Infrastructure.Persistence.Repository
 {
-    public class ReportRepository : MongoBaseRepository<ViolientReport>, IReportRepository
+    public class ReportRepository : MongoBaseRepository<ViolentReport>, IReportRepository
     {
         public ReportRepository(MongoDBContext mongoDB) : base(mongoDB, "report")
         {

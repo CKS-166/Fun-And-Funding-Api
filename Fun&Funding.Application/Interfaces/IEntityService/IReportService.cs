@@ -11,9 +11,9 @@ namespace Fun_Funding.Application.IService
 {
     public interface IReportService
     {
-        Task<ResultDTO<ViolientReport>> CreateReportRequest(ReportRequest request);
-        Task<ResultDTO<PaginatedResponse<ViolientReport>>> GetAllReport(ListRequest request);
-        Task<ResultDTO<ViolientReport>> UpdateHandleReport(HandleRequest request);
+        Task<ResultDTO<ViolentReport>> CreateReportRequest(ReportRequest request);
+        Task<ResultDTO<PaginatedResponse<ViolentReport>>> GetAllReport(ListRequest request);
+        Task<ResultDTO<ViolentReport>> UpdateHandleReport(HandleRequest request);
 
     }
 }

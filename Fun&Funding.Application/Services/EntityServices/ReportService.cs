@@ -29,26 +29,26 @@ namespace Fun_Funding.Application.Services.EntityServices
             _emailService = emailService;
         }
 
-        public async Task<ResultDTO<ViolientReport>> CreateReportRequest(ReportRequest request)
+        public async Task<ResultDTO<ViolentReport>> CreateReportRequest(ReportRequest request)
         {
             var user = _userService.GetUserInfo().Result;
             User exitUser = _mapper.Map<User>(user._data);
             if (exitUser == null)
             {
-                return ResultDTO<ViolientReport>.Fail("user must be authenticate");
+                return ResultDTO<ViolentReport>.Fail("user must be authenticate");
             }
             if (request is null)
             {
-                return ResultDTO<ViolientReport>.Fail("field can not be null");
+                return ResultDTO<ViolentReport>.Fail("field can not be null");
             }
             var exitedProject = await _unitOfWork.FundingProjectRepository.GetByIdAsync(request.ProjectId);
             if (exitedProject is null)
             {
-                return ResultDTO<ViolientReport>.Fail("can not found project");
+                return ResultDTO<ViolentReport>.Fail("can not found project");
             }
             try
             {
-                ViolientReport report = new ViolientReport
+                ViolentReport report = new ViolentReport
                 {
                     Id = Guid.NewGuid(),
                     FileUrls = request.FileUrls,
@@ -59,59 +59,59 @@ namespace Fun_Funding.Application.Services.EntityServices
                     Date = DateTime.Now,
                 };
                 _unitOfWork.ReportRepository.Create(report);
-                return ResultDTO<ViolientReport>.Success(report, "Successfull to create report");
+                return ResultDTO<ViolentReport>.Success(report, "Successfull to create report");
 
             }
             catch (Exception ex)
             {
-                return ResultDTO<ViolientReport>.Fail("something wrong!");
+                return ResultDTO<ViolentReport>.Fail("something wrong!");
             }
         }
 
-        public async Task<ResultDTO<PaginatedResponse<ViolientReport>>> GetAllReport(ListRequest request)
+        public async Task<ResultDTO<PaginatedResponse<ViolentReport>>> GetAllReport(ListRequest request)
         {
             try
             {
                 var list = _unitOfWork.ReportRepository.GetAllPaged(request);
-                return ResultDTO<PaginatedResponse<ViolientReport>>.Success(list, "Successfull querry");
+                return ResultDTO<PaginatedResponse<ViolentReport>>.Success(list, "Successfull querry");
             }
             catch (Exception ex)
             {
-                return ResultDTO<PaginatedResponse<ViolientReport>>.Fail("something wrong!");
+                return ResultDTO<PaginatedResponse<ViolentReport>>.Fail("something wrong!");
             }
         }
 
-        public async Task<ResultDTO<ViolientReport>> UpdateHandleReport(HandleRequest request)
+        public async Task<ResultDTO<ViolentReport>> UpdateHandleReport(HandleRequest request)
         {
             var user = _userService.GetUserInfo().Result;
             User exitUser = _mapper.Map<User>(user._data);
             if (exitUser == null)
-                return ResultDTO<ViolientReport>.Fail("user not authenticate");
+                return ResultDTO<ViolentReport>.Fail("user not authenticate");
             if (request == null)
-                return ResultDTO<ViolientReport>.Fail("request null");
+                return ResultDTO<ViolentReport>.Fail("request null");
             var exitedReport = _unitOfWork.ReportRepository.Get(x => x.Id == request.ReportId);
             if (exitedReport == null)
-                return ResultDTO<ViolientReport>.Fail("reportId null");
+                return ResultDTO<ViolentReport>.Fail("reportId null");
             var project = await _unitOfWork.FundingProjectRepository.GetByIdAsync(exitedReport.ProjectId);
             if (project == null)
-                return ResultDTO<ViolientReport>.Fail("project null");
+                return ResultDTO<ViolentReport>.Fail("project null");
             var owner = await _unitOfWork.UserRepository.GetByIdAsync(project.UserId);
             if (owner == null)
-                return ResultDTO<ViolientReport>.Fail("owner null");
+                return ResultDTO<ViolentReport>.Fail("owner null");
             try
             {
                 var reporter = await _unitOfWork.UserRepository.GetByIdAsync(exitedReport.ReporterId);
-                var update = Builders<ViolientReport>.Update.Set(x => x.IsHandle, true);
+                var update = Builders<ViolentReport>.Update.Set(x => x.IsHandle, true);
                 _unitOfWork.ReportRepository.Update(x => x.Id == request.ReportId, update);
                 var response = _unitOfWork.ReportRepository.Get(x => x.Id == request.ReportId);
 
                 //email
                 await _emailService.SendReportAsync(owner.Email, project.Name, owner.FullName, exitedReport.Date, reporter.FullName, exitedReport.Content);
-                return ResultDTO<ViolientReport>.Success(response, "Successfull updated");
+                return ResultDTO<ViolentReport>.Success(response, "Successfull updated");
             }
             catch (Exception ex)
             {
-                return ResultDTO<ViolientReport>.Fail("something wrong!");
+                return ResultDTO<ViolentReport>.Fail("something wrong!");
             }
         }
 

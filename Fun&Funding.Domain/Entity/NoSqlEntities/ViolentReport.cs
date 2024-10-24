@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Fun_Funding.Domain.Entity.NoSqlEntities
 {
-    public class ViolientReport
+    public class ViolentReport
     {
         [BsonId]
         [BsonRepresentation(BsonType.String)]

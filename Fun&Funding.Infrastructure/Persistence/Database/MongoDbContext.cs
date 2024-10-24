@@ -16,7 +16,7 @@ namespace Fun_Funding.Infrastructure.Persistence.Database
         public MongoDBContext(IConfiguration configuration)
         {
             var client = new MongoClient(configuration.GetValue<string>("DatabaseSettings:ConnectionString"));
-            _database = client.GetDatabase(configuration.GetValue<string>("DatabaseSettings:DatabadeName"));
+            _database = client.GetDatabase(configuration.GetValue<string>("DatabaseSettings:DatabaseName"));
         }
 
         // Generic method to get a collection for any entity type

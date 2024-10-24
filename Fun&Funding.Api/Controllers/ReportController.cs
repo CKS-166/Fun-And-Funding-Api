@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Fun_Funding.Api.Controllers
 {
-    [Route("api/report")]
+    [Route("api/reports")]
     [ApiController]
     public class ReportController : ControllerBase
     {

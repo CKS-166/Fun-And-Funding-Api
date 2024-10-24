@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Fun_Funding.Application.IRepository
 {
-    public interface IReportRepository : IMongoBaseRepository<ViolientReport>
+    public interface IReportRepository : IMongoBaseRepository<ViolentReport>
     {
     }
 }
