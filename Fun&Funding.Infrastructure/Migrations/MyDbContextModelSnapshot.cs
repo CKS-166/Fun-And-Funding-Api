@@ -727,6 +727,9 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Property<Guid>("MilestoneId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -1570,7 +1573,7 @@ namespace Fun_Funding.Infrastructure.Migrations
                         .WithOne("Wallet")
                         .HasForeignKey("Fun_Funding.Domain.Entity.Wallet", "BackerId");
 
-                    b.HasOne("Fun_Funding.Domain.Entity.BankAccount", null)
+                    b.HasOne("Fun_Funding.Domain.Entity.BankAccount", "BankAccount")
                         .WithOne("Wallet")
                         .HasForeignKey("Fun_Funding.Domain.Entity.Wallet", "BankAccountId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1585,6 +1588,8 @@ namespace Fun_Funding.Infrastructure.Migrations
                         .HasForeignKey("MarketplaceProjectId");
 
                     b.Navigation("Backer");
+
+                    b.Navigation("BankAccount");
 
                     b.Navigation("FundingProject");
 

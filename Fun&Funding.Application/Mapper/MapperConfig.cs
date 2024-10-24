@@ -37,7 +37,7 @@ namespace Fun_Funding.Infrastructure.Mapper
         }
         public MapperConfig()
         {
-            //MappingFundingProject();
+            MappingFundingProject();
             MappingUser();
             MappingWallet();
             MappingCategory();
@@ -49,38 +49,40 @@ namespace Fun_Funding.Infrastructure.Mapper
             MappingChat();
             MappingProjectCoupon();
         }
-        //public void MappingFundingProject()
-        //{
-        //    CreateMap<FundingFileRequest, FundingFile>().ReverseMap();
-        //    CreateMap<ItemAddRequest, RewardItem>().ReverseMap();
-        //    CreateMap<PackageAddRequest, Package>()
-        //        .ForMember(des => des.RewardItems, src => src.MapFrom(x => x.RewardItems)).ReverseMap();
-        //    CreateMap<BankAccountRequest, BankAccount>().ReverseMap();
-        //    CreateMap<BankAccountInfoResponse, BankAccount>().ReverseMap();
-        //    CreateMap<PackageUpdateRequest, Package>().ReverseMap();
-        //    CreateMap<ItemUpdateRequest, RewardItem>().ReverseMap();
-        //    CreateMap<FundingFileResponse, FundingFile>().ReverseMap();
-        //    CreateMap<FundingFileUpdateRequest, FundingFile>().ReverseMap();
-        //    CreateMap<ItemResponse, RewardItem>().ReverseMap();
-        //    CreateMap<PackageResponse, Package>().ReverseMap();
-        //    CreateMap<FundingProjectAddRequest, FundingProject>()
-        //        .ForMember(des => des.BankAccount, src => src.MapFrom(x => x.BankAccount))
-        //        .ForMember(des => des.Packages, src => src.MapFrom(x => x.Packages)).ReverseMap();
-        //    // UserInfoResponse -> User
-        //    CreateMap<UserInfoResponse, User>()
-        //        .ForPath(des => des.File.URL, src => src.MapFrom(x => x.Avatar))
-        //        .ForMember(des => des.Wallet, src => src.MapFrom(x => x.Wallet))
-        //        .ReverseMap();
-        //    CreateMap<FundingProjectResponse, FundingProject>()
-        //        .ForMember(des => des.BankAccount, src => src.MapFrom(x => x.BankAccount))
-        //        .ForMember(des => des.User, src => src.MapFrom(x => x.User))
-        //        .ForMember(des => des.SourceFiles, src => src.MapFrom(x => x.FundingFiles))
-        //        .ForMember(des => des.Packages, src => src.MapFrom(x => x.Packages)).ReverseMap();
-        //    CreateMap<FundingProjectUpdateRequest, FundingProject>()
-        //        .ForMember(des => des.BankAccount, src => src.MapFrom(x => x.BankAccount))
-        //        .ForMember(des => des.Packages, src => src.MapFrom(x => x.Packages))
-        //        .ReverseMap();
-        //}
+        public void MappingFundingProject()
+        {
+            CreateMap<FundingFileRequest, FundingFile>().ReverseMap();
+            CreateMap<ItemAddRequest, RewardItem>().ReverseMap();
+            CreateMap<PackageAddRequest, Package>()
+                .ForMember(des => des.RewardItems, src => src.MapFrom(x => x.RewardItems)).ReverseMap();
+            CreateMap<BankAccountRequest, BankAccount>().ReverseMap();
+            CreateMap<BankAccountInfoResponse, BankAccount>().ReverseMap();
+            CreateMap<PackageUpdateRequest, Package>().ReverseMap();
+            CreateMap<ItemUpdateRequest, RewardItem>().ReverseMap();
+            CreateMap<FundingFileResponse, FundingFile>().ReverseMap();
+            CreateMap<FundingFileUpdateRequest, FundingFile>().ReverseMap();
+            CreateMap<ItemResponse, RewardItem>().ReverseMap();
+            CreateMap<PackageResponse, Package>().ReverseMap();
+            CreateMap<FundingProjectAddRequest, FundingProject>()
+                .ForMember(des => des.Packages, src => src.MapFrom(x => x.Packages)).ReverseMap();
+            // UserInfoResponse -> User
+            CreateMap<UserInfoResponse, User>()
+                .ForPath(des => des.File.URL, src => src.MapFrom(x => x.Avatar))
+                .ForMember(des => des.Wallet, src => src.MapFrom(x => x.Wallet))
+                .ReverseMap();
+            CreateMap<FundingProjectResponse, FundingProject>()
+                .ForMember(des => des.User, src => src.MapFrom(x => x.User))
+                .ForMember(des => des.SourceFiles, src => src.MapFrom(x => x.FundingFiles))
+                .ForMember(des => des.Packages, src => src.MapFrom(x => x.Packages))
+                .ForMember(des => des.Wallet, src => src.MapFrom(x => x.Wallet))
+                .ReverseMap();
+            CreateMap<BankAccountUpdateRequest, BankAccount>().ReverseMap();
+            CreateMap<FundingProjectUpdateRequest, FundingProject>()
+                .ForMember(des => des.Packages, src => src.MapFrom(x => x.Packages))
+                .ReverseMap();
+            //BankAccount Update
+            CreateMap<BankAccount, BankAccountUpdateRequest>().ReverseMap();
+        }
 
         public void MappingUser()
         {
@@ -105,6 +107,10 @@ namespace Fun_Funding.Infrastructure.Mapper
             CreateMap<TransactionInfoResponse, Fun_Funding.Domain.Entity.Transaction>()
                 .ReverseMap();
             CreateMap<WithdrawResponse, WithdrawRequest>()
+                .ReverseMap();
+            
+            CreateMap<WalletFundingResponse, Wallet>()
+                .ForMember(des => des.BankAccount, src => src.MapFrom(x => x.BankAccount))
                 .ReverseMap();
         }
 

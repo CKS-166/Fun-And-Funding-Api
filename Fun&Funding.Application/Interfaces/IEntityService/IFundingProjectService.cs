@@ -12,10 +12,10 @@ namespace Fun_Funding.Application.IService
 {
     public interface IFundingProjectService
     {
-        //Task<ResultDTO<FundingProjectResponse>> GetProjectById(Guid id);
-        //Task<ResultDTO<FundingProjectResponse>> CreateFundingProject(FundingProjectAddRequest req);
-        //Task<ResultDTO<FundingProjectResponse>> UpdateFundingProject(FundingProjectUpdateRequest req);
-        //Task<ResultDTO<PaginatedResponse<FundingProjectResponse>>> GetFundingProjects(ListRequest request, string? categoryName, ProjectStatus? status, decimal? fromTarget, decimal? toTarget);
-        //Task<ResultDTO<FundingProjectResponse>> UpdateFundingProjectStatus(Guid id, ProjectStatus status);
+        Task<ResultDTO<FundingProjectResponse>> GetProjectById(Guid id);
+        Task<ResultDTO<FundingProjectResponse>> CreateFundingProject(FundingProjectAddRequest req);
+        Task<ResultDTO<FundingProjectResponse>> UpdateFundingProject(FundingProjectUpdateRequest req);
+        Task<ResultDTO<PaginatedResponse<FundingProjectResponse>>> GetFundingProjects(ListRequest request, string? categoryName, ProjectStatus? status, decimal? fromTarget, decimal? toTarget);
+        Task<ResultDTO<FundingProjectResponse>> UpdateFundingProjectStatus(Guid id, ProjectStatus status);
     }
 }

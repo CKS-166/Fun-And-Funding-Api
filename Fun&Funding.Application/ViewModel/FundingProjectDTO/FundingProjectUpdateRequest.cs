@@ -19,7 +19,7 @@ namespace Fun_Funding.Application.ViewModel.FundingProjectDTO
         public string Description { get; set; } = string.Empty;
         public string Introduction { get; set; } = string.Empty;
 
-        public BankAccountRequest? BankAccount { get; set; }
+        public BankAccountUpdateRequest? BankAccount { get; set; }
         //public virtual ICollection<Category> Categories { get; set; }
         public virtual ICollection<PackageUpdateRequest> Packages { get; set; }
         //public IFormFile ThumbnailFile { get; set; }

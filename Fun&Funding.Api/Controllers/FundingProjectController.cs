@@ -24,20 +24,20 @@ namespace Fun_Funding.Api.Controllers
             _fundingProjectService = fundingProjectService;
         }
 
-        //[HttpPost]
+        [HttpPost]
         //[Authorize(Roles = Role.GameOwner)]
-        //public async Task<IActionResult> CreateProject([FromForm] FundingProjectAddRequest req)
-        //{
-        //    var response = await _fundingProjectService.CreateFundingProject(req);
-        //    return Ok(response);
-        //}
+        public async Task<IActionResult> CreateProject([FromForm] FundingProjectAddRequest req)
+        {
+            var response = await _fundingProjectService.CreateFundingProject(req);
+            return Ok(response);
+        }
 
-        //[HttpGet("{id}")]
-        //public async Task<IActionResult> GetProjectById(Guid id)
-        //{
-        //    var response = await _fundingProjectService.GetProjectById(id);
-        //    return Ok(response);
-        //}
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetProjectById(Guid id)
+        {
+            var response = await _fundingProjectService.GetProjectById(id);
+            return Ok(response);
+        }
 
         //[HttpPut]
         //public async Task<IActionResult> UpdateProject([FromForm] FundingProjectUpdateRequest req)

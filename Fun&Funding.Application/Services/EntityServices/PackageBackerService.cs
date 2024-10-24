@@ -68,11 +68,18 @@ namespace Fun_Funding.Application.Services.EntityServices
                     DonateAmount = packageBackerRequest.DonateAmount,
                     IsHidden = false
                 };
+                // add donation amount to project wallet
+                var projectWallet = _unitOfWork.WalletRepository.GetQueryable()
+                    .Include(w => w.FundingProject)
+                    .FirstOrDefault(w => w.FundingProject.Id == package.ProjectId);
+
+                projectWallet.Balance += packageBackerRequest.DonateAmount;
 
                 Package donatedPack = _unitOfWork.PackageRepository.GetById(packageBackerRequest.PackageId);
                 donatedPack.LimitQuantity -= 1;
                 await _unitOfWork.PackageBackerRepository.AddAsync(packageBacker);
                 _unitOfWork.PackageRepository.Update(donatedPack);
+                _unitOfWork.WalletRepository.Update(projectWallet);
                 // add transaction
                 var description = $"Donation to package: {package.Name}";
                 await _transactionService.CreateTransactionAsync(
