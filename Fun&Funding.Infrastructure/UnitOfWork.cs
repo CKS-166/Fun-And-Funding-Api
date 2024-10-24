@@ -1,7 +1,7 @@
 ﻿using Fun_Funding.Application;
 using Fun_Funding.Application.IRepository;
-using Fun_Funding.Infrastructure.Database;
-using Fun_Funding.Infrastructure.Repository;
+using Fun_Funding.Infrastructure.Persistence.Database;
+using Fun_Funding.Infrastructure.Persistence.Repository;
 
 namespace Fun_Funding.Infrastructure
 {

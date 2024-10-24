@@ -1,5 +1,4 @@
 ﻿using Fun_Funding.Application.IService;
-using Fun_Funding.Application.IStorageService;
 using Fun_Funding.Application.ViewModel.FundingProjectDTO;
 using Fun_Funding.Application.ViewModel.FundingFileDTO;
 using Fun_Funding.Application.ViewModel;
@@ -8,6 +7,7 @@ using Fun_Funding.Domain.Enum;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Fun_Funding.Domain.Constrain;
+using Fun_Funding.Application.Interfaces.IExternalServices;
 
 namespace Fun_Funding.Api.Controllers
 {
