@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Fun_Funding.Application.ViewModel.UserDTO;
 using Fun_Funding.Application.ViewModel.CategoryDTO;
+using Fun_Funding.Application.ViewModel.WalletDTO;
 
 namespace Fun_Funding.Application.ViewModel.FundingProjectDTO
 {
@@ -30,7 +31,7 @@ namespace Fun_Funding.Application.ViewModel.FundingProjectDTO
         public decimal Balance { get; set; }
         public ProjectStatus Status { get; set; }
 
-        public BankAccountInfoResponse? BankAccount { get; set; }
+        public WalletFundingResponse Wallet {  get; set; }
         //public virtual ICollection<Category> Categories { get; set; }
         public virtual ICollection<PackageResponse> Packages { get; set; }
         //public IFormFile ThumbnailFile { get; set; }
@@ -38,8 +39,6 @@ namespace Fun_Funding.Application.ViewModel.FundingProjectDTO
         //public List<IFormFile> Stories {  get; set; }
 
         public List<FundingFileResponse> FundingFiles { get; set; }
-
-        public string Email { get; set; }
 
         public UserInfoResponse User { get; set; }
 

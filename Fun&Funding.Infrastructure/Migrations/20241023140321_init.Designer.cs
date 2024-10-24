@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fun_Funding.Infrastructure.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20241023090900_Update_Migration")]
-    partial class Update_Migration
+    [Migration("20241023140321_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1573,7 +1573,7 @@ namespace Fun_Funding.Infrastructure.Migrations
                         .WithOne("Wallet")
                         .HasForeignKey("Fun_Funding.Domain.Entity.Wallet", "BackerId");
 
-                    b.HasOne("Fun_Funding.Domain.Entity.BankAccount", null)
+                    b.HasOne("Fun_Funding.Domain.Entity.BankAccount", "BankAccount")
                         .WithOne("Wallet")
                         .HasForeignKey("Fun_Funding.Domain.Entity.Wallet", "BankAccountId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -1588,6 +1588,8 @@ namespace Fun_Funding.Infrastructure.Migrations
                         .HasForeignKey("MarketplaceProjectId");
 
                     b.Navigation("Backer");
+
+                    b.Navigation("BankAccount");
 
                     b.Navigation("FundingProject");
 
