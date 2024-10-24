@@ -15,6 +15,7 @@ namespace Fun_Funding.Domain.Entity
         public Guid MilestoneId { get; set; }
         public Milestone Milestone { get; set; }
  
+        public FixedRequirementStatus Status { get; set; }
         public virtual ICollection<ProjectMilestoneRequirement>? ProjectRequirements { get; set; }
 
     }
