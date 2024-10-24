@@ -29,6 +29,6 @@ namespace Fun_Funding.Domain.Entity
         public FundingProject? Project { get; set; } 
         public virtual ICollection<RewardItem> RewardItems { get; set; }
         public virtual ICollection<PackageBacker> PackageUsers { get; set; }
-        public virtual ICollection<RewardTracking>? RewardTrackings { get; set; }
+        
     }
 }

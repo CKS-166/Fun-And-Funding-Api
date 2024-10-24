@@ -783,81 +783,6 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.ToTable("RewardItem");
                 });
 
-            modelBuilder.Entity("Fun_Funding.Domain.Entity.RewardTracking", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Address")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("BackerId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<Guid>("PackageId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("ShipDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("TrackingStatus")
-                        .HasColumnType("int");
-
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("PackageId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("RewardTracking");
-                });
-
-            modelBuilder.Entity("Fun_Funding.Domain.Entity.Stage", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid?>("FundingProjectId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("UpdateDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("FundingProjectId");
-
-                    b.ToTable("Stage");
-                });
-
             modelBuilder.Entity("Fun_Funding.Domain.Entity.SystemWallet", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1513,28 +1438,6 @@ namespace Fun_Funding.Infrastructure.Migrations
                         .HasForeignKey("PackageId");
                 });
 
-            modelBuilder.Entity("Fun_Funding.Domain.Entity.RewardTracking", b =>
-                {
-                    b.HasOne("Fun_Funding.Domain.Entity.Package", null)
-                        .WithMany("RewardTrackings")
-                        .HasForeignKey("PackageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Fun_Funding.Domain.Entity.User", null)
-                        .WithMany("RewardTrackings")
-                        .HasForeignKey("UserId");
-                });
-
-            modelBuilder.Entity("Fun_Funding.Domain.Entity.Stage", b =>
-                {
-                    b.HasOne("Fun_Funding.Domain.Entity.FundingProject", "FundingProject")
-                        .WithMany("Stages")
-                        .HasForeignKey("FundingProjectId");
-
-                    b.Navigation("FundingProject");
-                });
-
             modelBuilder.Entity("Fun_Funding.Domain.Entity.Transaction", b =>
                 {
                     b.HasOne("Fun_Funding.Domain.Entity.CommissionFee", "CommissionFee")
@@ -1680,8 +1583,6 @@ namespace Fun_Funding.Infrastructure.Migrations
 
                     b.Navigation("SourceFiles");
 
-                    b.Navigation("Stages");
-
                     b.Navigation("Wallet");
 
                     b.Navigation("WithdrawRequests");
@@ -1713,8 +1614,6 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Navigation("PackageUsers");
 
                     b.Navigation("RewardItems");
-
-                    b.Navigation("RewardTrackings");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.ProjectCoupon", b =>
@@ -1758,8 +1657,6 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Navigation("PackageUsers");
 
                     b.Navigation("ProjectMilestoneBackers");
-
-                    b.Navigation("RewardTrackings");
 
                     b.Navigation("Wallet");
                 });

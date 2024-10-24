@@ -129,8 +129,6 @@ namespace Fun_Funding.Infrastructure.Persistence.Database
         public DbSet<Package> Package { get; set; }
         public DbSet<PackageBacker> PackageBacker { get; set; }
         public DbSet<RewardItem> RewardItem { get; set; }
-        public DbSet<RewardTracking> RewardTracking { get; set; }
-        public DbSet<Stage> Stage { get; set; }
         public DbSet<SystemWallet> SystemWallet { get; set; }
         public DbSet<Transaction> Transaction { get; set; }
         public DbSet<UserFile> UserFile { get; set; }

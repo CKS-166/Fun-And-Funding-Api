@@ -26,7 +26,7 @@ namespace Fun_Funding.Domain.Entity
         public Wallet? Wallet { get; set; }
         public virtual ICollection<PackageBacker> PackageUsers { get; set; }
         public virtual ICollection<Order>? Orders { get; set; }
-        public virtual ICollection<RewardTracking>? RewardTrackings { get; set; }
+       
         public virtual ICollection<FundingProject>? FundingProjects { get; set; }
         public virtual ICollection<ProjectMilestoneBacker> ProjectMilestoneBackers { get; set; }
     }
