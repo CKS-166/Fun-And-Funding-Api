@@ -9,6 +9,6 @@ namespace Fun_Funding.Application.IService
     {
         Task HandleWebSocketConnectionAsync(WebSocket webSocket, string senderId, string receiverId);
         Task<ResultDTO<IEnumerable<Chat>>> GetChatConversation(Guid senderId, Guid receiverId);
-        Task<ResultDTO<IEnumerable<ContactedUserResponse>>> GetContactedUsers(Guid userId);
+        Task<ResultDTO<IEnumerable<ContactedUserResponse>>> GetContactedUsers(Guid userId, string? name);
     }
 }
