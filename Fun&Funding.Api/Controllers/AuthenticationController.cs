@@ -14,6 +14,7 @@ using RegisterRequest = Fun_Funding.Application.ViewModel.Authentication.Registe
 using Microsoft.AspNetCore.Http.HttpResults;
 using System.Security.Claims;
 using Newtonsoft.Json;
+using Fun_Funding.Application.Services.EntityServices;
 
 namespace Fun_Funding.Api.Controllers
 {
@@ -51,6 +52,17 @@ namespace Fun_Funding.Api.Controllers
         public async Task<ActionResult<string>> RegisterProjectOwner(RegisterRequest registerModel)
         {
             var result = await _authService.RegisterUserAsync(registerModel, new List<string> { Role.GameOwner });
+            return Ok(result);
+        }
+        [HttpPost]
+        [Route("login-2FA")]
+        public async Task<IActionResult> LoginWithOTP(string code, string username)
+        {
+            var result = await _authService.LoginWithOTPAsync(code, username);
+            if (!result._isSuccess)
+            {
+                return BadRequest();
+            }
             return Ok(result);
         }
         [HttpPost("password")]
