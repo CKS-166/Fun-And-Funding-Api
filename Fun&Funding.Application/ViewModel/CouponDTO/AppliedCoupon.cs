@@ -11,5 +11,6 @@ namespace Fun_Funding.Application.ViewModel.CouponDTO
         public Guid Id { get; set; }
         public string CouponKey { get; set; } = string.Empty;
         public decimal DiscountRate { get; set; }
+        public decimal Quantity { get; set; }
     }
 }
