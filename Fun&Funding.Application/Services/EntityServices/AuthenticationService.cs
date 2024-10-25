@@ -60,13 +60,14 @@ namespace Fun_Funding.Application.Services.EntityServices
 
                 if (getUser is null || !await _userManager.CheckPasswordAsync(getUser, loginDTO.Password))
                     return ResultDTO<string>.Fail("Email or Password failed");
-                //if (getUser.EmailConfirmed == false)
-                //{
-                //    var emailToken = await _userManager.GenerateTwoFactorTokenAsync(getUser, "Email");
-                //    var mess = new Message(new string[] { getUser.Email! }, "OTP Verification", emailToken);
-                //    _emailService.SendEmail(mess);
-                //    return ResultDTO<ResponseToken>.Success(new ResponseToken { Token = $"OTP have been sent to your email {getUser.Email}" }, "otp_sent");
-                //}
+                if (!getUser.EmailConfirmed)
+                {
+                    await _signInManager.SignOutAsync();
+                    await _signInManager.PasswordSignInAsync(getUser, loginDTO.Password, false, true);
+                    var emailToken = await _userManager.GenerateTwoFactorTokenAsync(getUser, "Email");
+                    await _emailService.SendEmailAsync(getUser.Email, "Welcome to Fun&Funding", emailToken, EmailType.Register);
+                    return ResultDTO<string>.Success($"OTP have been send to your email {getUser.Email}", "Successfull resgiter");
+                }
 
                 var userRole = await _userManager.GetRolesAsync(getUser);
                 var token = _tokenGenerator.GenerateToken(getUser, userRole);
@@ -143,13 +144,58 @@ namespace Fun_Funding.Application.Services.EntityServices
                 await _unitOfWork.WalletRepository.AddAsync(wallet);
                 await _unitOfWork.CommitAsync();
 
-                var token = _tokenGenerator.GenerateToken(newUser, roles);
-                return ResultDTO<string>.Success(token, "Successfully created user and token");
+                if (newUser.TwoFactorEnabled)
+                {
+                    await _signInManager.SignOutAsync();
+                    await _signInManager.PasswordSignInAsync(newUser, registerModel.Password, false, true);
+                    var emailToken = await _userManager.GenerateTwoFactorTokenAsync(newUser, "Email");
+                    await _emailService.SendEmailAsync(newUser.Email, "Welcome to Fun&Funding", emailToken, EmailType.Register);
+                    return ResultDTO<string>.Success($"OTP have been send to your email {newUser.Email}", "Successfull resgiter");
+                }
+
+                return ResultDTO<string>.Success("emal has been send", "Successfully created user, please login");
             }
             catch (Exception ex)
             {
                 return ResultDTO<string>.Fail($"An error occurred: {ex.Message}");
             }
+        }
+        public async Task<ResultDTO<string>> LoginWithOTPAsync(string code, string username)
+        {
+            try
+            {
+                var user = await _userManager.FindByNameAsync(username);
+                if (user == null)
+                {
+                    return ResultDTO<string>.Fail("Can Not Found User !!!");
+                }
+
+
+                var signIn = await _userManager.VerifyTwoFactorTokenAsync(user, "Email", code);
+
+                if (signIn)
+                {
+                    user.EmailConfirmed = true;
+                    var updateResult = await _userManager.UpdateAsync(user);
+                    if (!updateResult.Succeeded)
+                    {
+
+                        return ResultDTO<string>.Fail("Failed to update user.");
+                    }
+                    var userRole = await _userManager.GetRolesAsync(user);
+                    var token = _tokenGenerator.GenerateToken(user, userRole);
+                    return ResultDTO<string>.Success(token, "Successfully created token");
+                }
+
+
+                return ResultDTO<string>.Fail("Invalid Code !!!");
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception("An error occurred during 2FA login.", ex);
+            }
+
         }
         public async Task<ResultDTO<string>> SendResetPasswordEmailAsync(EmailRequest emailRequest)
         {
