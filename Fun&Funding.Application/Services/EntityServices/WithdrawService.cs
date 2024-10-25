@@ -259,56 +259,56 @@ namespace Fun_Funding.Application.Services.EntityServices
         //    }
         //}
 
-        //public async Task<ResultDTO<string>> WalletWithdrawRequest()
-        //{
-        //    try
-        //    {
-        //        if (_claimsPrincipal == null || !_claimsPrincipal.Identity.IsAuthenticated)
-        //        {
-        //            throw new ExceptionError((int)HttpStatusCode.Unauthorized, "User not authenticated.");
-        //        }
-        //        var userEmailClaims = _claimsPrincipal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email);
-        //        if (userEmailClaims == null)
-        //        {
-        //            throw new ExceptionError((int)HttpStatusCode.NotFound, "User not found.");
-        //        }
-        //        var userEmail = userEmailClaims.Value;
-        //        var user = await _unitOfWork.UserRepository.GetQueryable()
-        //                        .AsNoTracking()
-        //                        .Include(u => u.Wallet)
-        //                        .FirstOrDefaultAsync(u => u.Email == userEmail);
-        //        if (user == null)
-        //        {
-        //            throw new ExceptionError((int)HttpStatusCode.NotFound, "User not found.");
-        //        }
-        //        Wallet? wallet = user.Wallet;
-        //        if (wallet.Balance < 10000)
-        //        {
-        //            return ResultDTO<string>.Fail("Your account balance must be higher than 10.000 VND to withdraw balance.", (int)HttpStatusCode.Forbidden);
-        //        }
-        //        WithdrawRequest withdrawRequest = new WithdrawRequest
-        //        {
-        //            Id = new Guid(),
-        //            Amount = wallet.Balance,
-        //            CreatedDate = DateTime.UtcNow,
-        //            ExpiredDate = DateTime.UtcNow.AddDays(7),
-        //            IsFinished = false,
-        //            WalletId = wallet.Id,
-        //            RequestType = TransactionTypes.WithdrawWalletMoney,
-        //            Status = WithdrawRequestStatus.Pending,
-        //        };
-        //        await _unitOfWork.WithdrawRequestRepository.AddAsync(withdrawRequest);
-        //        await _unitOfWork.CommitAsync();
-        //        return ResultDTO<string>.Success("", "Your withdraw has been create, please wait for admin to review");
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        if (ex is ExceptionError exceptionError)
-        //        {
-        //            throw exceptionError;
-        //        }
-        //        throw new Exception(ex.Message);
-        //    }
-        //}
+        public async Task<ResultDTO<string>> WalletWithdrawRequest()
+        {
+            try
+            {
+                if (_claimsPrincipal == null || !_claimsPrincipal.Identity.IsAuthenticated)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.Unauthorized, "User not authenticated.");
+                }
+                var userEmailClaims = _claimsPrincipal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email);
+                if (userEmailClaims == null)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "User not found.");
+                }
+                var userEmail = userEmailClaims.Value;
+                var user = await _unitOfWork.UserRepository.GetQueryable()
+                                .AsNoTracking()
+                                .Include(u => u.Wallet)
+                                .FirstOrDefaultAsync(u => u.Email == userEmail);
+                if (user == null)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "User not found.");
+                }
+                Wallet? wallet = user.Wallet;
+                if (wallet.Balance < 10000)
+                {
+                    return ResultDTO<string>.Fail("Your account balance must be higher than 10.000 VND to withdraw balance.", (int)HttpStatusCode.Forbidden);
+                }
+                WithdrawRequest withdrawRequest = new WithdrawRequest
+                {
+                    Id = new Guid(),
+                    Amount = wallet.Balance,
+                    CreatedDate = DateTime.UtcNow,
+                    ExpiredDate = DateTime.UtcNow.AddDays(7),
+                    IsFinished = false,
+                    WalletId = wallet.Id,
+                    RequestType = TransactionTypes.WithdrawWalletMoney,
+                    Status = WithdrawRequestStatus.Pending,
+                };
+                await _unitOfWork.WithdrawRequestRepository.AddAsync(withdrawRequest);
+                await _unitOfWork.CommitAsync();
+                return ResultDTO<string>.Success("", "Your withdraw has been create, please wait for admin to review");
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+                throw new Exception(ex.Message);
+            }
+        }
     }
 }

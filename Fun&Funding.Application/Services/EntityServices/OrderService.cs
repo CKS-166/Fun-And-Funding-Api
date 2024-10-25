@@ -82,6 +82,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 foreach (var cartItem in createOrderRequest.CartItems)
                 {
                     var gamePrice = cartItem.Price;
+                    //Check if Marketplace game have coupon
                     if (cartItem.AppliedCoupon != null)
                     {
                         ProjectCoupon projectCoupon = _unitOfWork.ProjectCouponRepository.GetById(cartItem.AppliedCoupon.Id);
@@ -98,13 +99,15 @@ namespace Fun_Funding.Application.Services.EntityServices
                     totalCost += gamePrice;
                 }
 
+                //Check Wallet Balance
                 if (wallet.Balance < totalCost)
                 {
                     throw new ExceptionError((int)HttpStatusCode.BadRequest, "Insufficient Wallet Balance.");
                 }
-
+                //Remove Amount Order Money From Wallet
                 wallet.Balance -= totalCost;
-
+                
+                //Create new Order
                 Order order = new Order
                 {
                     Id = Guid.NewGuid(),
@@ -114,8 +117,10 @@ namespace Fun_Funding.Application.Services.EntityServices
                     OrderDetails = new List<OrderDetail>()
                 };
 
+                //Create Backer's Transaction
                 Transaction purchaseTransaction = new Transaction
                 {
+                    Id = Guid.NewGuid(),
                     TotalAmount = -totalCost,
                     TransactionType = TransactionTypes.OrderPurchase,
                     Wallet = wallet,
@@ -125,6 +130,10 @@ namespace Fun_Funding.Application.Services.EntityServices
 
                 foreach (var cartItem in createOrderRequest.CartItems)
                 {
+                    var commissionFee = _commissionFeeService.GetAppliedCommissionFee(CommissionType.MarketingCommission)._data;
+                    var recieverWallet = await _unitOfWork.WalletRepository.GetAsync(w => w.Backer.Id == user.Id);
+
+                    // Create digital key for Marketplace Project
                     DigitalKey digitalKey = new DigitalKey
                     {
                         Id = Guid.NewGuid(),
@@ -134,24 +143,25 @@ namespace Fun_Funding.Application.Services.EntityServices
                         MarketplaceProject = _unitOfWork.MarketplaceRepository.GetById(cartItem.MarketplaceProjectId)
                     };
 
-                    OrderDetail orderDetail = new OrderDetail
-                    {
-                        DigitalKey = digitalKey,
-                        Order = order,
-                        CreatedDate = DateTime.Now,
-                    };
-
-                    order.OrderDetails.Add(orderDetail);
-
-                    var commissionFee = _commissionFeeService.GetAppliedCommissionFee(CommissionType.MarketingCommission)._data;
-                    var recieverWallet = await _unitOfWork.WalletRepository.GetAsync(w => w.Backer.Id == user.Id);
                     if (recieverWallet == null)
                     {
                         throw new ExceptionError((int)HttpStatusCode.NotFound, "Game Owner Wallet Not Found.");
                     }
                     else
                     {
-                        var recievedMoney = totalCost;
+                        var receivedMoney = cartItem.Price;
+                        decimal systemReceivedMoney = 0;
+
+                        //Create OrderDetail
+                        OrderDetail orderDetail = new OrderDetail();
+                        //Create Game Owner Transaction
+                        Transaction recieveTransaction = new Transaction();
+                        //Create System Transaction
+                        Transaction systemTransaction = new Transaction();
+                        //Get SystemWallet
+                        var systemWallets = await _unitOfWork.SystemWalletRepository.GetAllAsync();
+                        SystemWallet systemWallet = systemWallets.SingleOrDefault();
+                        //Check if have coupon
                         if (cartItem.AppliedCoupon != null)
                         {
                             ProjectCoupon projectCoupon = _unitOfWork.ProjectCouponRepository.GetById(cartItem.AppliedCoupon.Id);
@@ -159,36 +169,128 @@ namespace Fun_Funding.Application.Services.EntityServices
                             {
                                 throw new ExceptionError((int)HttpStatusCode.NotFound, "Project Coupon Not Found.");
                             }
-                            else if (projectCoupon.Status == ProjectCouponStatus.Disable)
+                            else if (projectCoupon.Status == ProjectCouponStatus.Disable || projectCoupon.Quantity <= 0)
                             {
-                                throw new ExceptionError((int)HttpStatusCode.BadRequest, "Coupon Already Used.");
+                                throw new ExceptionError((int)HttpStatusCode.BadRequest, "Coupon Already Used Up.");
                             }
-                            recievedMoney = recievedMoney * (1 - cartItem.AppliedCoupon.DiscountRate);
-                            projectCoupon.Status = ProjectCouponStatus.Disable;
+                            //Remove 1 quantity from coupon
+                            projectCoupon.Quantity -= 1;
+                            if (projectCoupon.Quantity <= 0)
+                            {
+                                projectCoupon.Status = ProjectCouponStatus.Disable;
+                            }
+                            //Money left when applying coupon
+                            receivedMoney = receivedMoney * (1 - cartItem.AppliedCoupon.DiscountRate);
+
+                            //Extra fee on commission rate
+                            systemReceivedMoney = receivedMoney * commissionFee.Rate;
+                            receivedMoney -= systemReceivedMoney;
+
+                            //Add OrderDetail
+                            orderDetail = new OrderDetail
+                            {
+                                Id = Guid.NewGuid(),
+                                DigitalKey = digitalKey,
+                                Order = order,
+                                UnitPrice = cartItem.Price,
+                                CreatedDate = DateTime.Now,
+                                ProjectCoupon = projectCoupon,
+                            };
+
+                            //Add GameOwner Transaction
+                            recieveTransaction = new Transaction
+                            {
+                                Id = Guid.NewGuid(),
+                                TotalAmount = receivedMoney,
+                                TransactionType = TransactionTypes.OrderPurchase,
+                                Wallet = recieverWallet,
+                                OrderDetailId = orderDetail.Id,
+                                CommissionFee = await _unitOfWork.CommissionFeeRepository.GetByIdAsync(commissionFee.Id),
+                                CreatedDate = DateTime.Now,
+                            };
+                            //Add System Transaction
+                            systemTransaction = new Transaction
+                            {
+                                Id = Guid.NewGuid(),
+                                TotalAmount = systemReceivedMoney,
+                                TransactionType = TransactionTypes.OrderPurchase,
+                                SystemWallet = systemWallet,
+                                OrderDetailId = orderDetail.Id,
+                                CommissionFee = await _unitOfWork.CommissionFeeRepository.GetByIdAsync(commissionFee.Id),
+                                CreatedDate = DateTime.Now,
+                            };
+
+                            //Add Order's OrderDetail
+                            order.OrderDetails.Add(orderDetail);
+                            //Update Project Coupon
                             _unitOfWork.ProjectCouponRepository.Update(projectCoupon);
                         }
-                        decimal marketplaceCommissionRate = commissionFee.Rate;
-                        recieverWallet.Balance += recievedMoney * (1 - marketplaceCommissionRate);
+                        else
+                        {
+                            //Extra fee on commission rate
+                            systemReceivedMoney = receivedMoney * commissionFee.Rate;
+                            receivedMoney -= systemReceivedMoney;
+
+                            //Add OrderDetail
+                            orderDetail = new OrderDetail
+                            {
+                                Id = Guid.NewGuid(),
+                                DigitalKey = digitalKey,
+                                Order = order,
+                                UnitPrice = cartItem.Price,
+                                CreatedDate = DateTime.Now,
+                            };
+
+                            //Add GameOwner Transaction
+                            recieveTransaction = new Transaction
+                            {
+                                Id = Guid.NewGuid(),
+                                TotalAmount = cartItem.Price,
+                                TransactionType = TransactionTypes.OrderPurchase,
+                                Wallet = recieverWallet,
+                                OrderDetailId = orderDetail.Id,
+                                CommissionFee = await _unitOfWork.CommissionFeeRepository.GetByIdAsync(commissionFee.Id),
+                                CreatedDate = DateTime.Now,
+                            };
+
+                            //Add System Transaction
+                            systemTransaction = new Transaction
+                            {
+                                Id = Guid.NewGuid(),
+                                TotalAmount = systemReceivedMoney,
+                                TransactionType = TransactionTypes.OrderPurchase,
+                                SystemWallet = systemWallet,
+                                OrderDetailId = orderDetail.Id,
+                                CommissionFee = await _unitOfWork.CommissionFeeRepository.GetByIdAsync(commissionFee.Id),
+                                CreatedDate = DateTime.Now,
+                            };
+
+                            //Add Order's OrderDetail
+                            order.OrderDetails.Add(orderDetail);
+                        }
+                        //Update GameOwner Wallet
+                        recieverWallet.Balance += receivedMoney;
+                        //Update SystemWallet
+                        systemWallet.TotalAmount += systemReceivedMoney;
+
+                        //Add DigitalKey
+                        _unitOfWork.DigitalKeyRepository.Add(digitalKey);
+                        //Save Game Owner Transaction
+                        _unitOfWork.TransactionRepository.Add(recieveTransaction);
+                        //Save System Transaction
+                        _unitOfWork.TransactionRepository.Add(systemTransaction);
+                        //Update GameOwner Wallet
+                        _unitOfWork.WalletRepository.Update(recieverWallet);
+                        //Save SystemWallet
+                        _unitOfWork.SystemWalletRepository.Update(systemWallet);
                     }
-
-                    Transaction recieveTransaction = new Transaction
-                    {
-                        TotalAmount = cartItem.Price,
-                        TransactionType = TransactionTypes.OrderPurchase,
-                        Wallet = recieverWallet,
-                        OrderDetailId = orderDetail.Id,
-                        CommissionFee = await _unitOfWork.CommissionFeeRepository.GetByIdAsync(commissionFee.Id),
-                        CreatedDate = DateTime.Now,
-                    };
-
-                    _unitOfWork.WalletRepository.Update(recieverWallet);
-                    _unitOfWork.DigitalKeyRepository.Add(digitalKey);
-                    _unitOfWork.OrderDetailRepository.Add(orderDetail);
-                    _unitOfWork.TransactionRepository.Add(recieveTransaction);
                 }
 
+                //Update Backer's Wallet
                 _unitOfWork.WalletRepository.Update(wallet);
+                //Add Backer's Order
                 _unitOfWork.OrderRepository.Add(order);
+                //Add Backer's Transaction
                 _unitOfWork.TransactionRepository.Add(purchaseTransaction);
                 await _unitOfWork.CommitAsync();
 
@@ -247,7 +349,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                        isAscending: request.IsAscending.Value,
                        pageIndex: request.PageIndex,
                        pageSize: request.PageSize,
-                       includeProperties: "OrderDetails,OrderDetails.DigitalKey,OrderDetails.DigitalKey.MarketplaceProject");
+                       includeProperties: "OrderDetails,OrderDetails.DigitalKey,OrderDetails.DigitalKey.MarketplaceProject,OrderDetails.ProjectCoupon");
 
                 if (list != null && list.Count() > 0)
                 {
@@ -377,7 +479,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                        isAscending: request.IsAscending.Value,
                        pageIndex: request.PageIndex,
                        pageSize: request.PageSize,
-                       includeProperties: "OrderDetails,OrderDetails.DigitalKey,OrderDetails.DigitalKey.MarketplaceProject");
+                       includeProperties: "OrderDetails,OrderDetails.DigitalKey,OrderDetails.DigitalKey.MarketplaceProject,OrderDetails.ProjectCoupon");
 
                 if (list != null && list.Count() > 0)
                 {
