@@ -1,4 +1,5 @@
 ﻿using Fun_Funding.Application.IService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Fun_Funding.Api.Controllers
@@ -15,6 +16,7 @@ namespace Fun_Funding.Api.Controllers
         }
 
         [HttpGet("conversation/{senderId}/{receiverId}")]
+        [Authorize]
         public async Task<IActionResult> GetChatConversation([FromRoute] Guid senderId,
             [FromRoute] Guid receiverId)
         {
@@ -23,9 +25,10 @@ namespace Fun_Funding.Api.Controllers
         }
 
         [HttpGet("users/{id}")]
-        public async Task<IActionResult> GetContactedUsers([FromRoute] Guid id)
+        [Authorize]
+        public async Task<IActionResult> GetContactedUsers([FromRoute] Guid id, [FromQuery] string? name)
         {
-            var response = await _chatService.GetContactedUsers(id);
+            var response = await _chatService.GetContactedUsers(id, name);
             return Ok(response);
         }
     }

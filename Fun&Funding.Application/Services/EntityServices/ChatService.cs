@@ -59,7 +59,7 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
-        public async Task<ResultDTO<IEnumerable<ContactedUserResponse>>> GetContactedUsers(Guid userId)
+        public async Task<ResultDTO<IEnumerable<ContactedUserResponse>>> GetContactedUsers(Guid userId, string? name)
         {
             try
             {
@@ -97,7 +97,16 @@ namespace Fun_Funding.Application.Services.EntityServices
                         contactedUsers.Add(contactedUser);
                     }
 
-                    return ResultDTO<IEnumerable<ContactedUserResponse>>.Success(contactedUsers);
+                    var response = contactedUsers.ToList();
+
+                    if (!string.IsNullOrEmpty(name))
+                    {
+                        response = response.Where(x => x.Name.ToLower().Contains(name.ToLower())).ToList();
+                    }
+
+                    response.OrderByDescending(x => x.CreatedDate);
+
+                    return ResultDTO<IEnumerable<ContactedUserResponse>>.Success(response);
                 }
             }
             catch (Exception ex)
