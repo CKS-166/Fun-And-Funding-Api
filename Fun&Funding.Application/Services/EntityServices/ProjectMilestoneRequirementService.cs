@@ -6,10 +6,12 @@ using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.ProjectMilestoneDTO;
 using Fun_Funding.Application.ViewModel.ProjectMilestoneRequirementDTO;
 using Fun_Funding.Domain.Entity;
+using Fun_Funding.Domain.Enum;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -34,6 +36,18 @@ namespace Fun_Funding.Application.Services.EntityServices
             {
                 var projectMilestone = _unitOfWork.ProjectMilestoneRepository.GetQueryable()
                     .FirstOrDefault(pm => pm.FundingProjectId == request[0].FundingProjectId && pm.MilestoneId == request[0].MilestoneId);
+                if (projectMilestone == null)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "Milestone for this project not found");
+                }
+                else
+                {
+                    if(projectMilestone.Status != ProjectMilestoneStatus.Processing)
+                    {
+                        throw new ExceptionError((int)HttpStatusCode.BadRequest, "Milestone for this project is not approved yet");
+                    }
+                }
+
                 foreach (var requestItem in request)
                 {
                     ProjectMilestoneRequirement req = new ProjectMilestoneRequirement

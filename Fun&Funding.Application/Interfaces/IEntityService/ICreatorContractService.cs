@@ -11,6 +11,6 @@ namespace Fun_Funding.Application.IService
 {
     public interface ICreatorContractService
     {
-        Task<ResultDTO<CreatorContract>> CreateContract(CreatorContractRequest contract); 
+        Task<ResultDTO<CreatorContract>> CreateContract(); 
     }
 }
