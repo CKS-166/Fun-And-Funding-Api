@@ -2,6 +2,7 @@
 using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel.CreatorContractDTO;
 using Fun_Funding.Domain.Entity.NoSqlEntities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Azure;
@@ -17,9 +18,10 @@ namespace Fun_Funding.Api.Controllers
            _contractService = contractService;
         }
         [HttpPost]
-        public IActionResult CreateContract([FromBody] CreatorContractRequest contract)
+        [Authorize]
+        public IActionResult CreateContract()
         {
-            var result = _contractService.CreateContract(contract);
+            var result = _contractService.CreateContract();
             return Ok(result);
         }
     }
