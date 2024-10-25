@@ -3,7 +3,6 @@ using Fun_Funding.Application.ViewModel.FundingProjectDTO;
 using Fun_Funding.Application.ViewModel.FundingFileDTO;
 using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Domain.Enum;
-using Fun_Funding.Domain.Enum;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Fun_Funding.Domain.Constrain;
