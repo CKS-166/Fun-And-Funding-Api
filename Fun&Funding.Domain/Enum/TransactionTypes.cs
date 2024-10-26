@@ -15,6 +15,7 @@ namespace Fun_Funding.Domain.Enum
         CommissionFee,
         FundingRefund, // case funding project fails
         FundingPurchase,
-        OrderPurchase
+        OrderPurchase,
+        MarketplaceWithdraw
     }
 }
