@@ -336,18 +336,18 @@ namespace Fun_Funding.Application.Services.EntityServices
                 {
 
                     var existedPack = existedProject.Packages.FirstOrDefault(p => p.Id == packageRequest.Id);
-                    //change image of package
-                    if (packageRequest.UpdatedImage != null)
-                    {
-                        var imageUploadResult = _azureService.UploadUrlSingleFiles(packageRequest.UpdatedImage);
-                        existedPack.Url = imageUploadResult.Result;
-                    }
                     if (existedPack != null)
                     {
                         existedPack.Name = packageRequest.Name;
                         existedPack.RequiredAmount = packageRequest.RequiredAmount;
                         existedPack.LimitQuantity = packageRequest.LimitQuantity;
                         existedPack.PackageTypes = PackageType.FixedPackage;
+                        //change image of package
+                        if (packageRequest.UpdatedImage != null)
+                        {
+                            var imageUploadResult = _azureService.UploadUrlSingleFiles(packageRequest.UpdatedImage);
+                            existedPack.Url = imageUploadResult.Result;
+                        }
                         //Handle change image of existing item
                         foreach (var rewardItemRequest in packageRequest.RewardItems)
                         {
@@ -394,6 +394,12 @@ namespace Fun_Funding.Application.Services.EntityServices
                             PackageTypes = PackageType.FixedPackage,
                             RewardItems = new List<RewardItem>()
                         };
+                        //change image of package
+                        if (packageRequest.UpdatedImage != null)
+                        {
+                            var imageUploadResult = _azureService.UploadUrlSingleFiles(packageRequest.UpdatedImage);
+                            newPackage.Url = imageUploadResult.Result;
+                        }
                         // Add reward items to the new package
                         foreach (var rewardItemRequest in packageRequest.RewardItems)
                         {
