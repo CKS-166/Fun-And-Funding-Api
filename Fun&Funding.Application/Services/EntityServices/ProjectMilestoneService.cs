@@ -61,17 +61,22 @@ namespace Fun_Funding.Application.Services.EntityServices
                     return ResultDTO<ProjectMilestoneResponse>.Fail("This milestone has already been added to the project.", 400);
                 }
                 //case request first
-                if (request.CreatedDate >= project.EndDate && requestMilestone.MilestoneOrder == 1)
+                if (requestMilestone.MilestoneOrder == 1)
                 {
-                    if ((request.CreatedDate - project.EndDate).TotalDays > maxExpireDay)
+                    if (request.CreatedDate >= project.EndDate)
                     {
-                        return ResultDTO<ProjectMilestoneResponse>.Fail("The milestone must begin within 30 days after the project's funding period ends.", 500);
+                        if ((request.CreatedDate - project.EndDate).TotalDays > maxExpireDay)
+                        {
+                            return ResultDTO<ProjectMilestoneResponse>.Fail("The milestone must begin within 30 days after the project's funding period ends.", 500);
+                        }
                     }
+                    else
+                    {
+                        throw new ExceptionError((int)HttpStatusCode.BadRequest, "First milestone requested date must be after the date project funded successfully");
+                    }
+
                 }
-                else
-                {
-                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "First milestone requested date must be after the date project funded successfully");
-                }
+               
 
                 var checkValidateMilstone = CanCreateProjectMilestone(project, requestMilestone.MilestoneOrder);
                 if (checkValidateMilstone != null)
