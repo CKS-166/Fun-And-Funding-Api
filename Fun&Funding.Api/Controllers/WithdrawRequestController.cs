@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Fun_Funding.Api.Controllers
 {
-    [Route("api/withdraw-request")]
+    [Route("api/withdraw-requests")]
     [ApiController]
     public class WithdrawRequestController : ControllerBase
     {
