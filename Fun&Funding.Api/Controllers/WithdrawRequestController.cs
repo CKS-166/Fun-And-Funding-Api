@@ -21,10 +21,10 @@ namespace Fun_Funding.Api.Controllers
             var result = await _withdrawService.GetAllRequest();
             return Ok(result);
         }
-        [HttpPost]
-        public async Task<IActionResult> CreateRequest(WithdrawReq request)
+        [HttpPost("marketplace/{marketplaceId}")]
+        public async Task<IActionResult> CreateRequest(Guid marketplaceId)
         {
-            var result = await _withdrawService.CreateMarketplaceRequest(request);
+            var result = await _withdrawService.CreateMarketplaceRequest(marketplaceId);
             return Ok(result);
         }
         [HttpPatch("{id}/process")]

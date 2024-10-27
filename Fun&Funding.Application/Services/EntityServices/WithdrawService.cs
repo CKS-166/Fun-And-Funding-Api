@@ -190,7 +190,7 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
-        public async Task<ResultDTO<WithdrawResponse>> CreateMarketplaceRequest(WithdrawReq request)
+        public async Task<ResultDTO<WithdrawResponse>> CreateMarketplaceRequest(Guid MarketplaceId)
         {
             // Check User
             var user = await _userService.GetUserInfo();
@@ -199,17 +199,17 @@ namespace Fun_Funding.Application.Services.EntityServices
                 return ResultDTO<WithdrawResponse>.Fail("UserID can not be null");
             }
             // Check Request
-            if (request == null)
+            if (MarketplaceId == null)
             {
                 return ResultDTO<WithdrawResponse>.Fail("ProjectID can not be null");
             }
-            var marketplaceProject = await _unitOfWork.MarketplaceRepository.GetByIdAsync(request.MarketplaceId);
+            var marketplaceProject = await _unitOfWork.MarketplaceRepository.GetByIdAsync(MarketplaceId);
             if (marketplaceProject == null)
             {
                 return ResultDTO<WithdrawResponse>.Fail("Project can not be null");
             }
             //get markeplace wallet
-            var marketplaceWallet = await _unitOfWork.WalletRepository.GetAsync(x => x.MarketplaceProject!.Id == request.MarketplaceId);
+            var marketplaceWallet = await _unitOfWork.WalletRepository.GetAsync(x => x.MarketplaceProject!.Id == MarketplaceId);
             if (marketplaceWallet == null)
             {
                 return ResultDTO<WithdrawResponse>.Fail("Waller can not found");
