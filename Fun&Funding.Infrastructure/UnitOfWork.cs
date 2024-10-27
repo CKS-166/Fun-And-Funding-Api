@@ -1,4 +1,5 @@
 ﻿using Fun_Funding.Application;
+using Fun_Funding.Application.Interfaces.IRepository;
 using Fun_Funding.Application.IRepository;
 using Fun_Funding.Infrastructure.Persistence.Database;
 using Fun_Funding.Infrastructure.Persistence.Repository;
@@ -42,6 +43,7 @@ namespace Fun_Funding.Infrastructure
         private IProjectRequirementFileRepository _projectRequirementFileRepository;
         private ICreatorContractRepository _creatorContractRepository;
         private IDigitalKeyRepository _digitalKeyRepository;
+        private ICartRepository _cartRepository;
         public UnitOfWork(MyDbContext dbContext, MongoDBContext mongoDBContext)
         {
             _dbContext = dbContext;
@@ -236,6 +238,9 @@ namespace Fun_Funding.Infrastructure
 
         public ICreatorContractRepository CreatorContractRepository =>
             _creatorContractRepository ??= new CreatorContractRepository(_mongoDBContext);
+
+        public ICartRepository CartRepository =>
+            _cartRepository ??= new CartRepository(_mongoDBContext);
 
 
         // Commit and rollback methods

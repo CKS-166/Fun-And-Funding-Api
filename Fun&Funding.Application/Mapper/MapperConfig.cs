@@ -1,6 +1,8 @@
 using AutoMapper;
 using Fun_Funding.Application;
+using Fun_Funding.Application.Resolver;
 using Fun_Funding.Application.ViewModel.BankAccountDTO;
+using Fun_Funding.Application.ViewModel.CartDTO;
 using Fun_Funding.Application.ViewModel.CategoryDTO;
 using Fun_Funding.Application.ViewModel.ChatDTO;
 using Fun_Funding.Application.ViewModel.CommissionDTO;
@@ -8,6 +10,7 @@ using Fun_Funding.Application.ViewModel.CouponDTO;
 using Fun_Funding.Application.ViewModel.DigitalKeyDTO;
 using Fun_Funding.Application.ViewModel.FundingFileDTO;
 using Fun_Funding.Application.ViewModel.FundingProjectDTO;
+using Fun_Funding.Application.ViewModel.MarketplaceFileDTO;
 using Fun_Funding.Application.ViewModel.MarketplaceProjectDTO;
 using Fun_Funding.Application.ViewModel.MilestoneDTO;
 using Fun_Funding.Application.ViewModel.OrderDetailDTO;
@@ -48,6 +51,12 @@ namespace Fun_Funding.Application.Mapper
             MappingProjectMilestoneRequirement();
             MappingChat();
             MappingProjectCoupon();
+            MappingMarketingProject();
+            MappingMarketplaceFile();
+            MappingOrder();
+            MappingOrderDetail();
+            MappingDigitalKey();
+            MappingCart();
             MappingWthdraw();
         }
         public void MappingFundingProject()
@@ -188,6 +197,15 @@ namespace Fun_Funding.Application.Mapper
         {
             CreateMap<MarketplaceProject, MarketplaceProjectOrderResponse>()
                 .ReverseMap();
+            CreateMap<MarketplaceProject, MarketplaceProjectInfoResponse>()
+                .ForMember(dest => dest.MarketingFiles, opt => opt.MapFrom(src => src.MarketingFiles))
+                .ReverseMap();
+        }
+
+        public void MappingMarketplaceFile()
+        {
+            CreateMap<MarketplaceFile, MarketplaceFileInfoResponse>()
+                .ReverseMap();
         }
 
         public void MappingChat()
@@ -212,6 +230,13 @@ namespace Fun_Funding.Application.Mapper
         }public void MappingWthdraw()
         {
             CreateMap<WithdrawRequest, WithdrawResponse>()
+                .ReverseMap();
+        }
+
+        public void MappingCart()
+        {
+            CreateMap<Cart, CartInfoResponse>()
+                .ForMember(dest => dest.Items, opt => opt.MapFrom<CartItemResolver>())
                 .ReverseMap();
         }
     }

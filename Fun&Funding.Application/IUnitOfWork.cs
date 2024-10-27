@@ -1,4 +1,5 @@
-﻿using Fun_Funding.Application.IRepository;
+﻿using Fun_Funding.Application.Interfaces.IRepository;
+using Fun_Funding.Application.IRepository;
 
 namespace Fun_Funding.Application
 {
@@ -36,6 +37,7 @@ namespace Fun_Funding.Application
         IProjectRequirementFileRepository ProjectRequirementFileRepository { get; }
         ICreatorContractRepository CreatorContractRepository { get; }
         IDigitalKeyRepository DigitalKeyRepository { get; }
+        ICartRepository CartRepository { get; }
 
         // Methods for committing and rolling back
         void Commit();
