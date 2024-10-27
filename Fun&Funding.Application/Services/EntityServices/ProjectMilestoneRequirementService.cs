@@ -50,6 +50,7 @@ namespace Fun_Funding.Application.Services.EntityServices
 
                 foreach (var requestItem in request)
                 {
+                    requestItem.Content = string.IsNullOrWhiteSpace(requestItem.Content) ? " " : requestItem.Content;
                     ProjectMilestoneRequirement req = new ProjectMilestoneRequirement
                     {
                         ProjectMilestoneId = projectMilestone.Id,
