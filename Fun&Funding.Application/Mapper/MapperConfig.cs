@@ -29,7 +29,7 @@ using Fun_Funding.Application.ViewModel.WithdrawDTO;
 using Fun_Funding.Domain.Entity;
 using Fun_Funding.Domain.Entity.NoSqlEntities;
 
-namespace Fun_Funding.Infrastructure.Mapper
+namespace Fun_Funding.Application.Mapper
 {
     public class MapperConfig : Profile
     {
@@ -57,6 +57,7 @@ namespace Fun_Funding.Infrastructure.Mapper
             MappingOrderDetail();
             MappingDigitalKey();
             MappingCart();
+            MappingWthdraw();
         }
         public void MappingFundingProject()
         {
@@ -225,6 +226,10 @@ namespace Fun_Funding.Infrastructure.Mapper
         public void MappingProjectCoupon()
         {
             CreateMap<ProjectCoupon, CouponResponse>()
+                .ReverseMap();
+        }public void MappingWthdraw()
+        {
+            CreateMap<WithdrawRequest, WithdrawResponse>()
                 .ReverseMap();
         }
 

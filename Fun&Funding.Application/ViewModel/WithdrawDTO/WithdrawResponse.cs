@@ -15,6 +15,6 @@ namespace Fun_Funding.Application.ViewModel.WithdrawDTO
         public TransactionTypes RequestType { get; set; }
         public WithdrawRequestStatus Status { get; set; }
         public DateTime ExpiredDate { get; set; }
-        public Guid? ProjectId { get; set; }
+        public Guid? WalletId { get; set; }
     }
 }

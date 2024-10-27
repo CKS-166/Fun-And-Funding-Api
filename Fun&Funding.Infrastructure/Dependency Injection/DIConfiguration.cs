@@ -7,7 +7,7 @@ using Fun_Funding.Domain.Entity;
 using Fun_Funding.Infrastructure.ExternalServices.BackgroundWorkerService;
 using Fun_Funding.Infrastructure.ExternalServices.StorageService;
 using Fun_Funding.Application.Services.ExternalServices;
-using Fun_Funding.Infrastructure.Mapper;
+using Fun_Funding.Application.Mapper;
 using Fun_Funding.Infrastructure.Persistence.Database;
 using Fun_Funding.Infrastructure.Persistence.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

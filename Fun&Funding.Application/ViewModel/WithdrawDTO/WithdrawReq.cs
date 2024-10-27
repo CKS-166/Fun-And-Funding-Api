@@ -8,6 +8,6 @@ namespace Fun_Funding.Application.ViewModel.WithdrawDTO
 {
     public class WithdrawReq
     {
-        public Guid ProjectId { get; set; }
+        public Guid MarketplaceId { get; set; }
     }
 }
