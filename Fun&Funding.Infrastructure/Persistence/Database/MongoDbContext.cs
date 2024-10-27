@@ -11,18 +11,18 @@ namespace Fun_Funding.Infrastructure.Persistence.Database
 {
     public class MongoDBContext
     {
-        private readonly IMongoDatabase _database;
+        private readonly IMongoDatabase _interactionDatabase;
 
         public MongoDBContext(IConfiguration configuration)
         {
             var client = new MongoClient(configuration.GetValue<string>("DatabaseSettings:ConnectionString"));
-            _database = client.GetDatabase(configuration.GetValue<string>("DatabaseSettings:DatabaseName"));
+            _interactionDatabase = client.GetDatabase(configuration.GetValue<string>("DatabaseSettings:DatabaseName"));
         }
 
         // Generic method to get a collection for any entity type
         public IMongoCollection<T> GetCollection<T>(string collectionName)
         {
-            return _database.GetCollection<T>(collectionName);
+            return _interactionDatabase.GetCollection<T>(collectionName);
         }
     }
 
