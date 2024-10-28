@@ -12,12 +12,13 @@ namespace Fun_Funding.Application.ViewModel.MarketplaceProjectDTO
 {
     public class MarketplaceProjectInfoResponse
     {
+        public Guid Id { get; set; }
         public string? Introduction { get; set; }
         public string? Name { get; set; }
         public string? Description { get; set; }
         [Range(0, (double)decimal.MaxValue)]
         [Column(TypeName = "decimal(18, 2)")]
         public decimal Price { get; set; }
-        public virtual ICollection<MarketplaceFileInfoResponse>? MarketingFiles { get; set; }
+        public virtual ICollection<MarketplaceFileInfoResponse>? MarketplaceFiles { get; set; }
     }
 }

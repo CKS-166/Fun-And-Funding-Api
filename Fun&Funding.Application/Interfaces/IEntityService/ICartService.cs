@@ -13,7 +13,8 @@ namespace Fun_Funding.Application.Interfaces.IEntityService
     {
         Task<ResultDTO<CartInfoResponse>> GetUserCartInfo();
         Task<ResultDTO<CartInfoResponse>> AddGameToUserCart(Guid marketplaceProjectId);
-        Task<ResultDTO<CartInfoResponse>> ClearCart();
-        Task<ResultDTO<CartInfoResponse>> DeleteCartItem(Guid marketplaceProjectId);
+        Task<ResultDTO<string>> ClearCart();
+        Task<ResultDTO<string>> DeleteCartItem(Guid marketplaceProjectId);
+        Task<ResultDTO<decimal>> CountUserCartItem();
     }
 }

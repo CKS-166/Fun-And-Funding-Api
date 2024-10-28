@@ -125,7 +125,7 @@ namespace Fun_Funding.Application.Services.EntityServices
         }
 
 
-        public async Task<ResultDTO<CartInfoResponse>> DeleteCartItem(Guid marketplaceProjectId)
+        public async Task<ResultDTO<string>> DeleteCartItem(Guid marketplaceProjectId)
         {
             try
             {
@@ -147,10 +147,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 );
 
                 _unitOfWork.CartRepository.Update(x => x.Id == cart.Id, updateDefinition);
-
-                var updatedCart = _unitOfWork.CartRepository.GetQueryable().Where(cart => cart.Id == cart.Id).SingleOrDefault();
-                var cartInfoResponse = _mapper.Map<CartInfoResponse>(updatedCart);
-                return ResultDTO<CartInfoResponse>.Success(cartInfoResponse, "Item removed from cart successfully!");
+                return ResultDTO<string>.Success("", "Item removed from cart successfully!");
             }
             catch (Exception ex)
             {
@@ -162,7 +159,7 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
-        public async Task<ResultDTO<CartInfoResponse>> ClearCart()
+        public async Task<ResultDTO<string>> ClearCart()
         {
             try
             {
@@ -181,10 +178,39 @@ namespace Fun_Funding.Application.Services.EntityServices
                 var updateDefinition = Builders<Cart>.Update.Set(c => c.Items, new List<BsonDocument>());
 
                 _unitOfWork.CartRepository.Update(x => x.Id == cart.Id, updateDefinition);
+                return ResultDTO<string>.Success("", "Item removed from cart successfully!");
+            }
+            catch (Exception ex) when (ex is not ExceptionError)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
 
-                var updatedCart = _unitOfWork.CartRepository.GetQueryable().Where(cart => cart.Id == cart.Id).SingleOrDefault();
-                var cartInfoResponse = _mapper.Map<CartInfoResponse>(updatedCart);
-                return ResultDTO<CartInfoResponse>.Success(cartInfoResponse, "Item removed from cart successfully!");
+        public async Task<ResultDTO<decimal>> CountUserCartItem()
+        {
+            try
+            {
+                var user = await _userService.GetUserInfo();
+                var existUser = _mapper.Map<User>(user._data);
+                var cart = _unitOfWork.CartRepository
+                    .GetQueryable()
+                    .SingleOrDefault(c => c.UserId == existUser.Id);
+                if (cart == null)
+                {
+                    cart = new Cart
+                    {
+                        Id = Guid.NewGuid(),
+                        UserId = existUser.Id,
+                        Items = new List<BsonDocument>()
+                    };
+                    await _unitOfWork.CartRepository.CreateAsync(cart);
+                    return ResultDTO<decimal>.Success(0, "Cart found!");
+                }
+                return ResultDTO<decimal>.Success(cart.Items.Count, "Cart found!");
             }
             catch (Exception ex) when (ex is not ExceptionError)
             {

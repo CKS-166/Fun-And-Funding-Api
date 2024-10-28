@@ -130,7 +130,7 @@ namespace Fun_Funding.Application.Services.EntityServices
 
                 foreach (var cartItem in createOrderRequest.CartItems)
                 {
-                    var commissionFee = _commissionFeeService.GetAppliedCommissionFee(CommissionType.MarketingCommission)._data;
+                    var commissionFee = _commissionFeeService.GetAppliedCommissionFee(CommissionType.MarketplaceCommission)._data;
                     var recieverWallet = await _unitOfWork.WalletRepository.GetAsync(w => w.Backer.Id == user.Id);
 
                     // Create digital key for Marketplace Project

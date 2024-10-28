@@ -198,7 +198,7 @@ namespace Fun_Funding.Application.Mapper
             CreateMap<MarketplaceProject, MarketplaceProjectOrderResponse>()
                 .ReverseMap();
             CreateMap<MarketplaceProject, MarketplaceProjectInfoResponse>()
-                .ForMember(dest => dest.MarketingFiles, opt => opt.MapFrom(src => src.MarketingFiles))
+                .ForMember(dest => dest.MarketplaceFiles, opt => opt.MapFrom(src => src.MarketplaceFiles))
                 .ReverseMap();
         }
 

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fun_Funding.Infrastructure.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20241025120630_InitialCreate1")]
-    partial class InitialCreate1
+    [Migration("20241027142014_Remove-MarketingProjectId-MarketplaceFile")]
+    partial class RemoveMarketingProjectIdMarketplaceFile
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -261,9 +261,6 @@ namespace Fun_Funding.Infrastructure.Migrations
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
-
-                    b.Property<Guid?>("MarketingProjectId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid?>("MarketplaceProjectId")
                         .HasColumnType("uniqueidentifier");
@@ -1265,7 +1262,7 @@ namespace Fun_Funding.Infrastructure.Migrations
             modelBuilder.Entity("Fun_Funding.Domain.Entity.MarketplaceFile", b =>
                 {
                     b.HasOne("Fun_Funding.Domain.Entity.MarketplaceProject", null)
-                        .WithMany("MarketingFiles")
+                        .WithMany("MarketplaceFiles")
                         .HasForeignKey("MarketplaceProjectId");
                 });
 
@@ -1595,7 +1592,7 @@ namespace Fun_Funding.Infrastructure.Migrations
                 {
                     b.Navigation("DigitalKeys");
 
-                    b.Navigation("MarketingFiles");
+                    b.Navigation("MarketplaceFiles");
 
                     b.Navigation("ProjectCoupons");
                 });

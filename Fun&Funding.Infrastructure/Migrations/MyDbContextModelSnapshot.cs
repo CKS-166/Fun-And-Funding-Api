@@ -34,7 +34,7 @@ namespace Fun_Funding.Infrastructure.Migrations
 
                     b.HasIndex("ProjectsId");
 
-                    b.ToTable("CategoryFundingProject", (string)null);
+                    b.ToTable("CategoryFundingProject");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.BankAccount", b =>
@@ -60,7 +60,7 @@ namespace Fun_Funding.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("BankAccount", (string)null);
+                    b.ToTable("BankAccount");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.Category", b =>
@@ -83,7 +83,7 @@ namespace Fun_Funding.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Category", (string)null);
+                    b.ToTable("Category");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.CommissionFee", b =>
@@ -116,7 +116,7 @@ namespace Fun_Funding.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("CommissionFee", (string)null);
+                    b.ToTable("CommissionFee");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.DigitalKey", b =>
@@ -150,7 +150,7 @@ namespace Fun_Funding.Infrastructure.Migrations
 
                     b.HasIndex("MarketplaceProjectId");
 
-                    b.ToTable("DigitalKey", (string)null);
+                    b.ToTable("DigitalKey");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.FundingFile", b =>
@@ -186,7 +186,7 @@ namespace Fun_Funding.Infrastructure.Migrations
 
                     b.HasIndex("FundingProjectId");
 
-                    b.ToTable("FundingFile", (string)null);
+                    b.ToTable("FundingFile");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.FundingProject", b =>
@@ -238,7 +238,7 @@ namespace Fun_Funding.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("FundingProject", (string)null);
+                    b.ToTable("FundingProject");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.MarketplaceFile", b =>
@@ -259,9 +259,6 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<Guid?>("MarketingProjectId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid?>("MarketplaceProjectId")
                         .HasColumnType("uniqueidentifier");
 
@@ -277,7 +274,7 @@ namespace Fun_Funding.Infrastructure.Migrations
 
                     b.HasIndex("MarketplaceProjectId");
 
-                    b.ToTable("MarketplaceFile", (string)null);
+                    b.ToTable("MarketplaceFile");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.MarketplaceProject", b =>
@@ -318,7 +315,7 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.HasIndex("FundingProjectId")
                         .IsUnique();
 
-                    b.ToTable("MarketplaceProject", (string)null);
+                    b.ToTable("MarketplaceProject");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.Milestone", b =>
@@ -361,7 +358,7 @@ namespace Fun_Funding.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Milestones", (string)null);
+                    b.ToTable("Milestones");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.Order", b =>
@@ -389,7 +386,7 @@ namespace Fun_Funding.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Order", (string)null);
+                    b.ToTable("Order");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.OrderDetail", b =>
@@ -429,7 +426,7 @@ namespace Fun_Funding.Infrastructure.Migrations
                         .IsUnique()
                         .HasFilter("[ProjectCouponId] IS NOT NULL");
 
-                    b.ToTable("OrderDetail", (string)null);
+                    b.ToTable("OrderDetail");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.Package", b =>
@@ -475,7 +472,7 @@ namespace Fun_Funding.Infrastructure.Migrations
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("Package", (string)null);
+                    b.ToTable("Package");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.PackageBacker", b =>
@@ -511,7 +508,7 @@ namespace Fun_Funding.Infrastructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("PackageBacker", (string)null);
+                    b.ToTable("PackageBacker");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.ProjectCoupon", b =>
@@ -553,7 +550,7 @@ namespace Fun_Funding.Infrastructure.Migrations
 
                     b.HasIndex("MarketplaceProjectId");
 
-                    b.ToTable("ProjectCoupon", (string)null);
+                    b.ToTable("ProjectCoupon");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.ProjectMilestone", b =>
@@ -589,7 +586,7 @@ namespace Fun_Funding.Infrastructure.Migrations
 
                     b.HasIndex("MilestoneId");
 
-                    b.ToTable("ProjectMilestones", (string)null);
+                    b.ToTable("ProjectMilestones");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.ProjectMilestoneBacker", b =>
@@ -626,7 +623,7 @@ namespace Fun_Funding.Infrastructure.Migrations
 
                     b.HasIndex("ProjectMilestoneId");
 
-                    b.ToTable("ProjectMilestoneBacker", (string)null);
+                    b.ToTable("ProjectMilestoneBacker");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.ProjectMilestoneRequirement", b =>
@@ -666,7 +663,7 @@ namespace Fun_Funding.Infrastructure.Migrations
 
                     b.HasIndex("RequirementId");
 
-                    b.ToTable("ProjectMilestoneRequirements", (string)null);
+                    b.ToTable("ProjectMilestoneRequirements");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.ProjectRequirementFile", b =>
@@ -702,7 +699,7 @@ namespace Fun_Funding.Infrastructure.Migrations
 
                     b.HasIndex("ProjectMilestoneRequirementId");
 
-                    b.ToTable("ProjectRequirementFiles", (string)null);
+                    b.ToTable("ProjectRequirementFiles");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.Requirement", b =>
@@ -741,7 +738,7 @@ namespace Fun_Funding.Infrastructure.Migrations
 
                     b.HasIndex("MilestoneId");
 
-                    b.ToTable("Requirements", (string)null);
+                    b.ToTable("Requirements");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.RewardItem", b =>
@@ -780,7 +777,7 @@ namespace Fun_Funding.Infrastructure.Migrations
 
                     b.HasIndex("PackageId");
 
-                    b.ToTable("RewardItem", (string)null);
+                    b.ToTable("RewardItem");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.SystemWallet", b =>
@@ -806,7 +803,7 @@ namespace Fun_Funding.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("SystemWallet", (string)null);
+                    b.ToTable("SystemWallet");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.Transaction", b =>
@@ -865,7 +862,7 @@ namespace Fun_Funding.Infrastructure.Migrations
 
                     b.HasIndex("WalletId");
 
-                    b.ToTable("Transaction", (string)null);
+                    b.ToTable("Transaction");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.User", b =>
@@ -988,7 +985,7 @@ namespace Fun_Funding.Infrastructure.Migrations
                         .IsUnique()
                         .HasFilter("[UserId] IS NOT NULL");
 
-                    b.ToTable("UserFile", (string)null);
+                    b.ToTable("UserFile");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.Wallet", b =>
@@ -1036,7 +1033,7 @@ namespace Fun_Funding.Infrastructure.Migrations
 
                     b.HasIndex("MarketplaceProjectId");
 
-                    b.ToTable("Wallet", (string)null);
+                    b.ToTable("Wallet");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.WithdrawRequest", b =>
@@ -1081,7 +1078,7 @@ namespace Fun_Funding.Infrastructure.Migrations
 
                     b.HasIndex("WalletId");
 
-                    b.ToTable("WithdrawRequest", (string)null);
+                    b.ToTable("WithdrawRequest");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<System.Guid>", b =>
@@ -1262,7 +1259,7 @@ namespace Fun_Funding.Infrastructure.Migrations
             modelBuilder.Entity("Fun_Funding.Domain.Entity.MarketplaceFile", b =>
                 {
                     b.HasOne("Fun_Funding.Domain.Entity.MarketplaceProject", null)
-                        .WithMany("MarketingFiles")
+                        .WithMany("MarketplaceFiles")
                         .HasForeignKey("MarketplaceProjectId");
                 });
 
@@ -1592,7 +1589,7 @@ namespace Fun_Funding.Infrastructure.Migrations
                 {
                     b.Navigation("DigitalKeys");
 
-                    b.Navigation("MarketingFiles");
+                    b.Navigation("MarketplaceFiles");
 
                     b.Navigation("ProjectCoupons");
                 });

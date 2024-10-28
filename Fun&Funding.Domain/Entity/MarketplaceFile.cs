@@ -11,9 +11,8 @@ namespace Fun_Funding.Domain.Entity
     {
         public string Name { get; set; }
         public string URL { get; set; }
-        public FileType Filetype { get; set; }
-
-        public Guid? MarketingProjectId { get; set; }
+        public FileType FileType { get; set; }
+        public Guid? MarketplaceProjectId { get; set; }
 
     }
 }

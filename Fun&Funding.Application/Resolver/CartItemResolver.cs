@@ -3,6 +3,7 @@ using Fun_Funding.Application.ViewModel.CartDTO;
 using Fun_Funding.Application.ViewModel.MarketplaceProjectDTO;
 using Fun_Funding.Domain.Entity;
 using Fun_Funding.Domain.Entity.NoSqlEntities;
+using Microsoft.EntityFrameworkCore;
 using MongoDB.Bson;
 using System;
 using System.Collections.Generic;
@@ -27,15 +28,31 @@ namespace Fun_Funding.Application.Resolver
         {
             var items = new List<ItemInfoResponse>();
 
+            var projectIds = new HashSet<Guid>();
+
+            foreach (var bsonItem in source.Items)
+            {
+                if (bsonItem.TryGetValue("marketplaceProjectId", out BsonValue projectIdValue) && projectIdValue.IsGuid)
+                {
+                    projectIds.Add(projectIdValue.AsGuid);
+                }
+            }
+
+            var projects = _unitOfWork.MarketplaceRepository.GetQueryable()
+                .AsNoTracking()
+                .Include(p => p.MarketplaceFiles)
+                .Where(p => projectIds.Contains(p.Id))
+                .ToList();
+
+            var projectLookup = projects.ToDictionary(p => p.Id);
+
             foreach (var bsonItem in source.Items)
             {
                 if (bsonItem.TryGetValue("marketplaceProjectId", out BsonValue projectIdValue) && projectIdValue.IsGuid)
                 {
                     Guid projectId = projectIdValue.AsGuid;
 
-                    MarketplaceProject projectInfo = _unitOfWork.MarketplaceRepository.GetById(projectId);
-
-                    if (projectInfo != null)
+                    if (projectLookup.TryGetValue(projectId, out MarketplaceProject projectInfo))
                     {
                         items.Add(new ItemInfoResponse
                         {
@@ -50,6 +67,7 @@ namespace Fun_Funding.Application.Resolver
 
             return items;
         }
+
     }
 
 }
