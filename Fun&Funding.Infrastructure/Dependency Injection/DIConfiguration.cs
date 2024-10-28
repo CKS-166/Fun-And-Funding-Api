@@ -18,6 +18,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Fun_Funding.Application.ExternalServices.SoftDeleteService;
+using Fun_Funding.Application.Interfaces.IEntityService;
 
 namespace Fun_Funding.Infrastructure.Dependency_Injection
 {
@@ -129,6 +130,7 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             service.AddScoped<IOrderService, OrderService>();
             service.AddScoped<ICreatorContractService, CreatorContractService>();
             service.AddScoped<IDigitalKeyService, DigitalKeyService>();
+            service.AddScoped<IBankAccountService, BankAccountService>();
 
             #endregion
 
