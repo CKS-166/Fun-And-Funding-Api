@@ -10,7 +10,7 @@ namespace Fun_Funding.Domain.Entity
     {
         public string? BankNumber { get; set; }
         public string? BankCode { get; set; }
-
+        
         public Wallet? Wallet { get; set; }
     }
 }
