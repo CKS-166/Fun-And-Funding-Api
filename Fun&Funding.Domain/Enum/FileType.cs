@@ -12,7 +12,7 @@ namespace Fun_Funding.Domain.Enum
         LiveDemo,
         Thumbnail,
         GameFile,
-        FundingMedia
-
+        FundingMedia,
+        Evidence,
     }
 }

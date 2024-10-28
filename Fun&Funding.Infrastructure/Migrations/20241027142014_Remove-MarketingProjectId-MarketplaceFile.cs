@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Fun_Funding.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate1 : Migration
+    public partial class RemoveMarketingProjectIdMarketplaceFile : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -510,7 +510,6 @@ namespace Fun_Funding.Infrastructure.Migrations
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     URL = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Filetype = table.Column<int>(type: "int", nullable: false),
-                    MarketingProjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     MarketplaceProjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),

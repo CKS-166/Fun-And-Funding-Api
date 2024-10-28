@@ -47,5 +47,12 @@ namespace Fun_Funding.Api.Controllers
             var response = await _cartService.DeleteCartItem(marketplaceProjectId);
             return Ok(response);
         }
+        [HttpGet("count")]
+        [Authorize(Roles = Role.Backer)]
+        public async Task<IActionResult> CountUserCartItem()
+        {
+            var response = await _cartService.CountUserCartItem();
+            return Ok(response);
+        }
     }
 }

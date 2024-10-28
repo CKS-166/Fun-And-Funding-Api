@@ -11,6 +11,6 @@ namespace Fun_Funding.Application.ViewModel.MarketplaceFileDTO
     {
         public string? Name { get; set; }
         public string? URL { get; set; }
-        public FileType Filetype { get; set; }
+        public FileType FileType { get; set; }
     }
 }
