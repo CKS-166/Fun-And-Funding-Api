@@ -76,9 +76,9 @@ namespace Fun_Funding.Application.Services.EntityServices
                     }
 
                 }
-               
 
-                var checkValidateMilstone = CanCreateProjectMilestone(project, requestMilestone.MilestoneOrder);
+
+                var checkValidateMilstone = CanCreateProjectMilestone(project, requestMilestone.MilestoneOrder, requestMilestone.CreatedDate);
                 if (checkValidateMilstone != null)
                 {
                     return ResultDTO<ProjectMilestoneResponse>.Fail(checkValidateMilstone, 500);
@@ -117,7 +117,9 @@ namespace Fun_Funding.Application.Services.EntityServices
                     .GetQueryable()
                     .Include(pm => pm.Milestone)
                     .ThenInclude(pmr => pmr.Requirements)
-                    .Include(pmr => pmr.ProjectMilestoneRequirements)
+                    .Include(pm => pm.ProjectMilestoneRequirements) // Include ProjectMilestoneRequirements collection
+                    .ThenInclude(pmr => pmr.Requirement) // Include Requirement within ProjectMilestoneRequirements
+                    .Include(pm => pm.ProjectMilestoneRequirements) // Include ProjectMilestoneRequirements collection again
                     .ThenInclude(pmr => pmr.RequirementFiles)
                     .FirstOrDefault(pm => pm.Id == id);
                 if (projectMilestone == null)
@@ -138,7 +140,7 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
-        public string CanCreateProjectMilestone(FundingProject project, int requestedMilestoneOrder)
+        public string CanCreateProjectMilestone(FundingProject project, int requestedMilestoneOrder, DateTime createdDate)
         {
             // Get all the project milestones ordered by MilestoneOrder
             var projectMilestones = project.ProjectMilestones
@@ -159,9 +161,10 @@ namespace Fun_Funding.Application.Services.EntityServices
                 }
                 if (requestedMilestoneOrder > 1)
                 {
-                    if ((projectMilestones[requestedMilestoneOrder].CreatedDate - projectMilestones[requestedMilestoneOrder - 1].EndDate).TotalDays > maxMilestoneExtend)
+                    var previousMilestone = projectMilestones[requestedMilestoneOrder - 2];
+                    if ((createdDate - previousMilestone.EndDate).TotalDays > maxMilestoneExtend)
                     {
-                        return "Requested days betweeen each milestone must be within 10 days";
+                        return $"Requested days between each milestone must be within {maxMilestoneExtend} days";
                     }
                 }
 
@@ -323,7 +326,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                     isAscending: request.IsAscending ?? true,
                     pageIndex: request.PageIndex ?? 1,
                     pageSize: request.PageSize ?? 10,
-                    includeProperties: "Milestone,ProjectMilestoneRequirements.RequirementFiles"
+                    includeProperties: "Milestone,ProjectMilestoneRequirements.RequirementFiles,ProjectMilestoneRequirements.Requirement"
                 );
 
                 if (list != null && list.Any())
