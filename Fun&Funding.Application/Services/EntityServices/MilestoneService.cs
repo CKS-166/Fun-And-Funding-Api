@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Azure.Core;
+using Fun_Funding.Application.ExceptionHandler;
 using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.MilestoneDTO;
@@ -10,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -146,7 +148,29 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
+        public async Task<ResultDTO<MilestoneResponse>> GetMilestoneById(Guid milestoneId)
+        {
+            try
+            {
+                var milestone = _unitOfWork.MilestoneRepository.GetQueryable()
+                    .Include(m => m.Requirements).FirstOrDefault(m => m.Id == milestoneId && m.IsDeleted == false);
+                if (milestone == null)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "Milestone not found");
+                }
+                var response = _mapper.Map<MilestoneResponse>(milestone);
+                return ResultDTO<MilestoneResponse>.Success(response);
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
 
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
 
 
 

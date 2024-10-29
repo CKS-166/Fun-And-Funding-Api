@@ -1,5 +1,7 @@
 ﻿using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel.WithdrawDTO;
+using Fun_Funding.Domain.Constrain;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,18 +21,28 @@ namespace Fun_Funding.Api.Controllers
         public async Task<IActionResult> GetAllRequest()
         {
             var result = await _withdrawService.GetAllRequest();
+            if(result == null) return NotFound();
             return Ok(result);
         }
-        [HttpPost]
-        public async Task<IActionResult> CreateRequest(WithdrawReq request)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetRequestById(Guid id)
         {
-            var result = await _withdrawService.CreateMarketplaceRequest(request);
+            var result = await _withdrawService.GetWithdrawRequestById(id);
+            if(result == null) return NotFound();
+            return Ok(result);
+        }
+        [HttpPost("marketplace/{marketplaceId}")]
+        public async Task<IActionResult> CreateRequest(Guid marketplaceId)
+        {
+            var result = await _withdrawService.CreateMarketplaceRequest(marketplaceId);
             return Ok(result);
         }
         [HttpPatch("{id}/process")]
+        [Authorize(Roles = Role.Admin)]
         public async Task<IActionResult> ProcessingRequest(Guid id)
         {
             var result = await _withdrawService.AdminProcessingRequest(id);
+            if(result == null) return NotFound();
             return Ok(result);
         }
         [HttpPatch("{id}/approve")]

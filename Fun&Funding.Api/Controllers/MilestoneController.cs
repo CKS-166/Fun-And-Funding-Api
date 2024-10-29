@@ -39,5 +39,11 @@ namespace Fun_Funding.Api.Controllers
                 return BadRequest(result);
             return Ok(result);
         }
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetMilestoneById(Guid id)
+        {
+            var result = _milestoneService.GetMilestoneById(id);
+            return Ok(result);
+        }
     }
 }
