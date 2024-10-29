@@ -155,7 +155,7 @@ namespace Fun_Funding.Application.Mapper
                 .ForMember(des => des.Description, src => src.MapFrom(x => x.Milestone.Description))
                 .ReverseMap();
             CreateMap<ProjectMilestoneRequirement, ProjectMilestoneRequirementResponse>()
-                .ForMember(des => des.Description , src => src.MapFrom(x => x.Requirement.Description))
+                .ForMember(des => des.ReqDescription , src => src.MapFrom(x => x.Requirement.Description))
                 .ReverseMap();
         }
 
