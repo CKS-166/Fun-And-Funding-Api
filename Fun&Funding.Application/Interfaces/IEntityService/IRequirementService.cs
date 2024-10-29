@@ -11,6 +11,7 @@ namespace Fun_Funding.Application.IService
 {
     public interface IRequirementService
     {
+        Task<ResultDTO<RequirementResponse>> GetRequirementById(Guid id);
         Task<ResultDTO<RequirementResponse>> CreateNewRequirement(RequirementRequest request);
         Task<ResultDTO<RequirementResponse>> UpdateRequirement(UpdateRequirement request);
     }

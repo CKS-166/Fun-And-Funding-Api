@@ -57,7 +57,7 @@ namespace Fun_Funding.Application.Mapper
             MappingOrderDetail();
             MappingDigitalKey();
             MappingCart();
-            MappingWthdraw();
+            MappingWithdraw();
         }
         public void MappingFundingProject()
         {
@@ -118,7 +118,7 @@ namespace Fun_Funding.Application.Mapper
                 .ReverseMap();
             CreateMap<WithdrawResponse, WithdrawRequest>()
                 .ReverseMap();
-            
+
             CreateMap<WalletFundingResponse, Wallet>()
                 .ForMember(des => des.BankAccount, src => src.MapFrom(x => x.BankAccount))
                 .ReverseMap();
@@ -155,7 +155,7 @@ namespace Fun_Funding.Application.Mapper
                 .ForMember(des => des.Description, src => src.MapFrom(x => x.Milestone.Description))
                 .ReverseMap();
             CreateMap<ProjectMilestoneRequirement, ProjectMilestoneRequirementResponse>()
-                .ForMember(des => des.Description , src => src.MapFrom(x => x.Requirement.Description))
+                .ForMember(des => des.Description, src => src.MapFrom(x => x.Requirement.Description))
                 .ReverseMap();
         }
 
@@ -221,13 +221,14 @@ namespace Fun_Funding.Application.Mapper
             }).ReverseMap();
 
             CreateMap<Chat, ChatRequest>().ReverseMap();
-            
+
         }
         public void MappingProjectCoupon()
         {
             CreateMap<ProjectCoupon, CouponResponse>()
                 .ReverseMap();
-        }public void MappingWthdraw()
+        }
+        public void MappingWithdraw()
         {
             CreateMap<WithdrawRequest, WithdrawResponse>()
                 .ReverseMap();

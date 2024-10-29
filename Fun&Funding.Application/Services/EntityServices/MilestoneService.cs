@@ -3,6 +3,7 @@ using Azure.Core;
 using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.MilestoneDTO;
+using Fun_Funding.Application.ViewModel.RequirementDTO;
 using Fun_Funding.Domain.Constrain;
 using Fun_Funding.Domain.Entity;
 using Microsoft.EntityFrameworkCore;
@@ -99,27 +100,53 @@ namespace Fun_Funding.Application.Services.EntityServices
 
         public async Task<ResultDTO<List<MilestoneResponse>>> GetListLastestMilestone()
         {
-            //var user = _userService.GetUserInfo().Result;
-            //User exitUser = _mapper.Map<User>(user._data);
-            //if (user is null)
-            //{
-            //    return ResultDTO<List<MilestoneResponse>>.Fail("can not found user");
-            //}
             try
             {
                 var latestGroupMilestones = _unitOfWork.MilestoneRepository.GetQueryable()
                     .Include(x => x.Requirements)
-                    .GroupBy(x => x.MilestoneOrder)
-                    .Select(g => g.OrderByDescending(x => x.Version).FirstOrDefault())
+                    .GroupBy(milestone => milestone.MilestoneOrder)
+                    .Select(group => group
+                        .OrderByDescending(milestone => milestone.Version)
+                        .Select(milestone => new MilestoneResponse
+                        {
+                            Id = milestone.Id,
+                            MilestoneName = milestone.MilestoneName,
+                            Description = milestone.Description,
+                            Duration = milestone.Duration,
+                            Version = milestone.Version,
+                            MilestoneOrder = milestone.MilestoneOrder,
+                            DisbursementPercentage = milestone.DisbursementPercentage,
+                            UpdateDate = milestone.UpdateDate,
+                            Requirements = milestone.Requirements
+                                .Where(req => req.IsDeleted == false)
+                                .OrderByDescending(req => req.Version)
+                                .Select(req => new RequirementResponse
+                                {
+                                    Id = req.Id,
+                                    Title = req.Title,
+                                    Description = req.Description,
+                                    Version = req.Version,
+                                    Order = req.Order,
+                                    Status = req.Status,
+                                    CreateDate = req.CreatedDate,
+                                    MilestoneId = req.MilestoneId,
+                                    IsDeleted = req.IsDeleted
+                                })
+                                .ToList()
+                        })
+                        .FirstOrDefault()
+                    )
                     .ToList();
-                List<MilestoneResponse> responses = _mapper.Map<List<MilestoneResponse>>(latestGroupMilestones);
-                return ResultDTO<List<MilestoneResponse>>.Success(responses, "Group latest milestone");
+
+                return ResultDTO<List<MilestoneResponse>>.Success(latestGroupMilestones, "Group latest milestone");
             }
             catch (Exception ex)
             {
-                return ResultDTO<List<MilestoneResponse>>.Fail("something wrong");
+                return ResultDTO<List<MilestoneResponse>>.Fail("something went wrong");
             }
         }
+
+
 
 
 

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Fun_Funding.Api.Controllers
 {
-    [Route("api/milestone")]
+    [Route("api/milestones")]
     [ApiController]
     public class MilestoneController : ControllerBase
     {
