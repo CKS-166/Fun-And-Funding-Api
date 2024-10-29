@@ -1,5 +1,4 @@
 using AutoMapper;
-using Fun_Funding.Application;
 using Fun_Funding.Application.Resolver;
 using Fun_Funding.Application.ViewModel.BankAccountDTO;
 using Fun_Funding.Application.ViewModel.CartDTO;
@@ -118,7 +117,7 @@ namespace Fun_Funding.Application.Mapper
                 .ReverseMap();
             CreateMap<WithdrawResponse, WithdrawRequest>()
                 .ReverseMap();
-            
+
             CreateMap<WalletFundingResponse, Wallet>()
                 .ForMember(des => des.BankAccount, src => src.MapFrom(x => x.BankAccount))
                 .ReverseMap();
@@ -155,7 +154,7 @@ namespace Fun_Funding.Application.Mapper
                 .ForMember(des => des.Description, src => src.MapFrom(x => x.Milestone.Description))
                 .ReverseMap();
             CreateMap<ProjectMilestoneRequirement, ProjectMilestoneRequirementResponse>()
-                .ForMember(des => des.Description , src => src.MapFrom(x => x.Requirement.Description))
+                .ForMember(des => des.Description, src => src.MapFrom(x => x.Requirement.Description))
                 .ReverseMap();
         }
 
@@ -199,13 +198,16 @@ namespace Fun_Funding.Application.Mapper
                 .ReverseMap();
             CreateMap<MarketplaceProject, MarketplaceProjectInfoResponse>()
                 .ForMember(dest => dest.MarketplaceFiles, opt => opt.MapFrom(src => src.MarketplaceFiles))
+                .ForMember(dest => dest.Categories, opt => opt.MapFrom(src => src.FundingProject.Categories))
+                .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.FundingProject.User))
                 .ReverseMap();
         }
 
         public void MappingMarketplaceFile()
         {
-            CreateMap<MarketplaceFile, MarketplaceFileInfoResponse>()
-                .ReverseMap();
+            CreateMap<MarketplaceFile, MarketplaceFileInfoResponse>().ReverseMap();
+
+            CreateMap<MarketplaceProjectAddRequest, MarketplaceProject>().ReverseMap();
         }
 
         public void MappingChat()
@@ -221,13 +223,14 @@ namespace Fun_Funding.Application.Mapper
             }).ReverseMap();
 
             CreateMap<Chat, ChatRequest>().ReverseMap();
-            
+
         }
         public void MappingProjectCoupon()
         {
             CreateMap<ProjectCoupon, CouponResponse>()
                 .ReverseMap();
-        }public void MappingWthdraw()
+        }
+        public void MappingWthdraw()
         {
             CreateMap<WithdrawRequest, WithdrawResponse>()
                 .ReverseMap();

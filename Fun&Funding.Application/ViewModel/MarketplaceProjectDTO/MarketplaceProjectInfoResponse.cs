@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Fun_Funding.Application.ViewModel.MarketplaceFileDTO;
+using Fun_Funding.Application.ViewModel.UserDTO;
 using Fun_Funding.Domain.Entity;
-using Fun_Funding.Application.ViewModel.MarketplaceFileDTO;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Fun_Funding.Application.ViewModel.MarketplaceProjectDTO
 {
@@ -19,6 +15,8 @@ namespace Fun_Funding.Application.ViewModel.MarketplaceProjectDTO
         [Range(0, (double)decimal.MaxValue)]
         [Column(TypeName = "decimal(18, 2)")]
         public decimal Price { get; set; }
-        public virtual ICollection<MarketplaceFileInfoResponse>? MarketplaceFiles { get; set; }
+        public required UserInfoResponse User { get; set; }
+        public required virtual ICollection<MarketplaceFileInfoResponse> MarketplaceFiles { get; set; }
+        public required virtual ICollection<Category> Categories { get; set; }
     }
 }
