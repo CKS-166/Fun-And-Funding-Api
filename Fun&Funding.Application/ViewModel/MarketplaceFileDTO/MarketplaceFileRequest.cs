@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace Fun_Funding.Application.ViewModel.MarketplaceFileDTO
 {
-    public class MarketplaceFileAddRequest
+    public class MarketplaceFileRequest
     {
         public string Name { get; set; } = string.Empty;
         public required IFormFile URL { get; set; }

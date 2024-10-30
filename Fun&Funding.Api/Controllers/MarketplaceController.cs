@@ -33,5 +33,27 @@ namespace Fun_Funding.Api.Controllers
                 StatusCode = response._statusCode
             };
         }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetMarketplaceProjectById([FromRoute] Guid id)
+        {
+            var response = await _marketplace.GetMarketplaceProjectById(id);
+            return Ok(response);
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteMarketplaceProject([FromRoute] Guid id)
+        {
+            await _marketplace.DeleteMarketplaceProject(id);
+            return NoContent();
+        }
+
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> UpdateMarketplaceProject([FromRoute] Guid id,
+            [FromForm] MarketplaceProjectUpdateRequest request)
+        {
+            var response = await _marketplace.UpdateMarketplaceProject(id, request);
+            return Ok(response);
+        }
     }
 }

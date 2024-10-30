@@ -1,13 +1,16 @@
 ﻿using Fun_Funding.Application;
+using Fun_Funding.Application.ExternalServices.SoftDeleteService;
+using Fun_Funding.Application.Interfaces.IEntityService;
 using Fun_Funding.Application.Interfaces.IExternalServices;
+using Fun_Funding.Application.Interfaces.IRepository;
 using Fun_Funding.Application.IRepository;
 using Fun_Funding.Application.IService;
+using Fun_Funding.Application.Mapper;
 using Fun_Funding.Application.Services.EntityServices;
+using Fun_Funding.Application.Services.ExternalServices;
 using Fun_Funding.Domain.Entity;
 using Fun_Funding.Infrastructure.ExternalServices.BackgroundWorkerService;
 using Fun_Funding.Infrastructure.ExternalServices.StorageService;
-using Fun_Funding.Application.Services.ExternalServices;
-using Fun_Funding.Application.Mapper;
 using Fun_Funding.Infrastructure.Persistence.Database;
 using Fun_Funding.Infrastructure.Persistence.Repository;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -17,9 +20,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Fun_Funding.Application.ExternalServices.SoftDeleteService;
-using Fun_Funding.Application.Interfaces.IRepository;
-using Fun_Funding.Application.Interfaces.IEntityService;
 
 namespace Fun_Funding.Infrastructure.Dependency_Injection
 {
@@ -102,6 +102,7 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             service.AddScoped<IChatRepository, ChatRepository>();
             service.AddScoped<ICartRepository, CartRepository>();
             service.AddScoped<IProjectCouponService, ProjectCouponService>();
+            service.AddScoped<IMarketplaceFileRepository, MarketplaceFileRepository>();
             #endregion
 
             #region Sevices

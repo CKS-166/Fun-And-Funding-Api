@@ -44,6 +44,7 @@ namespace Fun_Funding.Infrastructure
         private ICreatorContractRepository _creatorContractRepository;
         private IDigitalKeyRepository _digitalKeyRepository;
         private ICartRepository _cartRepository;
+        private IMarketplaceFileRepository _marketplaceFileRepository;
         public UnitOfWork(MyDbContext dbContext, MongoDBContext mongoDBContext)
         {
             _dbContext = dbContext;
@@ -233,7 +234,7 @@ namespace Fun_Funding.Infrastructure
         public IChatRepository ChatRepository =>
             _chatRepository ??= new ChatRepository(_mongoDBContext);
 
-        public IMarketplaceRepository MarketplaceRepository => 
+        public IMarketplaceRepository MarketplaceRepository =>
             _marketplaceRepository ??= new MarketplaceRepository(_dbContext);
 
         public ICreatorContractRepository CreatorContractRepository =>
@@ -241,6 +242,9 @@ namespace Fun_Funding.Infrastructure
 
         public ICartRepository CartRepository =>
             _cartRepository ??= new CartRepository(_mongoDBContext);
+
+        public IMarketplaceFileRepository MarketplaceFileRepository =>
+            _marketplaceFileRepository ??= new MarketplaceFileRepository(_dbContext);
 
 
         // Commit and rollback methods

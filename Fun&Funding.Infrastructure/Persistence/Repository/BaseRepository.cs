@@ -1,7 +1,6 @@
 ﻿using Fun_Funding.Application.IRepository;
 using Fun_Funding.Infrastructure.Persistence.Database;
 using Microsoft.EntityFrameworkCore;
-using Org.BouncyCastle.Asn1;
 using System.Linq.Expressions;
 
 namespace Fun_Funding.Infrastructure.Persistence.Repository
@@ -167,6 +166,5 @@ namespace Fun_Funding.Infrastructure.Persistence.Repository
         {
             return _entitySet.AsQueryable();
         }
-
     }
 }
