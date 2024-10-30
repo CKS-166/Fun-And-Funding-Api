@@ -11,6 +11,7 @@
         Rejected,
         Approved,
         Withdrawed,
-        Refunded
+        Refunded,
+        Reported
     }
 }

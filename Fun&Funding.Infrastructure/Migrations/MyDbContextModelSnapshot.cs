@@ -253,7 +253,7 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<int>("Filetype")
+                    b.Property<int>("FileType")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsDeleted")
@@ -309,6 +309,9 @@ namespace Fun_Funding.Infrastructure.Migrations
 
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18, 2)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
