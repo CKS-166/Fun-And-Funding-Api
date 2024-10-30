@@ -55,7 +55,8 @@ namespace Fun_Funding.Application.Services.EntityServices
                     {
                         ProjectMilestoneId = projectMilestone.Id,
                         Content = requestItem.Content,
-                        RequirementId = requestItem.RequirementId
+                        RequirementId = requestItem.RequirementId,
+                        RequirementStatus = requestItem.RequirementStatus
                     };
                     List<ProjectRequirementFile> files = new List<ProjectRequirementFile>();
                     if (requestItem.RequirementFiles?.Count > 0)
@@ -106,7 +107,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                         .GetQueryable().Include(pmr => pmr.RequirementFiles).FirstOrDefault(pmr => pmr.Id == requestItem.Id);
                     req.Content = requestItem.Content;
                     req.UpdateDate = requestItem.UpdateDate;
-
+                    req.RequirementStatus = requestItem.RequirementStatus;
                     if (requestItem.RequirementFiles != null)
                     {
                         foreach (var file in requestItem.RequirementFiles)

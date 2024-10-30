@@ -14,5 +14,8 @@ namespace Fun_Funding.Domain.Enum
         GameFile,
         FundingMedia,
         Evidence,
+        ImageEvidence,
+        VideoEvidence,
+        Others
     }
 }
