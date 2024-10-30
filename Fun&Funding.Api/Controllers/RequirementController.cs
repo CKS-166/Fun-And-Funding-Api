@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Fun_Funding.Api.Controllers
 {
-    [Route("api/requirement")]
+    [Route("api/requirements")]
     [ApiController]
     public class RequirementController : ControllerBase
     {
@@ -15,6 +15,14 @@ namespace Fun_Funding.Api.Controllers
         public RequirementController(IRequirementService requirementService)
         {
             _requirementService = requirementService;
+        }
+        [HttpGet("{id}")]
+        public async Task<IActionResult> FindRequirement(Guid id)
+        {
+            var result = await _requirementService.GetRequirementById(id);
+            if (!result._isSuccess)
+                return BadRequest(result);
+            return Ok(result);
         }
         [HttpPost]
         public async Task<IActionResult> CreateRequirement([FromBody] RequirementRequest request)

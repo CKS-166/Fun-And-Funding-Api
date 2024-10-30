@@ -32,19 +32,33 @@ namespace Fun_Funding.Application.Services.EntityServices
         {
             var user = await _userService.GetUserInfo();
             if (!user._isSuccess)
-                return ResultDTO<RequirementResponse>.Fail("user null");
-            User exitUser = _mapper.Map<User>(user._data);
+                return ResultDTO<RequirementResponse>.Fail("User not found.");
+
+            var exitUser = _mapper.Map<User>(user._data);
+
             if (request is null)
-                return ResultDTO<RequirementResponse>.Fail("request null");
+                return ResultDTO<RequirementResponse>.Fail("Request is null.");
+
             var exitedMilestone = await _unitOfWork.MilestoneRepository.GetAsync(x => x.Id == request.MilestoneId);
             if (exitedMilestone is null)
-                return ResultDTO<RequirementResponse>.Fail("request null");
-            if (exitedMilestone.IsDeleted is true)
-                return ResultDTO<RequirementResponse>.Fail("milestone is deleted, can not create requirement");
+                return ResultDTO<RequirementResponse>.Fail("Milestone not found.");
+
+            if (exitedMilestone.IsDeleted)
+                return ResultDTO<RequirementResponse>.Fail("Milestone is deleted; cannot create requirement.");
+
+            // Get all requirements for the milestone
+            var exitedRequirements = await _unitOfWork.RequirementRepository.GetAllAsync(x => x.MilestoneId == request.MilestoneId);
+
+            // Determine the next order number for the new requirement
+            int nextOrder = 1;
+            if (exitedRequirements.Any())
+            {
+                nextOrder = exitedRequirements.OrderByDescending(x => x.Order).First().Order + 1;
+            }
+
             try
             {
-
-                //tao requirement moi
+                // Create the new requirement
                 Requirement requirement = new Requirement
                 {
                     MilestoneId = request.MilestoneId,
@@ -55,11 +69,29 @@ namespace Fun_Funding.Application.Services.EntityServices
                     Milestone = exitedMilestone,
                     Version = 1,
                     Title = request.Title,
+                    Order = nextOrder // Use the calculated next order
                 };
+
                 await _unitOfWork.RequirementRepository.AddAsync(requirement);
                 await _unitOfWork.CommitAsync();
 
                 RequirementResponse response = _mapper.Map<RequirementResponse>(requirement);
+                return ResultDTO<RequirementResponse>.Success(response, "Successfully created.");
+            }
+            catch (Exception ex)
+            {
+                // Optionally log the exception ex
+                return ResultDTO<RequirementResponse>.Fail("An error occurred while creating the requirement.");
+            }
+        }
+
+
+        public async Task<ResultDTO<RequirementResponse>> GetRequirementById(Guid id)
+        {
+            try
+            {
+                var req = await _unitOfWork.RequirementRepository.GetByIdAsync(id);
+                RequirementResponse response = _mapper.Map<RequirementResponse>(req);
                 return ResultDTO<RequirementResponse>.Success(response, "successfull create");
             }
             catch (Exception ex)
@@ -86,6 +118,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 {
                     Id = Guid.NewGuid(),
                     Version = requirement.Version + 1,
+                    Order = requirement.Order,
                     Title = request.Title ?? requirement.Title,
                     CreatedDate = DateTime.Now,
                     IsDeleted = false,

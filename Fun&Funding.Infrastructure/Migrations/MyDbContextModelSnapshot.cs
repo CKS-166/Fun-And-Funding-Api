@@ -724,6 +724,9 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Property<Guid>("MilestoneId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
