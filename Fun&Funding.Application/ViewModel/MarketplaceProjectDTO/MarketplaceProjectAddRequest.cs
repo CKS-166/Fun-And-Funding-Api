@@ -19,6 +19,6 @@ namespace Fun_Funding.Application.ViewModel.MarketplaceProjectDTO
         [Required]
         public Guid FundingProjectId { get; set; }
         [Required]
-        public List<MarketplaceFileAddRequest> MarketplaceFiles { get; set; } = new List<MarketplaceFileAddRequest>();
+        public required List<MarketplaceFileAddRequest> MarketplaceFiles { get; set; }
     }
 }

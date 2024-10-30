@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using Fun_Funding.Domain.Enum;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Fun_Funding.Domain.Entity
 {
     public class MarketplaceProject : BaseEntity
     {
-        public string Introduction {  get; set; }
+        public string Introduction { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         [Range(0, (double)decimal.MaxValue)]
@@ -19,6 +15,7 @@ namespace Fun_Funding.Domain.Entity
 
         public FundingProject FundingProject { get; set; }
         public Guid FundingProjectId { get; set; }
+        public ProjectStatus Status { get; set; }
         public virtual ICollection<DigitalKey>? DigitalKeys { get; set; }
         public virtual ICollection<MarketplaceFile>? MarketplaceFiles { get; set; }
         public virtual ICollection<ProjectCoupon>? ProjectCoupons { get; set; }

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fun_Funding.Infrastructure.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20241027142014_Remove-MarketingProjectId-MarketplaceFile")]
-    partial class RemoveMarketingProjectIdMarketplaceFile
+    [Migration("20241030120308_Migrations")]
+    partial class Migrations
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -256,7 +256,7 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<int>("Filetype")
+                    b.Property<int>("FileType")
                         .HasColumnType("int");
 
                     b.Property<bool>("IsDeleted")
@@ -312,6 +312,9 @@ namespace Fun_Funding.Infrastructure.Migrations
 
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18, 2)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 

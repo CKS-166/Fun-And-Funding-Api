@@ -6,7 +6,9 @@ using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.MarketplaceFileDTO;
 using Fun_Funding.Application.ViewModel.MarketplaceProjectDTO;
 using Fun_Funding.Domain.Entity;
+using Fun_Funding.Domain.Enum;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using System.Net;
 using System.Security.Claims;
@@ -39,8 +41,12 @@ namespace Fun_Funding.Application.Services.EntityServices
             try
             {
                 //find funding project
-                var fundingProject = await _unitOfWork.FundingProjectRepository
-                    .GetByIdAsync(request.FundingProjectId);
+                var fundingProject = await _unitOfWork.FundingProjectRepository.GetQueryable()
+                    .Where(p => p.Id == request.FundingProjectId)
+                    .Include(p => p.User)
+                    .Include(p => p.Categories)
+                    .FirstOrDefaultAsync();
+
                 if (fundingProject == null)
                     throw new ExceptionError((int)HttpStatusCode.NotFound, "Funding Project not found.");
 
@@ -69,7 +75,8 @@ namespace Fun_Funding.Application.Services.EntityServices
                         {
                             Name = file.Name,
                             URL = result.Result,
-                            FileType = file.FileType
+                            FileType = file.FileType,
+                            CreatedDate = DateTime.Now
                         };
 
                         files.Add(media);
@@ -79,6 +86,8 @@ namespace Fun_Funding.Application.Services.EntityServices
                 //map project
                 var marketplaceProject = _mapper.Map<MarketplaceProject>(request);
                 marketplaceProject.MarketplaceFiles = files;
+                marketplaceProject.FundingProject = fundingProject;
+                marketplaceProject.Status = ProjectStatus.Pending;
                 marketplaceProject.CreatedDate = DateTime.Now;
 
                 //save to db
@@ -129,7 +138,7 @@ namespace Fun_Funding.Application.Services.EntityServices
 
                 if (request.MarketplaceFiles.Count <= 0)
                 {
-                    errorMessages.Add("Media file(s) is required.");
+                    errorMessages.Add("Missing file(s).");
                 }
 
                 return errorMessages;
