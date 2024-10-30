@@ -8,5 +8,8 @@ namespace Fun_Funding.Application.IService
     {
         Task<ResultDTO<PaginatedResponse<MarketplaceProject>>> GetAllMarketplaceProject(ListRequest request);
         Task<ResultDTO<MarketplaceProjectInfoResponse>> CreateMarketplaceProject(MarketplaceProjectAddRequest request);
+        Task<ResultDTO<MarketplaceProjectInfoResponse>> GetMarketplaceProjectById(Guid id);
+        Task DeleteMarketplaceProject(Guid id);
+        Task<ResultDTO<MarketplaceProjectInfoResponse>> UpdateMarketplaceProject(Guid id, MarketplaceProjectUpdateRequest request);
     }
 }

@@ -202,13 +202,14 @@ namespace Fun_Funding.Application.Mapper
                 .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.FundingProject.User))
                 .ReverseMap();
             CreateMap<MarketplaceProjectAddRequest, MarketplaceProject>().ReverseMap();
+            CreateMap<MarketplaceProjectUpdateRequest, MarketplaceProject>().ReverseMap();
         }
 
         public void MappingMarketplaceFile()
         {
             CreateMap<MarketplaceFile, MarketplaceFileInfoResponse>().ReverseMap();
 
-            CreateMap<MarketplaceFileAddRequest, MarketplaceFile>().ReverseMap();
+            CreateMap<MarketplaceFileRequest, MarketplaceFile>().ReverseMap();
         }
 
         public void MappingChat()

@@ -36,7 +36,8 @@ namespace Fun_Funding.Application.Services.EntityServices
             _azureService = azureService;
         }
 
-        public async Task<ResultDTO<MarketplaceProjectInfoResponse>> CreateMarketplaceProject(MarketplaceProjectAddRequest request)
+        public async Task<ResultDTO<MarketplaceProjectInfoResponse>>
+            CreateMarketplaceProject(MarketplaceProjectAddRequest request)
         {
             try
             {
@@ -60,7 +61,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 //add files 
                 List<MarketplaceFile> files = new List<MarketplaceFile>();
 
-                foreach (MarketplaceFileAddRequest file in request.MarketplaceFiles)
+                foreach (MarketplaceFileRequest file in request.MarketplaceFiles)
                 {
                     if (file.URL.Length > 0)
                     {
@@ -212,6 +213,100 @@ namespace Fun_Funding.Application.Services.EntityServices
             catch (Exception ex)
             {
                 return ResultDTO<PaginatedResponse<MarketplaceProject>>.Fail("Something wrong");
+            }
+        }
+
+        public async Task<ResultDTO<MarketplaceProjectInfoResponse>> GetMarketplaceProjectById(Guid id)
+        {
+            try
+            {
+                var marketPlaceProject = await _unitOfWork.MarketplaceRepository.GetQueryable()
+                    .Where(p => p.Id == id)
+                    .Include(p => p.MarketplaceFiles)
+                    .Include(p => p.FundingProject)
+                    .ThenInclude(p => p.User)
+                    .FirstOrDefaultAsync();
+
+                if (marketPlaceProject == null)
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "Marketplace Project not found.");
+                else
+                {
+                    var response = _mapper.Map<MarketplaceProjectInfoResponse>(marketPlaceProject);
+
+                    return ResultDTO<MarketplaceProjectInfoResponse>.Success(response);
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
+
+        public async Task DeleteMarketplaceProject(Guid id)
+        {
+            try
+            {
+                var marketPlaceProject = await _unitOfWork.MarketplaceRepository.GetByIdAsync(id);
+
+                if (marketPlaceProject == null)
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "Marketplace Project not found.");
+                else if (marketPlaceProject.Status != ProjectStatus.Pending)
+                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "Marketplace Project cannot be deleted.");
+                else
+                {
+                    _unitOfWork.MarketplaceRepository.Remove(marketPlaceProject);
+                    await _unitOfWork.CommitAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
+
+        public async Task<ResultDTO<MarketplaceProjectInfoResponse>>
+            UpdateMarketplaceProject(Guid id, MarketplaceProjectUpdateRequest request)
+        {
+            try
+            {
+                var marketPlaceProject = await _unitOfWork.MarketplaceRepository.GetByIdAsync(id);
+
+                if (marketPlaceProject == null)
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "Marketplace Project not found.");
+
+                if (marketPlaceProject.Status == ProjectStatus.Pending)
+                {
+                    _mapper.Map(request, marketPlaceProject);
+
+                    _unitOfWork.MarketplaceRepository.Update(marketPlaceProject);
+                    await _unitOfWork.CommitAsync();
+
+                    var response = _mapper.Map<MarketplaceProjectInfoResponse>(marketPlaceProject);
+
+                    return ResultDTO<MarketplaceProjectInfoResponse>.Success(response);
+                }
+                else
+                    throw new ExceptionError((int)HttpStatusCode.BadRequest,
+                        $"Marketplace Project cannot be updated when in status {marketPlaceProject.Status}.");
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
             }
         }
     }
