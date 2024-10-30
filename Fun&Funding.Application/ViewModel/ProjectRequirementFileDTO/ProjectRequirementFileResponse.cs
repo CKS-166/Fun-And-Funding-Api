@@ -13,5 +13,7 @@ namespace Fun_Funding.Application.ViewModel.ProjectRequirementFileDTO
         public string Name { get; set; }
         public string URL { get; set; }
         public FileType File { get; set; }
+
+        public bool IsDeleted { get; set; } 
     }
 }

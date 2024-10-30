@@ -8,6 +8,9 @@
         GameFile,
         FundingMedia,
         Evidence,
+        ImageEvidence,
+        VideoEvidence,
+        Others,
         Coupons
     }
 }
