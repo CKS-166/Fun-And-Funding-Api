@@ -17,7 +17,7 @@ namespace Fun_Funding.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllProject(ListRequest request)
+        public async Task<IActionResult> GetAllProject([FromQuery] ListRequest request)
         {
             var result = await _marketplace.GetAllMarketplaceProject(request);
             if (result == null) return NotFound();

@@ -331,6 +331,7 @@ namespace Fun_Funding.Infrastructure.Migrations
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Version = table.Column<int>(type: "int", nullable: false),
+                    Order = table.Column<int>(type: "int", nullable: false),
                     MilestoneId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -523,7 +524,8 @@ namespace Fun_Funding.Infrastructure.Migrations
                         name: "FK_MarketplaceFile_MarketplaceProject_MarketplaceProjectId",
                         column: x => x.MarketplaceProjectId,
                         principalTable: "MarketplaceProject",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -548,7 +550,8 @@ namespace Fun_Funding.Infrastructure.Migrations
                         name: "FK_ProjectCoupon_MarketplaceProject_MarketplaceProjectId",
                         column: x => x.MarketplaceProjectId,
                         principalTable: "MarketplaceProject",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(

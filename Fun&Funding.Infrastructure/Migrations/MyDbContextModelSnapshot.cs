@@ -1266,7 +1266,8 @@ namespace Fun_Funding.Infrastructure.Migrations
                 {
                     b.HasOne("Fun_Funding.Domain.Entity.MarketplaceProject", null)
                         .WithMany("MarketplaceFiles")
-                        .HasForeignKey("MarketplaceProjectId");
+                        .HasForeignKey("MarketplaceProjectId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.MarketplaceProject", b =>
@@ -1350,7 +1351,8 @@ namespace Fun_Funding.Infrastructure.Migrations
                 {
                     b.HasOne("Fun_Funding.Domain.Entity.MarketplaceProject", "MarketplaceProject")
                         .WithMany("ProjectCoupons")
-                        .HasForeignKey("MarketplaceProjectId");
+                        .HasForeignKey("MarketplaceProjectId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("MarketplaceProject");
                 });

@@ -41,6 +41,20 @@ namespace Fun_Funding.Application.Services.EntityServices
         {
             try
             {
+                //check if marketplace project is deleted
+                var mp = _unitOfWork.MarketplaceRepository
+                    .GetDeleted(p => p.FundingProjectId == request.FundingProjectId);
+
+                if (mp != null)
+                {
+                    mp.IsDeleted = false;
+                    mp.DeletedAt = null;
+
+                    var updateRequest = _mapper.Map<MarketplaceProjectUpdateRequest>(request);
+
+                    await UpdateMarketplaceProject(mp.Id, updateRequest);
+                }
+
                 //find funding project
                 var fundingProject = await _unitOfWork.FundingProjectRepository.GetQueryable()
                     .Where(p => p.Id == request.FundingProjectId)
@@ -223,6 +237,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 var marketPlaceProject = await _unitOfWork.MarketplaceRepository.GetQueryable()
                     .Where(p => p.Id == id)
                     .Include(p => p.MarketplaceFiles)
+                    .Include(p => p.FundingProject.Categories)
                     .Include(p => p.FundingProject)
                     .ThenInclude(p => p.User)
                     .FirstOrDefaultAsync();

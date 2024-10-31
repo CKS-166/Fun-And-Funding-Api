@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fun_Funding.Infrastructure.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20241030120308_Migrations")]
+    [Migration("20241031160254_Migrations")]
     partial class Migrations
     {
         /// <inheritdoc />
@@ -730,6 +730,9 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Property<Guid>("MilestoneId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("Order")
+                        .HasColumnType("int");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
@@ -1266,7 +1269,8 @@ namespace Fun_Funding.Infrastructure.Migrations
                 {
                     b.HasOne("Fun_Funding.Domain.Entity.MarketplaceProject", null)
                         .WithMany("MarketplaceFiles")
-                        .HasForeignKey("MarketplaceProjectId");
+                        .HasForeignKey("MarketplaceProjectId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.MarketplaceProject", b =>
@@ -1350,7 +1354,8 @@ namespace Fun_Funding.Infrastructure.Migrations
                 {
                     b.HasOne("Fun_Funding.Domain.Entity.MarketplaceProject", "MarketplaceProject")
                         .WithMany("ProjectCoupons")
-                        .HasForeignKey("MarketplaceProjectId");
+                        .HasForeignKey("MarketplaceProjectId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("MarketplaceProject");
                 });

@@ -116,33 +116,34 @@ namespace Fun_Funding.Infrastructure.Persistence.Repository
         {
             _context.Remove(entity);
         }
-        // Retrieve non-deleted entities
-        public IEnumerable<T> GetAllNonDeleted()
+
+        // Retrieve deleted entities
+        public IEnumerable<T> GetAllDeleted()
         {
-            return _entitySet.AsNoTracking().Where(e => EF.Property<bool>(e, "IsDeleted") == false).ToList();
+            return _entitySet.AsNoTracking().IgnoreQueryFilters().ToList();
         }
 
-        // Asynchronously retrieve non-deleted entities
-        public async Task<IEnumerable<T>> GetAllNonDeletedAsync(CancellationToken cancellationToken = default)
+        // Asynchronously retrieve deleted entities
+        public async Task<IEnumerable<T>> GetAllDeletedAsync(CancellationToken cancellationToken = default)
         {
             return await _entitySet.AsNoTracking()
-                .Where(e => EF.Property<bool>(e, "IsDeleted") == false)
+                .IgnoreQueryFilters()
                 .ToListAsync(cancellationToken);
         }
 
-        // Get a single non-deleted entity by a condition
-        public T GetNonDeleted(Expression<Func<T, bool>> predicate)
+        // Get a single deleted entity by a condition
+        public T GetDeleted(Expression<Func<T, bool>> predicate)
         {
             return _entitySet.AsNoTracking()
-                .Where(e => EF.Property<bool>(e, "IsDeleted") == false)
+                .IgnoreQueryFilters()
                 .FirstOrDefault(predicate);
         }
 
-        // Asynchronously get a single non-deleted entity by a condition
-        public async Task<T> GetNonDeletedAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
+        // Asynchronously get a single deleted entity by a condition
+        public async Task<T> GetDeletedAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
         {
             return await _entitySet.AsNoTracking()
-                .Where(e => EF.Property<bool>(e, "IsDeleted") == false)
+                .IgnoreQueryFilters()
                 .FirstOrDefaultAsync(predicate, cancellationToken);
         }
         public virtual void RemoveRange(IEnumerable<T> entities)
