@@ -1,9 +1,9 @@
-﻿using Fun_Funding.Domain.Entity;
+﻿using Fun_Funding.Application.ExternalServices.SoftDeleteService;
+using Fun_Funding.Domain.Entity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Fun_Funding.Application.ExternalServices.SoftDeleteService;
 
 
 namespace Fun_Funding.Infrastructure.Persistence.Database
@@ -110,6 +110,37 @@ namespace Fun_Funding.Infrastructure.Persistence.Database
                 .WithMany(u => u.ProjectMilestoneBackers)
                 .HasForeignKey(pmb => pmb.BackerId)
                 .OnDelete(DeleteBehavior.Restrict);
+            #endregion
+
+            #region MarketplaceProject
+            // Configure cascade delete between MarketplaceProject and MarketplaceFile
+            modelBuilder.Entity<MarketplaceProject>()
+                .HasMany(mp => mp.MarketplaceFiles)
+                .WithOne()
+                .HasForeignKey(mf => mf.MarketplaceProjectId)
+                .OnDelete(DeleteBehavior.Cascade); // Set cascade delete
+
+            // Configure cascade delete between MarketplaceProject and ProjectCoupon
+            modelBuilder.Entity<MarketplaceProject>()
+                .HasMany(mp => mp.ProjectCoupons)
+                .WithOne(pc => pc.MarketplaceProject)
+                .HasForeignKey(pc => pc.MarketplaceProjectId)
+                .OnDelete(DeleteBehavior.Cascade); // Set cascade delete
+            #endregion
+
+            #region FilterIsDeleted
+            modelBuilder.Entity<FundingProject>().HasQueryFilter(x => x.IsDeleted == false);
+            modelBuilder.Entity<FundingFile>().HasQueryFilter(x => x.IsDeleted == false);
+            modelBuilder.Entity<MarketplaceProject>().HasQueryFilter(x => x.IsDeleted == false);
+            modelBuilder.Entity<MarketplaceFile>().HasQueryFilter(x => x.IsDeleted == false);
+            modelBuilder.Entity<Category>().HasQueryFilter(x => x.IsDeleted == false);
+            modelBuilder.Entity<DigitalKey>().HasQueryFilter(x => x.IsDeleted == false);
+            modelBuilder.Entity<Milestone>().HasQueryFilter(x => x.IsDeleted == false);
+            modelBuilder.Entity<Package>().HasQueryFilter(x => x.IsDeleted == false);
+            modelBuilder.Entity<ProjectCoupon>().HasQueryFilter(x => x.IsDeleted == false);
+            modelBuilder.Entity<Requirement>().HasQueryFilter(x => x.IsDeleted == false);
+            modelBuilder.Entity<RewardItem>().HasQueryFilter(x => x.IsDeleted == false);
+            modelBuilder.Entity<WithdrawRequest>().HasQueryFilter(x => x.IsDeleted == false);
             #endregion
         }
 

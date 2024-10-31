@@ -10,10 +10,10 @@ namespace Fun_Funding.Application.IRepository
         IEnumerable<T> GetAll();
         IEnumerable<T> GetAll(Expression<Func<T, bool>> predicate = null);
         // Soft delete-related methods
-        IEnumerable<T> GetAllNonDeleted(); // Retrieve non-deleted entities
-        Task<IEnumerable<T>> GetAllNonDeletedAsync(CancellationToken cancellationToken = default);
-        T GetNonDeleted(Expression<Func<T, bool>> predicate); // Get non-deleted by condition
-        Task<T> GetNonDeletedAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default);
+        IEnumerable<T> GetAllDeleted(); // Retrieve deleted entities
+        Task<IEnumerable<T>> GetAllDeletedAsync(CancellationToken cancellationToken = default);
+        T GetDeleted(Expression<Func<T, bool>> predicate); // Get deleted by condition
+        Task<T> GetDeletedAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default);
         void Add(T entity);
         void AddRange(IEnumerable<T> entities);
         void Update(T entity);

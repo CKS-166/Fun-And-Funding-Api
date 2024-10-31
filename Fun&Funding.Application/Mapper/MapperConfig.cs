@@ -203,12 +203,12 @@ namespace Fun_Funding.Application.Mapper
                 .ReverseMap();
             CreateMap<MarketplaceProjectAddRequest, MarketplaceProject>().ReverseMap();
             CreateMap<MarketplaceProjectUpdateRequest, MarketplaceProject>().ReverseMap();
+            CreateMap<MarketplaceProjectAddRequest, MarketplaceProjectUpdateRequest>().ReverseMap();
         }
 
         public void MappingMarketplaceFile()
         {
             CreateMap<MarketplaceFile, MarketplaceFileInfoResponse>().ReverseMap();
-
             CreateMap<MarketplaceFileRequest, MarketplaceFile>().ReverseMap();
         }
 

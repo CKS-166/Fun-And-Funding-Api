@@ -4,6 +4,7 @@ using Fun_Funding.Infrastructure.Persistence.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fun_Funding.Infrastructure.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241031160254_Migrations")]
+    partial class Migrations
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1060,6 +1063,9 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Property<DateTime>("ExpiredDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid?>("FundingProjectId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -1076,6 +1082,8 @@ namespace Fun_Funding.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("FundingProjectId");
 
                     b.HasIndex("WalletId");
 
@@ -1501,6 +1509,10 @@ namespace Fun_Funding.Infrastructure.Migrations
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.WithdrawRequest", b =>
                 {
+                    b.HasOne("Fun_Funding.Domain.Entity.FundingProject", null)
+                        .WithMany("WithdrawRequests")
+                        .HasForeignKey("FundingProjectId");
+
                     b.HasOne("Fun_Funding.Domain.Entity.Wallet", "Wallet")
                         .WithMany("WithdrawRequests")
                         .HasForeignKey("WalletId");
@@ -1580,6 +1592,8 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Navigation("SourceFiles");
 
                     b.Navigation("Wallet");
+
+                    b.Navigation("WithdrawRequests");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.MarketplaceProject", b =>
