@@ -12,7 +12,6 @@
         Approved,
         Withdrawed,
         Refunded,
-        Reported,
-        Disabled
+        Reported
     }
 }

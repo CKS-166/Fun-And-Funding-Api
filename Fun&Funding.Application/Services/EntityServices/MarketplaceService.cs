@@ -47,12 +47,9 @@ namespace Fun_Funding.Application.Services.EntityServices
 
                 if (mp != null)
                 {
-                    mp.IsDeleted = false;
-                    mp.DeletedAt = null;
-
                     var updateRequest = _mapper.Map<MarketplaceProjectUpdateRequest>(request);
 
-                    await UpdateMarketplaceProject(mp.Id, updateRequest);
+                    await UpdateMarketplaceProject(mp.Id, updateRequest, true);
                 }
 
                 //find funding project
@@ -66,7 +63,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                     throw new ExceptionError((int)HttpStatusCode.NotFound, "Funding Project not found.");
 
                 //validate
-                var errorMessages = validateAddMarketplaceProject(request);
+                var errorMessages = validateCommonFields(request);
                 if (errorMessages != null && errorMessages.Count > 0)
                 {
                     throw new ExceptionError((int)HttpStatusCode.BadRequest, string.Join("\n", errorMessages));
@@ -113,50 +110,6 @@ namespace Fun_Funding.Application.Services.EntityServices
                 var response = _mapper.Map<MarketplaceProjectInfoResponse>(marketplaceProject);
                 return new ResultDTO<MarketplaceProjectInfoResponse>(true, "Create successfully.",
                     response, (int)HttpStatusCode.Created);
-            }
-            catch (Exception ex)
-            {
-                if (ex is ExceptionError exceptionError)
-                {
-                    throw exceptionError;
-                }
-
-                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
-            }
-        }
-
-        private List<string> validateAddMarketplaceProject(MarketplaceProjectAddRequest request)
-        {
-            try
-            {
-                List<string> errorMessages = new List<string>();
-
-                if (string.IsNullOrEmpty(request.Name))
-                {
-                    errorMessages.Add("Name is required.");
-                }
-
-                if (string.IsNullOrEmpty(request.Description))
-                {
-                    errorMessages.Add("Description is required.");
-                }
-
-                if (string.IsNullOrEmpty(request.Introduction))
-                {
-                    errorMessages.Add("Introduction is required.");
-                }
-
-                if (request.Price <= 0)
-                {
-                    errorMessages.Add("Invalid price.");
-                }
-
-                if (request.MarketplaceFiles.Count <= 0)
-                {
-                    errorMessages.Add("Missing file(s).");
-                }
-
-                return errorMessages;
             }
             catch (Exception ex)
             {
@@ -234,7 +187,7 @@ namespace Fun_Funding.Application.Services.EntityServices
         {
             try
             {
-                var marketPlaceProject = await _unitOfWork.MarketplaceRepository.GetQueryable()
+                var marketplaceProject = await _unitOfWork.MarketplaceRepository.GetQueryable()
                     .Where(p => p.Id == id)
                     .Include(p => p.MarketplaceFiles)
                     .Include(p => p.FundingProject.Categories)
@@ -242,11 +195,11 @@ namespace Fun_Funding.Application.Services.EntityServices
                     .ThenInclude(p => p.User)
                     .FirstOrDefaultAsync();
 
-                if (marketPlaceProject == null)
+                if (marketplaceProject == null)
                     throw new ExceptionError((int)HttpStatusCode.NotFound, "Marketplace Project not found.");
                 else
                 {
-                    var response = _mapper.Map<MarketplaceProjectInfoResponse>(marketPlaceProject);
+                    var response = _mapper.Map<MarketplaceProjectInfoResponse>(marketplaceProject);
 
                     return ResultDTO<MarketplaceProjectInfoResponse>.Success(response);
                 }
@@ -266,7 +219,11 @@ namespace Fun_Funding.Application.Services.EntityServices
         {
             try
             {
-                var marketPlaceProject = await _unitOfWork.MarketplaceRepository.GetByIdAsync(id);
+                var marketPlaceProject = await _unitOfWork.MarketplaceRepository.GetQueryable()
+                    .Where(p => p.Id == id)
+                    .Include(p => p.MarketplaceFiles)
+                    .Include(p => p.ProjectCoupons)
+                    .FirstOrDefaultAsync();
 
                 if (marketPlaceProject == null)
                     throw new ExceptionError((int)HttpStatusCode.NotFound, "Marketplace Project not found.");
@@ -274,8 +231,22 @@ namespace Fun_Funding.Application.Services.EntityServices
                     throw new ExceptionError((int)HttpStatusCode.BadRequest, "Marketplace Project cannot be deleted.");
                 else
                 {
+                    if (marketPlaceProject.MarketplaceFiles != null
+                        && marketPlaceProject.MarketplaceFiles.Count > 0)
+                    {
+                        _unitOfWork.MarketplaceFileRepository.RemoveRange(marketPlaceProject.MarketplaceFiles);
+                    }
+
+                    if (marketPlaceProject.ProjectCoupons != null
+                        && marketPlaceProject.ProjectCoupons.Count > 0)
+                    {
+                        _unitOfWork.ProjectCouponRepository.RemoveRange(marketPlaceProject.ProjectCoupons);
+                    }
+
                     _unitOfWork.MarketplaceRepository.Remove(marketPlaceProject);
                     await _unitOfWork.CommitAsync();
+
+                    await UpdateMarketplaceProjectStatus(id, ProjectStatus.Deleted);
                 }
             }
             catch (Exception ex)
@@ -289,30 +260,69 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
+
         public async Task<ResultDTO<MarketplaceProjectInfoResponse>>
-            UpdateMarketplaceProject(Guid id, MarketplaceProjectUpdateRequest request)
+            UpdateMarketplaceProject(Guid id, MarketplaceProjectUpdateRequest request, bool? isDeleted = null)
         {
             try
             {
-                var marketPlaceProject = await _unitOfWork.MarketplaceRepository.GetByIdAsync(id);
+                MarketplaceProject marketplaceProject;
 
-                if (marketPlaceProject == null)
-                    throw new ExceptionError((int)HttpStatusCode.NotFound, "Marketplace Project not found.");
-
-                if (marketPlaceProject.Status == ProjectStatus.Pending)
+                if (isDeleted != null && isDeleted == true)
                 {
-                    _mapper.Map(request, marketPlaceProject);
-
-                    _unitOfWork.MarketplaceRepository.Update(marketPlaceProject);
-                    await _unitOfWork.CommitAsync();
-
-                    var response = _mapper.Map<MarketplaceProjectInfoResponse>(marketPlaceProject);
-
-                    return ResultDTO<MarketplaceProjectInfoResponse>.Success(response);
+                    marketplaceProject = await _unitOfWork.MarketplaceRepository.GetQueryable()
+                                        .IgnoreQueryFilters()
+                                        .Where(p => p.Id == id)
+                                        .Include(p => p.MarketplaceFiles)
+                                        .Include(p => p.FundingProject.Categories)
+                                        .Include(p => p.FundingProject)
+                                        .ThenInclude(p => p.User)
+                                        .FirstOrDefaultAsync();
                 }
                 else
-                    throw new ExceptionError((int)HttpStatusCode.BadRequest,
-                        $"Marketplace Project cannot be updated when in status {marketPlaceProject.Status}.");
+                {
+                    marketplaceProject = await _unitOfWork.MarketplaceRepository.GetQueryable()
+                                        .Where(p => p.Id == id)
+                                        .Include(p => p.MarketplaceFiles)
+                                        .Include(p => p.FundingProject.Categories)
+                                        .Include(p => p.FundingProject)
+                                        .ThenInclude(p => p.User)
+                                        .FirstOrDefaultAsync();
+                }
+
+                if (marketplaceProject == null)
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "Marketplace Project not found.");
+                else
+                {
+                    if (isDeleted != null && isDeleted == true)
+                    {
+                        marketplaceProject.Status = ProjectStatus.Pending;
+                        marketplaceProject.IsDeleted = false;
+                        marketplaceProject.DeletedAt = null;
+                    }
+
+                    if (marketplaceProject.Status == ProjectStatus.Pending)
+                    {
+                        //validate
+                        var errorMessages = validateCommonFields(request);
+                        if (errorMessages != null && errorMessages.Count > 0)
+                        {
+                            throw new ExceptionError((int)HttpStatusCode.BadRequest, string.Join("\n", errorMessages));
+                        }
+
+                        _mapper.Map(request, marketplaceProject);
+
+                        _unitOfWork.MarketplaceRepository.Update(marketplaceProject);
+                        await _unitOfWork.CommitAsync();
+
+                        var response = _mapper.Map<MarketplaceProjectInfoResponse>(marketplaceProject);
+
+                        return ResultDTO<MarketplaceProjectInfoResponse>.Success(response);
+                    }
+                    else
+                        throw new ExceptionError((int)HttpStatusCode.BadRequest,
+                            $"Marketplace Project cannot be updated when in status {marketplaceProject.Status}.");
+                }
             }
             catch (Exception ex)
             {
@@ -323,6 +333,144 @@ namespace Fun_Funding.Application.Services.EntityServices
 
                 throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
             }
+        }
+
+        public async Task<ResultDTO<MarketplaceProjectInfoResponse>> UpdateMarketplaceProjectStatus(Guid id, ProjectStatus status)
+        {
+            try
+            {
+                var marketplaceProject = await _unitOfWork.MarketplaceRepository.GetQueryable()
+                    .Where(p => p.Id == id)
+                    .Include(p => p.MarketplaceFiles)
+                    .Include(p => p.FundingProject.Categories)
+                    .Include(p => p.FundingProject)
+                    .ThenInclude(p => p.User)
+                    .FirstOrDefaultAsync();
+
+                //pending status change list
+                List<ProjectStatus> pendingChangelist = new List<ProjectStatus>()
+                    {
+                        ProjectStatus.Processing,
+                        ProjectStatus.Rejected,
+                        ProjectStatus.Deleted
+                    };
+
+                //rejected status change list
+                List<ProjectStatus> rejectedChangelist = new List<ProjectStatus>()
+                    {
+                        ProjectStatus.Deleted
+                    };
+
+                //processing status change list
+                List<ProjectStatus> processingChangelist = new List<ProjectStatus>()
+                    {
+                        ProjectStatus.Reported
+                    };
+
+                bool isChanged = false;
+
+                if (marketplaceProject != null)
+                {
+                    //change status from pending
+                    if (marketplaceProject.Status == ProjectStatus.Pending && pendingChangelist.Contains(status))
+                    {
+                        marketplaceProject.Status = status;
+                        isChanged = true;
+                    }
+                    //change status from rejected
+                    else if (marketplaceProject.Status == ProjectStatus.Rejected && rejectedChangelist.Contains(status))
+                    {
+                        marketplaceProject.Status = status;
+                        isChanged = true;
+                    }
+                    //change status from processing
+                    else if (marketplaceProject.Status == ProjectStatus.Processing && processingChangelist.Contains(status))
+                    {
+                        marketplaceProject.Status = status;
+                        isChanged = true;
+                    }
+
+                    if (isChanged)
+                    {
+                        _unitOfWork.MarketplaceRepository.Update(marketplaceProject);
+                        await _unitOfWork.CommitAsync();
+
+                        var response = _mapper.Map<MarketplaceProjectInfoResponse>(marketplaceProject);
+
+                        return ResultDTO<MarketplaceProjectInfoResponse>.Success(response);
+                    }
+                    else throw new ExceptionError(
+                        (int)HttpStatusCode.BadRequest,
+                        $"Marketplace Project with status {marketplaceProject.Status} cannot be changed to {status}.");
+                }
+                else
+                {
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "Marketplace Project Not Found.");
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
+
+        //validation
+        private List<string> validateCommonFields(dynamic request)
+        {
+            try
+            {
+                List<string> errorMessages = new List<string>();
+
+                if (string.IsNullOrEmpty(request.Name))
+                {
+                    errorMessages.Add("Name is required.");
+                }
+
+                if (string.IsNullOrEmpty(request.Description))
+                {
+                    errorMessages.Add("Description is required.");
+                }
+
+                if (string.IsNullOrEmpty(request.Introduction))
+                {
+                    errorMessages.Add("Introduction is required.");
+                }
+
+                if (request.Price <= 0)
+                {
+                    errorMessages.Add("Invalid price.");
+                }
+
+                if (request.MarketplaceFiles.Count <= 0)
+                {
+                    errorMessages.Add("Missing file(s).");
+                }
+
+                return errorMessages;
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
+
+        private List<string> validateMarketplaceProject(MarketplaceProjectAddRequest request)
+        {
+            return validateCommonFields(request);
+        }
+
+        private List<string> validateMarketplaceProject(MarketplaceProjectUpdateRequest request)
+        {
+            return validateCommonFields(request);
         }
     }
 }
