@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Fun_Funding.Api.Controllers
 {
-    [Route("api/coupon")]
+    [Route("api/coupons")]
     [ApiController]
     public class CouponController : ControllerBase
     {
@@ -13,6 +13,20 @@ namespace Fun_Funding.Api.Controllers
         public CouponController(IProjectCouponService couponService)
         {
             _couponService = couponService;
+        }
+        [HttpGet("get-by-code")]
+        public async Task<IActionResult> GetCouponsByCode(string couponCode)
+        {
+            var result = await _couponService.GetCouponByCode(couponCode);
+            if (!result._isSuccess) return BadRequest(result);
+            return Ok(result);
+        } 
+        [HttpGet("check-avaliable-coupons")]
+        public async Task<IActionResult> CheckCouponsUsed(Guid couponId)
+        {
+            var result = await _couponService.CheckCouponUsed(couponId);
+            if (!result._isSuccess) return BadRequest(result);
+            return Ok(result);
         }
         [HttpPost]
         public async Task<IActionResult> ImportFile(IFormFile formFile, Guid projectId)

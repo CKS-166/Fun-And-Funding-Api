@@ -61,6 +61,31 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
+        public async Task<ResultDTO<ProjectCoupon>> CheckCouponUsed(Guid couponId)
+        {
+            try
+            {
+                var exitedCoupon = await _unitOfWork.ProjectCouponRepository.GetAsync(x => x.Id == couponId);
+                if (exitedCoupon is null)
+                {
+                    return ResultDTO<ProjectCoupon>.Fail("can not found any coupons");
+                }
+                if (exitedCoupon.Status.Equals(ProjectCouponStatus.Disable))
+                {
+                    return ResultDTO<ProjectCoupon>.Success(exitedCoupon, "coupon is disable");
+                }
+                if (exitedCoupon.IsDeleted)
+                {
+                    return ResultDTO<ProjectCoupon>.Fail("coupon is deleted");
+                }
+                return ResultDTO<ProjectCoupon>.Success(exitedCoupon, "this coupon is avaliable");
+            }
+            catch (Exception ex)
+            {
+                return ResultDTO<ProjectCoupon>.Fail("somethings wrong please try again");
+            }
+        }
+
         public List<ProjectCoupon> CheckDuplicateCouponCode(Guid? marketplaceId, List<ProjectCoupon> list)
         {
             try
@@ -81,6 +106,24 @@ namespace Fun_Funding.Application.Services.EntityServices
             catch (Exception ex)
             {
                 throw new Exception(ex.Message, ex);
+            }
+        }
+
+        public async Task<ResultDTO<ProjectCoupon>> GetCouponByCode(string couponCode)
+        {
+            try
+            {
+                var exitedCoupon = await _unitOfWork.ProjectCouponRepository.GetAsync(x => x.CouponKey == couponCode);
+                if (exitedCoupon is null)
+                {
+                    return ResultDTO<ProjectCoupon>.Fail("can not found any coupons");
+                }
+                return ResultDTO<ProjectCoupon>.Success(exitedCoupon, "successfully found coupon");
+
+            }
+            catch (Exception ex)
+            {
+                return ResultDTO<ProjectCoupon>.Fail("somethings wrong please try again");
             }
         }
 

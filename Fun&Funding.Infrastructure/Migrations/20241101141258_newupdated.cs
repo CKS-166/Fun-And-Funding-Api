@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Fun_Funding.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InititalCreate : Migration
+    public partial class newupdated : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -524,7 +524,8 @@ namespace Fun_Funding.Infrastructure.Migrations
                         name: "FK_MarketplaceFile_MarketplaceProject_MarketplaceProjectId",
                         column: x => x.MarketplaceProjectId,
                         principalTable: "MarketplaceProject",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -536,7 +537,7 @@ namespace Fun_Funding.Infrastructure.Migrations
                     CouponName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DiscountRate = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
-                    Quantity = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Quantity = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
                     MarketplaceProjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
@@ -549,7 +550,8 @@ namespace Fun_Funding.Infrastructure.Migrations
                         name: "FK_ProjectCoupon_MarketplaceProject_MarketplaceProjectId",
                         column: x => x.MarketplaceProjectId,
                         principalTable: "MarketplaceProject",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -797,7 +799,6 @@ namespace Fun_Funding.Infrastructure.Migrations
                     Status = table.Column<int>(type: "int", nullable: false),
                     ExpiredDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     WalletId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    FundingProjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
@@ -805,11 +806,6 @@ namespace Fun_Funding.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_WithdrawRequest", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_WithdrawRequest_FundingProject_FundingProjectId",
-                        column: x => x.FundingProjectId,
-                        principalTable: "FundingProject",
-                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_WithdrawRequest_Wallet_WalletId",
                         column: x => x.WalletId,
@@ -1049,11 +1045,6 @@ namespace Fun_Funding.Infrastructure.Migrations
                 name: "IX_Wallet_MarketplaceProjectId",
                 table: "Wallet",
                 column: "MarketplaceProjectId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_WithdrawRequest_FundingProjectId",
-                table: "WithdrawRequest",
-                column: "FundingProjectId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_WithdrawRequest_WalletId",
