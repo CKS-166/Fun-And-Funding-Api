@@ -253,6 +253,9 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Property<DateTimeOffset?>("DeletedAt")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("FileType")
                         .HasColumnType("int");
 
@@ -268,6 +271,9 @@ namespace Fun_Funding.Infrastructure.Migrations
 
                     b.Property<string>("URL")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Version")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
