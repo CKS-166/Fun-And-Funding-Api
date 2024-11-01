@@ -1,17 +1,33 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Fun_Funding.Application.IService;
+using Fun_Funding.Application.ViewModel.ProjectMilestoneBackerDTO;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Fun_Funding.Api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/project-milestone-backer")]
     [ApiController]
     public class ProjectMilestoneBackerController : ControllerBase
     {
-        // api post projectmilestonebacker
-        [HttpPost]
-        public async Task<IActionResult> PostMilestoneReview()
+        private readonly IProjectMilestoneBackerService _projectMilestoneBackerService;
+
+        public ProjectMilestoneBackerController(IProjectMilestoneBackerService projectMilestoneBackerService)
         {
-            throw new NotImplementedException();
+            _projectMilestoneBackerService = projectMilestoneBackerService;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> PostMilestoneReview(ProjectMilestoneBackerRequest request)
+        {
+            var result = await _projectMilestoneBackerService.CreateNewProjectMilestoneBackerReview(request);
+            return Ok(result);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllProjectMilestoneReview(Guid projectMilestoneId)
+        {
+            var result = await _projectMilestoneBackerService.GetAllMilestoneReview(projectMilestoneId);
+            return Ok(result);
         }
     }
 }

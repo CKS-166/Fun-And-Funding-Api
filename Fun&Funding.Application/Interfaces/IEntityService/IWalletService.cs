@@ -10,7 +10,7 @@ namespace Fun_Funding.Application.IService
 {
     public interface IWalletService
     {
-        Task<ResultDTO<WalletInfoResponse>> GetWalletByUser(Guid userId);
+        Task<ResultDTO<WalletInfoResponse>> GetWalletByUser();
         Task<ResultDTO<WalletInfoResponse>> AddMoneyToWallet(WalletRequest walletRequest);
     }
 }

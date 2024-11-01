@@ -39,6 +39,7 @@ namespace Fun_Funding.Application
         IDigitalKeyRepository DigitalKeyRepository { get; }
         ICartRepository CartRepository { get; }
         IMarketplaceFileRepository MarketplaceFileRepository { get; }
+        INotificationRepository NotificationRepository { get; }
 
         // Methods for committing and rolling back
         void Commit();

@@ -4,6 +4,8 @@ using Net.payOS.Types;
 using Net.payOS;
 using Fun_Funding.Application.ViewModel.WalletDTO;
 using Org.BouncyCastle.Utilities;
+using Fun_Funding.Application.IService;
+using static System.Net.WebRequestMethods;
 
 namespace Fun_Funding.Api.Controllers
 {
@@ -12,10 +14,25 @@ namespace Fun_Funding.Api.Controllers
     public class PayOSController : ControllerBase
     {
         private readonly PayOS _payOS;
+        private readonly IWalletService _walletService;
 
-        public PayOSController(PayOS payOS)
+        public PayOSController(PayOS payOS, IWalletService walletService)
         {
             _payOS = payOS;
+            _walletService = walletService;
+        }
+
+        [HttpGet("success")]
+        public async Task<IActionResult> PaymentSuccess([FromQuery] WalletRequest walletRequest) {
+
+            await _walletService.AddMoneyToWallet(walletRequest);
+            return Redirect("http://localhost:5173/account/wallet");
+        }
+
+        [HttpGet("cancel")]
+        public IActionResult PaymentCancel()
+        {
+            return Redirect("http://localhost:5173/account/wallet");
         }
 
         [HttpGet("create-payment-link")]
@@ -28,8 +45,9 @@ namespace Fun_Funding.Api.Controllers
                 ItemData item = new ItemData(description, 1, (int)walletRequest.Balance);
                 List<ItemData> items = new List<ItemData>();
                 items.Add(item);
-                PaymentData paymentData = new PaymentData(orderCode, (int)walletRequest.Balance, description, items, "http://localhost:5173/choose-project-plan", "http://localhost:5173/account/wallet");
-
+                PaymentData paymentData = new PaymentData(orderCode, (int)walletRequest.Balance, description, items,
+                    "https://localhost:7044/api/payos/cancel",
+                    $"https://localhost:7044/api/payos/success?balance={walletRequest.Balance}&walletId={walletRequest.WalletId}");
                 CreatePaymentResult createPayment = await _payOS.createPaymentLink(paymentData);
 
                 return Redirect(createPayment.checkoutUrl);

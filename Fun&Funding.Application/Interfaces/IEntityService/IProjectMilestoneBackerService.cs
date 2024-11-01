@@ -12,6 +12,6 @@ namespace Fun_Funding.Application.IService
     public interface IProjectMilestoneBackerService
     {
         Task<ResultDTO<ProjectMilestoneBackerResponse>> CreateNewProjectMilestoneBackerReview(ProjectMilestoneBackerRequest request);
-        Task<ResultDTO<List<ProjectMilestoneBackerResponse>>> GetAllMilestoneReview();
+        Task<ResultDTO<List<ProjectMilestoneBackerResponse>>> GetAllMilestoneReview(Guid projectMilestoneId);
     }
 }
