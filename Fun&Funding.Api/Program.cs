@@ -1,6 +1,7 @@
 using Fun_Funding.Api.Dependency_Injection;
 using Fun_Funding.Api.Exception;
 using Fun_Funding.Application;
+using Fun_Funding.Application.AppHub;
 using Fun_Funding.Application.Interfaces.IExternalServices;
 using Fun_Funding.Application.IService;
 using Fun_Funding.Application.Services.ExternalServices;
@@ -186,6 +187,8 @@ namespace Fun_Funding.Api
             }
 
             app.UseHttpsRedirection();
+            app.UseRouting();
+
             app.UseCors("MyCors");
 
             app.UseAuthentication();
@@ -193,7 +196,7 @@ namespace Fun_Funding.Api
 
 
             app.MapControllers();
-
+            app.MapHub<NotificationHub>("/notificationHub");
             app.Run();
         }
     }

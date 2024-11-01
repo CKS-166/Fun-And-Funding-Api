@@ -12,6 +12,7 @@ namespace Fun_Funding.Application.ViewModel.ProjectMilestoneBackerDTO
     {
         public decimal Star { get; set; }
         public string Comment { get; set; }
+        public DateTime CreatedDate { get; set; }
         public UserInfoResponse Backer { get; set; }
         public ProjectMilestoneResponse ProjectMilestone { get; set; }
     }

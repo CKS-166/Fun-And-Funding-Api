@@ -11,7 +11,7 @@ namespace Fun_Funding.Application.ViewModel.WalletDTO
     public class WalletRequest
     {
         [Required]
-        public Guid Id { get; set; }
+        public Guid WalletId { get; set; }
         [Range(0, (double)decimal.MaxValue)]
         public decimal Balance { get; set; }
     }

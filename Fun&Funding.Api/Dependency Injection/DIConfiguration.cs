@@ -8,6 +8,8 @@ using Microsoft.OpenApi.Models;
 using Net.payOS;
 using System.Net.Mail;
 using System.Security.Claims;
+using Microsoft.AspNetCore.SignalR;
+using Fun_Funding.Application.CustomUserIdProvider;
 
 namespace Fun_Funding.Api.Dependency_Injection
 {
@@ -48,9 +50,10 @@ namespace Fun_Funding.Api.Dependency_Injection
             //add CORS
             service.AddCors(p => p.AddPolicy("MyCors", build =>
             {
-                build.WithOrigins("*")
+                build.WithOrigins("http://localhost:5173")
                 .AllowAnyMethod()
-                .AllowAnyHeader();
+                .AllowAnyHeader()
+                .AllowCredentials();
             }));
             #endregion
 
@@ -111,6 +114,11 @@ namespace Fun_Funding.Api.Dependency_Injection
                     }
                 });
             });
+            #endregion
+
+            #region CustomIdProviderSignalR
+            service.AddSignalR();
+            service.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
             #endregion
 
             service.AddTransient<IEmailService, EmailService>();

@@ -20,6 +20,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Fun_Funding.Application.ExternalServices.SoftDeleteService;
+using Fun_Funding.Application.Interfaces.IRepository;
+using Fun_Funding.Application.Interfaces.IEntityService;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Fun_Funding.Infrastructure.Dependency_Injection
 {
@@ -66,6 +70,20 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
                     IssuerSigningKey = new SymmetricSecurityKey
                     (Encoding.UTF8.GetBytes(configuration["Jwt:key"]!))
                 };
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+                        var path = context.HttpContext.Request.Path;
+                        if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/notificationHub"))
+                        {
+                            context.Token = accessToken;
+                        }
+                        return Task.CompletedTask;
+                    }
+                };
+
             });
             #endregion
 
@@ -103,6 +121,7 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             service.AddScoped<ICartRepository, CartRepository>();
             service.AddScoped<IProjectCouponService, ProjectCouponService>();
             service.AddScoped<IMarketplaceFileRepository, MarketplaceFileRepository>();
+            service.AddScoped<INotificationRepository, NotificationRepository>();
             #endregion
 
             #region Sevices
@@ -137,9 +156,10 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             service.AddScoped<IBankAccountService, BankAccountService>();
 
             service.AddScoped<ICartService, CartService>();
-
-
+            service.AddScoped<INotificationService, NotificationService>();
             #endregion
+
+            
 
             //BaseRepository          
             service.AddTransient(typeof(IBaseRepository<>), typeof(BaseRepository<>));
@@ -149,6 +169,7 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             service.AddScoped<IUnitOfWork, UnitOfWork>();
             service.AddAutoMapper(typeof(MapperConfig).Assembly);
             service.AddHostedService<WorkerService>();
+            service.AddSignalR();
             return service;
 
         }

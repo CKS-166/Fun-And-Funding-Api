@@ -17,10 +17,10 @@ namespace Fun_Funding.Api.Controllers
             _walletService = walletService;
         }
 
-        [HttpGet("{userId}")]
-        public async Task<IActionResult> GetWalletByUserId(Guid userId)
+        [HttpGet("user")]
+        public async Task<IActionResult> GetWalletByUserId()
         {
-            var walletResult = await _walletService.GetWalletByUser(userId);
+            var walletResult = await _walletService.GetWalletByUser();
             if (walletResult._isSuccess)
                 return Ok(walletResult);
             else

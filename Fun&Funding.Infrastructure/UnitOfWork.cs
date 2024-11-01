@@ -44,6 +44,7 @@ namespace Fun_Funding.Infrastructure
         private ICreatorContractRepository _creatorContractRepository;
         private IDigitalKeyRepository _digitalKeyRepository;
         private ICartRepository _cartRepository;
+        private INotificationRepository _notificationRepository;
         private IMarketplaceFileRepository _marketplaceFileRepository;
         public UnitOfWork(MyDbContext dbContext, MongoDBContext mongoDBContext)
         {
@@ -246,6 +247,8 @@ namespace Fun_Funding.Infrastructure
         public IMarketplaceFileRepository MarketplaceFileRepository =>
             _marketplaceFileRepository ??= new MarketplaceFileRepository(_dbContext);
 
+        public INotificationRepository NotificationRepository =>
+            _notificationRepository ??= new NotificationRepository(_mongoDBContext);
 
         // Commit and rollback methods
         public void Commit()
