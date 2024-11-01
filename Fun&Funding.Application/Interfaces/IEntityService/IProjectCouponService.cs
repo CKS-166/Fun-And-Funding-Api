@@ -15,5 +15,7 @@ namespace Fun_Funding.Application.IService
         public List<ProjectCoupon> CheckDuplicateCouponCode(Guid? marketplaceId, List<ProjectCoupon> list);
         public Task<ResultDTO<ListCouponResponse>> ImportFile(IFormFile formFile, Guid projectId);
         public Task<ResultDTO<ProjectCoupon>> ChangeStatus(Guid couponId);
+        public Task<ResultDTO<ProjectCoupon>> GetCouponByCode(string couponCode);
+        public Task<ResultDTO<ProjectCoupon>> CheckCouponUsed(Guid couponId);
     }
 }
