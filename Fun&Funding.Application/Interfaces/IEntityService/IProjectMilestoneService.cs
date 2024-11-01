@@ -1,5 +1,6 @@
 ﻿using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.ProjectMilestoneDTO;
+using Fun_Funding.Domain.Entity;
 using Fun_Funding.Domain.Enum;
 using System;
 using System.Collections.Generic;
@@ -20,6 +21,7 @@ namespace Fun_Funding.Application.IService
              ProjectMilestoneStatus? status,
              Guid? fundingProjectId,
              Guid? milestoneId);
+        string CanCreateProjectMilestone(FundingProject project, int requestedMilestoneOrder, DateTime createdDate);
     }
 }
 

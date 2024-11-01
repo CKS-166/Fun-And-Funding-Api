@@ -9,7 +9,6 @@ namespace Fun_Funding.Domain.Enum
     public enum ProjectMilestoneStatus
     {
         Pending,
-
         Processing,
         Completed,
         Warning,

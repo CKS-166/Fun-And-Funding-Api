@@ -9,7 +9,7 @@ using Microsoft.Extensions.Azure;
 
 namespace Fun_Funding.Api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/creator-contracts")]
     [ApiController]
     public class CreatorContractController : ControllerBase
     {
