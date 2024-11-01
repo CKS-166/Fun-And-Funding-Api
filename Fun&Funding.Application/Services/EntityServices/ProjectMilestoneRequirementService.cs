@@ -23,18 +23,22 @@ namespace Fun_Funding.Application.Services.EntityServices
         private IMapper _mapper;
         private IAzureService _azureService;
         private IProjectMilestoneService _projectMilestoneService;
-        public ProjectMilestoneRequirementService(IUnitOfWork unitOfWork, IMapper mapper, IAzureService azureService, IProjectMilestoneService projectMilestoneService)
+        private readonly IMilestoneService _milestoneService;
+        public ProjectMilestoneRequirementService(IUnitOfWork unitOfWork, IMapper mapper, IAzureService azureService, IProjectMilestoneService projectMilestoneService, IMilestoneService milestoneService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _azureService = azureService;
             _projectMilestoneService = projectMilestoneService;
+            _milestoneService = milestoneService;
         }
-        public async Task<ResultDTO<ProjectMilestoneResponse>> CreateMilestoneRequirements(List<ProjectMilestoneRequirementRequest> request)
+        public async Task<ResultDTO<ProjectMilestoneResponse>> CreateMilestoneRequirements(List<ProjectMilestoneRequirementRequest> request )
         {
             try
             {
                 var projectMilestone = _unitOfWork.ProjectMilestoneRepository.GetQueryable()
+                    .Include( x => x.Milestone )
+                    .Include(x =>  x.FundingProject)
                     .FirstOrDefault(pm => pm.FundingProjectId == request[0].FundingProjectId && pm.MilestoneId == request[0].MilestoneId);
                 if (projectMilestone == null)
                 {
@@ -42,7 +46,12 @@ namespace Fun_Funding.Application.Services.EntityServices
                 }
                 else
                 {
-                    if(projectMilestone.Status != ProjectMilestoneStatus.Processing)
+                    var checkValidateMilstone = _projectMilestoneService.CanCreateProjectMilestone(projectMilestone.FundingProject, projectMilestone.Milestone.MilestoneOrder, projectMilestone.CreatedDate);
+                    if (checkValidateMilstone != null)
+                    {
+                        throw new ExceptionError((int)HttpStatusCode.BadRequest, checkValidateMilstone);
+                    }
+                    if (projectMilestone.Status != ProjectMilestoneStatus.Processing)
                     {
                         throw new ExceptionError((int)HttpStatusCode.BadRequest, "Milestone for this project is not approved yet");
                     }
