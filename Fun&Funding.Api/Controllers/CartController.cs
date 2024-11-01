@@ -26,28 +26,28 @@ namespace Fun_Funding.Api.Controllers
             var response = await _cartService.GetUserCartInfo();
             return Ok(response);
         }
-        [HttpPatch("add/{marketplaceProjectId}")]
+        [HttpPost("{marketplaceProjectId}")]
         [Authorize(Roles = Role.Backer)]
         public async Task<IActionResult> AddGameToUserCart([FromRoute]Guid marketplaceProjectId)
         {
             var response = await _cartService.AddGameToUserCart(marketplaceProjectId);
             return Ok(response);
         }
-        [HttpPatch("clear")]
+        [HttpDelete]
         [Authorize(Roles = Role.Backer)]
         public async Task<IActionResult> ClearCart()
         {
             var response = await _cartService.ClearCart();
             return Ok(response);
         }
-        [HttpPatch("delete/{marketplaceProjectId}")]
+        [HttpDelete("{marketplaceProjectId}")]
         [Authorize(Roles = Role.Backer)]
         public async Task<IActionResult> DeleteCartItem([FromRoute] Guid marketplaceProjectId)
         {
             var response = await _cartService.DeleteCartItem(marketplaceProjectId);
             return Ok(response);
         }
-        [HttpGet("count")]
+        [HttpGet("quantity")]
         [Authorize(Roles = Role.Backer)]
         public async Task<IActionResult> CountUserCartItem()
         {
