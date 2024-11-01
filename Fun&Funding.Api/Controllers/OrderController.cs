@@ -29,7 +29,7 @@ namespace Fun_Funding.Api.Controllers
             return Ok(response);
         }
         [HttpPost]
-        public async Task<IActionResult> CreateOrder([FromForm] CreateOrderRequest createOrderRequest)
+        public async Task<IActionResult> CreateOrder([FromBody] CreateOrderRequest createOrderRequest)
         {
             var response = await _orderService.CreateOrder(createOrderRequest);
             return Ok(response);

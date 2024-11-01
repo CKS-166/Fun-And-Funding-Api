@@ -32,7 +32,6 @@ namespace Fun_Funding.Domain.Entity
         public virtual ICollection<FundingFile> SourceFiles { get; set; }
         public virtual ICollection<Category> Categories { get; set; }
         public virtual ICollection<Package> Packages { get; set; }
-        public virtual ICollection<WithdrawRequest>? WithdrawRequests { get; set; }
         public virtual ICollection<ProjectMilestone>? ProjectMilestones { get; set; }
         
         //public virtual User? GameOwner { get; set; }
