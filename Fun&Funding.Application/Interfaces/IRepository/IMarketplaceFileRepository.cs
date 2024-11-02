@@ -5,5 +5,6 @@ namespace Fun_Funding.Application.Interfaces.IRepository
 {
     public interface IMarketplaceFileRepository : IBaseRepository<MarketplaceFile>
     {
+        Task HardDeleteMarketplaceFilesAsync(IEnumerable<MarketplaceFile> files);
     }
 }

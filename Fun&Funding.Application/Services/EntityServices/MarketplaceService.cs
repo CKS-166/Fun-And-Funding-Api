@@ -49,67 +49,72 @@ namespace Fun_Funding.Application.Services.EntityServices
                 {
                     var updateRequest = _mapper.Map<MarketplaceProjectUpdateRequest>(request);
 
-                    await UpdateMarketplaceProject(mp.Id, updateRequest, true);
+                    var response = UpdateMarketplaceProject(mp.Id, updateRequest, true).Result._data;
+
+                    return new ResultDTO<MarketplaceProjectInfoResponse>(true, "Create successfully.",
+                        response, (int)HttpStatusCode.Created);
                 }
-
-                //find funding project
-                var fundingProject = await _unitOfWork.FundingProjectRepository.GetQueryable()
-                    .Where(p => p.Id == request.FundingProjectId)
-                    .Include(p => p.User)
-                    .Include(p => p.Categories)
-                    .FirstOrDefaultAsync();
-
-                if (fundingProject == null)
-                    throw new ExceptionError((int)HttpStatusCode.NotFound, "Funding Project not found.");
-
-                //validate
-                var errorMessages = validateCommonFields(request);
-                if (errorMessages != null && errorMessages.Count > 0)
+                else
                 {
-                    throw new ExceptionError((int)HttpStatusCode.BadRequest, string.Join("\n", errorMessages));
-                }
+                    //find funding project
+                    var fundingProject = await _unitOfWork.FundingProjectRepository.GetQueryable()
+                        .Where(p => p.Id == request.FundingProjectId)
+                        .Include(p => p.User)
+                        .Include(p => p.Categories)
+                        .FirstOrDefaultAsync();
 
-                //add files 
-                List<MarketplaceFile> files = new List<MarketplaceFile>();
+                    if (fundingProject == null)
+                        throw new ExceptionError((int)HttpStatusCode.NotFound, "Funding Project not found.");
 
-                foreach (MarketplaceFileRequest file in request.MarketplaceFiles)
-                {
-                    if (file.URL.Length > 0)
+                    //validate
+                    var errorMessages = validateCommonFields(request);
+                    if (errorMessages != null && errorMessages.Count > 0)
                     {
-                        var result = _azureService.UploadUrlSingleFiles(file.URL);
-
-                        if (result == null)
-                        {
-                            throw new ExceptionError((int)HttpStatusCode.BadRequest, "Fail to upload file");
-                        }
-
-                        MarketplaceFile media = new MarketplaceFile
-                        {
-                            Name = file.Name,
-                            URL = result.Result,
-                            FileType = file.FileType,
-                            CreatedDate = DateTime.Now
-                        };
-
-                        files.Add(media);
+                        throw new ExceptionError((int)HttpStatusCode.BadRequest, string.Join("\n", errorMessages));
                     }
+
+                    //add files 
+                    List<MarketplaceFile> files = new List<MarketplaceFile>();
+
+                    foreach (MarketplaceFileRequest file in request.MarketplaceFiles)
+                    {
+                        if (file.URL.Length > 0)
+                        {
+                            var result = _azureService.UploadUrlSingleFiles(file.URL);
+
+                            if (result == null)
+                            {
+                                throw new ExceptionError((int)HttpStatusCode.BadRequest, "Fail to upload file");
+                            }
+
+                            MarketplaceFile media = new MarketplaceFile
+                            {
+                                Name = file.Name,
+                                URL = result.Result,
+                                FileType = file.FileType,
+                                CreatedDate = DateTime.Now
+                            };
+
+                            files.Add(media);
+                        }
+                    }
+
+                    //map project
+                    var marketplaceProject = _mapper.Map<MarketplaceProject>(request);
+                    marketplaceProject.MarketplaceFiles = files;
+                    marketplaceProject.FundingProject = fundingProject;
+                    marketplaceProject.Status = ProjectStatus.Pending;
+                    marketplaceProject.CreatedDate = DateTime.Now;
+
+                    //save to db
+                    await _unitOfWork.MarketplaceRepository.AddAsync(marketplaceProject);
+                    await _unitOfWork.CommitAsync();
+
+                    //response
+                    var response = _mapper.Map<MarketplaceProjectInfoResponse>(marketplaceProject);
+                    return new ResultDTO<MarketplaceProjectInfoResponse>(true, "Create successfully.",
+                        response, (int)HttpStatusCode.Created);
                 }
-
-                //map project
-                var marketplaceProject = _mapper.Map<MarketplaceProject>(request);
-                marketplaceProject.MarketplaceFiles = files;
-                marketplaceProject.FundingProject = fundingProject;
-                marketplaceProject.Status = ProjectStatus.Pending;
-                marketplaceProject.CreatedDate = DateTime.Now;
-
-                //save to db
-                await _unitOfWork.MarketplaceRepository.AddAsync(marketplaceProject);
-                await _unitOfWork.CommitAsync();
-
-                //response
-                var response = _mapper.Map<MarketplaceProjectInfoResponse>(marketplaceProject);
-                return new ResultDTO<MarketplaceProjectInfoResponse>(true, "Create successfully.",
-                    response, (int)HttpStatusCode.Created);
             }
             catch (Exception ex)
             {
@@ -296,9 +301,14 @@ namespace Fun_Funding.Application.Services.EntityServices
                 {
                     if (isDeleted != null && isDeleted == true)
                     {
+                        /*//add files 
+                        var files = addFiles(request.MarketplaceFiles, id);*/
+
                         marketplaceProject.Status = ProjectStatus.Pending;
                         marketplaceProject.IsDeleted = false;
                         marketplaceProject.DeletedAt = null;
+                        marketplaceProject.CreatedDate = DateTime.Now;
+                        /*marketplaceProject.MarketplaceFiles = files;*/
                     }
 
                     if (marketplaceProject.Status == ProjectStatus.Pending)
@@ -310,7 +320,15 @@ namespace Fun_Funding.Application.Services.EntityServices
                             throw new ExceptionError((int)HttpStatusCode.BadRequest, string.Join("\n", errorMessages));
                         }
 
+                        //remove existing files
+                        //if (marketplaceProject.MarketplaceFiles != null && marketplaceProject.MarketplaceFiles.Count() > 0)
+                        //{
+                        //    await _unitOfWork.MarketplaceFileRepository.HardDeleteMarketplaceFilesAsync(marketplaceProject.MarketplaceFiles);
+                        //}
+
                         _mapper.Map(request, marketplaceProject);
+
+                        marketplaceProject.MarketplaceFiles = addFiles(request.MarketplaceFiles, id);
 
                         _unitOfWork.MarketplaceRepository.Update(marketplaceProject);
                         await _unitOfWork.CommitAsync();
@@ -471,6 +489,38 @@ namespace Fun_Funding.Application.Services.EntityServices
         private List<string> validateMarketplaceProject(MarketplaceProjectUpdateRequest request)
         {
             return validateCommonFields(request);
+        }
+
+        //add files
+        private List<MarketplaceFile> addFiles(List<MarketplaceFileRequest> marketplaceFiles, Guid id)
+        {
+            List<MarketplaceFile> files = new List<MarketplaceFile>();
+
+            foreach (MarketplaceFileRequest file in marketplaceFiles)
+            {
+                if (file.URL.Length > 0)
+                {
+                    var result = _azureService.UploadUrlSingleFiles(file.URL);
+
+                    if (result == null)
+                    {
+                        throw new ExceptionError((int)HttpStatusCode.BadRequest, "Fail to upload file");
+                    }
+
+                    MarketplaceFile media = new MarketplaceFile
+                    {
+                        Name = file.Name,
+                        URL = result.Result,
+                        FileType = file.FileType,
+                        CreatedDate = DateTime.Now,
+                        MarketplaceProjectId = id
+                    };
+
+                    files.Add(media);
+                }
+            }
+
+            return files;
         }
     }
 }
