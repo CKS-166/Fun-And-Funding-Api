@@ -47,7 +47,7 @@ namespace Fun_Funding.Application.ExternalServices.SoftDeleteService
 
                 entry.State = EntityState.Modified;
                 delete.IsDeleted = true;
-                delete.DeletedAt = DateTimeOffset.UtcNow;
+                delete.DeletedAt = DateTimeOffset.Now;
             }
 
             return result;
@@ -79,7 +79,7 @@ namespace Fun_Funding.Application.ExternalServices.SoftDeleteService
 
                 entry.State = EntityState.Modified;
                 delete.IsDeleted = true;
-                delete.DeletedAt = DateTimeOffset.UtcNow;
+                delete.DeletedAt = DateTimeOffset.Now;
             }
 
             return await Task.FromResult(result);
