@@ -193,7 +193,7 @@ namespace Fun_Funding.Application.Services.EntityServices
             try
             {
                 var marketplaceProject = await _unitOfWork.MarketplaceRepository.GetQueryable()
-                    .Where(p => p.Id == id)
+                    .Where(p => p.Id == id && p.IsDeleted == false)
                     .Include(p => p.MarketplaceFiles)
                     .Include(p => p.FundingProject.Categories)
                     .Include(p => p.FundingProject)
@@ -204,6 +204,12 @@ namespace Fun_Funding.Application.Services.EntityServices
                     throw new ExceptionError((int)HttpStatusCode.NotFound, "Marketplace Project not found.");
                 else
                 {
+                    if (marketplaceProject.MarketplaceFiles != null)
+                    {
+                        var existingFiles = marketplaceProject.MarketplaceFiles.ToList();
+                        marketplaceProject.MarketplaceFiles = getNonDeletedFiles(existingFiles);
+                    }
+
                     var response = _mapper.Map<MarketplaceProjectInfoResponse>(marketplaceProject);
 
                     return ResultDTO<MarketplaceProjectInfoResponse>.Success(response);
@@ -271,29 +277,13 @@ namespace Fun_Funding.Application.Services.EntityServices
         {
             try
             {
-                MarketplaceProject marketplaceProject;
-
-                if (isDeleted != null && isDeleted == true)
-                {
-                    marketplaceProject = await _unitOfWork.MarketplaceRepository.GetQueryable()
-                                        .IgnoreQueryFilters()
+                MarketplaceProject marketplaceProject = await _unitOfWork.MarketplaceRepository.GetQueryable()
                                         .Where(p => p.Id == id)
                                         .Include(p => p.MarketplaceFiles)
                                         .Include(p => p.FundingProject.Categories)
                                         .Include(p => p.FundingProject)
                                         .ThenInclude(p => p.User)
-                                        .FirstOrDefaultAsync();
-                }
-                else
-                {
-                    marketplaceProject = await _unitOfWork.MarketplaceRepository.GetQueryable()
-                                        .Where(p => p.Id == id)
-                                        .Include(p => p.MarketplaceFiles)
-                                        .Include(p => p.FundingProject.Categories)
-                                        .Include(p => p.FundingProject)
-                                        .ThenInclude(p => p.User)
-                                        .FirstOrDefaultAsync();
-                }
+                                        .FirstOrDefaultAsync(); ;
 
                 if (marketplaceProject == null)
                     throw new ExceptionError((int)HttpStatusCode.NotFound, "Marketplace Project not found.");
@@ -345,6 +335,9 @@ namespace Fun_Funding.Application.Services.EntityServices
 
                         _unitOfWork.MarketplaceRepository.Update(marketplaceProject);
                         await _unitOfWork.CommitAsync();
+
+                        //return non-deleted files only
+                        marketplaceProject.MarketplaceFiles = getNonDeletedFiles(existingFiles.ToList());
 
                         var response = _mapper.Map<MarketplaceProjectInfoResponse>(marketplaceProject);
 
@@ -530,6 +523,22 @@ namespace Fun_Funding.Application.Services.EntityServices
                     };
 
                     files.Add(media);
+                }
+            }
+
+            return files;
+        }
+
+        //get non-deleted files
+        private List<MarketplaceFile> getNonDeletedFiles(List<MarketplaceFile> marketplaceFiles)
+        {
+            List<MarketplaceFile> files = new List<MarketplaceFile>();
+
+            foreach (MarketplaceFile file in marketplaceFiles)
+            {
+                if (file.IsDeleted == false)
+                {
+                    files.Add(file);
                 }
             }
 

@@ -214,6 +214,7 @@ namespace Fun_Funding.Application.Mapper
         {
             CreateMap<MarketplaceFile, MarketplaceFileInfoResponse>().ReverseMap();
             CreateMap<MarketplaceFileRequest, MarketplaceFile>().ReverseMap();
+            CreateMap<MarketplaceGameFileRequest, MarketplaceFile>().ReverseMap();
         }
 
         public void MappingChat()
