@@ -11,6 +11,8 @@ namespace Fun_Funding.Domain.Enum
         Advertisement,
         ResetPassword,
         Policy,
-        Register
+        Register,
+        MilestoneExpired,
+        MilestoneReminder
     }
 }

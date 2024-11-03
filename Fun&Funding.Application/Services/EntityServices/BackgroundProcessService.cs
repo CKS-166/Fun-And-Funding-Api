@@ -2,6 +2,7 @@
 using Fun_Funding.Application.IService;
 using Fun_Funding.Domain.Entity;
 using Fun_Funding.Domain.Enum;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -82,22 +83,45 @@ namespace Fun_Funding.Application.Services.EntityServices
             {
                 var projectMilestones = _unitOfWork.ProjectMilestoneRepository
                     .GetQueryable()
+                    .Include(pm => pm.Milestone)
                     .Where(p => p.Status == ProjectMilestoneStatus.Pending
                     || p.Status == ProjectMilestoneStatus.Processing
                     || p.Status == ProjectMilestoneStatus.Warning).ToList();
                 foreach (var projectMilestone in projectMilestones)
                 {
                     bool statusChanged = false;
-                    if (projectMilestone.Status == ProjectMilestoneStatus.Pending && (projectMilestone.CreatedDate - present).TotalDays == 0)
+                    User owner = GetUserByProjectMilestoneId(projectMilestone.FundingProjectId);
+                    FundingProject project = GetProject(projectMilestone.FundingProjectId);
+                    if (projectMilestone.Status == ProjectMilestoneStatus.Processing)
                     {
-                        projectMilestone.Status = ProjectMilestoneStatus.Processing;
-                        statusChanged = true;
+                        if ((projectMilestone.EndDate.Date - present.Date).TotalDays == 7)
+                        {
+                            await _emailService.SendMilestoneAsync(owner.Email, project.Name, projectMilestone.Milestone.MilestoneName, owner.FullName, null, 7, present, EmailType.MilestoneReminder);
+                        }
+                        if ((projectMilestone.EndDate - present).TotalDays == 0)
+                        {
+                            projectMilestone.Status = ProjectMilestoneStatus.Submitted;
+                            await _emailService.SendMilestoneAsync(owner.Email, project.Name, projectMilestone.Milestone.MilestoneName, owner.FullName, "Submitted for review", null, present, EmailType.MilestoneExpired);
+                            statusChanged = true;
+                        }
+                       
+
                     }
-                    else if (projectMilestone.Status == ProjectMilestoneStatus.Warning && (projectMilestone.EndDate - present).TotalDays == 0)
+                    else if (projectMilestone.Status == ProjectMilestoneStatus.Warning)
                     {
-                        projectMilestone.Status = ProjectMilestoneStatus.Failed;
-                        statusChanged = true;
+                        if ((projectMilestone.EndDate.Date - present.Date).TotalDays == 7)
+                        {
+                            await _emailService.SendMilestoneAsync(owner.Email, project.Name, projectMilestone.Milestone.MilestoneName, owner.FullName, null, 7, present, EmailType.MilestoneReminder);
+                        }else if ((projectMilestone.EndDate.Date - present).TotalDays == 0)
+                        {
+                            projectMilestone.Status = ProjectMilestoneStatus.Failed;
+                            await _emailService.SendMilestoneAsync(owner.Email, project.Name, projectMilestone.Milestone.MilestoneName, owner.FullName, "Failed", null, present, EmailType.MilestoneExpired);
+                            project.Status = ProjectStatus.Failed;
+                            statusChanged = true;
+                        }
+                      
                     }
+
                     if (statusChanged)
                     {
                         _unitOfWork.ProjectMilestoneRepository.Update(projectMilestone);
@@ -111,11 +135,31 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
-        //public User GetUserByProjectMilestoneId(Guid mileId)
-        //{
-        //    FundingProject project = _unitOfWork.
-        //    User user = null;
-        //    return user;
-        //}
+        public User GetUserByProjectMilestoneId(Guid projectId)
+        {
+            FundingProject project = _unitOfWork.FundingProjectRepository.GetQueryable()
+                .Include(p => p.User).FirstOrDefault(p => p.Id == projectId);   
+            if (project == null)
+            {
+                return null;
+            }
+            User owner = _unitOfWork.UserRepository.GetById(project.UserId);
+            if(owner == null)
+            {
+                return null;
+            }
+            return owner;
+        }
+
+        public FundingProject GetProject(Guid projectId)
+        {
+            FundingProject project = _unitOfWork.FundingProjectRepository.GetQueryable()
+               .Include(p => p.User).FirstOrDefault(p => p.Id == projectId);
+            if (project == null)
+            {
+                return null;
+            }
+            return project;
+        }
     }
 }

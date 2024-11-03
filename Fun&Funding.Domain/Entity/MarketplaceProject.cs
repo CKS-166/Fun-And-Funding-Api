@@ -12,7 +12,6 @@ namespace Fun_Funding.Domain.Entity
         [Range(0, (double)decimal.MaxValue)]
         [Column(TypeName = "decimal(18, 2)")]
         public decimal Price { get; set; }
-
         public FundingProject FundingProject { get; set; }
         public Guid FundingProjectId { get; set; }
         public ProjectStatus Status { get; set; }
