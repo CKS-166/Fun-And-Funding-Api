@@ -201,8 +201,12 @@ namespace Fun_Funding.Application.Mapper
                 .ForMember(dest => dest.Categories, opt => opt.MapFrom(src => src.FundingProject.Categories))
                 .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.FundingProject.User))
                 .ReverseMap();
-            CreateMap<MarketplaceProjectAddRequest, MarketplaceProject>().ReverseMap();
-            CreateMap<MarketplaceProjectUpdateRequest, MarketplaceProject>().ReverseMap();
+            CreateMap<MarketplaceProjectAddRequest, MarketplaceProject>()
+                .ForMember(dest => dest.MarketplaceFiles, opt => opt.Ignore())
+                .ReverseMap();
+            CreateMap<MarketplaceProjectUpdateRequest, MarketplaceProject>()
+                .ForMember(dest => dest.MarketplaceFiles, opt => opt.Ignore())
+                .ReverseMap();
             CreateMap<MarketplaceProjectAddRequest, MarketplaceProjectUpdateRequest>().ReverseMap();
         }
 
