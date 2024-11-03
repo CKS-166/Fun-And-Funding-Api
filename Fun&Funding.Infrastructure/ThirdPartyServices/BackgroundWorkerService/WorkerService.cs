@@ -30,7 +30,7 @@ namespace Fun_Funding.Infrastructure.ExternalServices.BackgroundWorkerService
                 try
                 {
                     var validateFundingTask = RunValidationLoop(stoppingToken, TimeSpan.FromHours(6), ValidateFundingStatus);
-                    await Task.WhenAll(validateFundingTask);
+                    //await Task.WhenAll(validateFundingTask);
                 }
                 catch (Exception ex)
                 {
@@ -70,13 +70,14 @@ namespace Fun_Funding.Infrastructure.ExternalServices.BackgroundWorkerService
         {
             using (var scope = _serviceScopeFactory.CreateScope())
             {
-                var fundingService = scope.ServiceProvider.GetRequiredService<IBackgroundProcessService>();
+                var backgroundService = scope.ServiceProvider.GetRequiredService<IBackgroundProcessService>();
 
-                var test = fundingService.UpdateFundingStatus();
-                //_logger.LogInformation("Updating marketplace status at: {time}", test.Result);
+                // Run both tasks concurrently
+                var updateFundingStatusTask = backgroundService.UpdateFundingStatus();
+                var updateProjectMilestoneStatusTask = backgroundService.UpdateProjectMilestoneStatus();
 
-                // Call the UpdateStatus method (no parameters needed).
-                //marketplaceService.UpdateStatus();
+                // Await both tasks to complete
+                await Task.WhenAll(updateFundingStatusTask, updateProjectMilestoneStatusTask);
             }
         }
     }
