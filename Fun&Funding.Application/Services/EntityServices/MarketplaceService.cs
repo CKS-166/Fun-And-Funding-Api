@@ -321,14 +321,27 @@ namespace Fun_Funding.Application.Services.EntityServices
                         }
 
                         //remove existing files
-                        //if (marketplaceProject.MarketplaceFiles != null && marketplaceProject.MarketplaceFiles.Count() > 0)
-                        //{
-                        //    await _unitOfWork.MarketplaceFileRepository.HardDeleteMarketplaceFilesAsync(marketplaceProject.MarketplaceFiles);
-                        //}
+                        var existingFiles = marketplaceProject.MarketplaceFiles;
+                        if (existingFiles != null && existingFiles.Count() > 0)
+                        {
+                            _unitOfWork.MarketplaceFileRepository.RemoveRange(existingFiles);
+                            await _unitOfWork.CommitAsync();
+                        }
+
+                        //files to be update
+                        if (existingFiles != null)
+                        {
+                            var filesToUpdate = addFiles(request.MarketplaceFiles, id);
+
+                            foreach (var file in filesToUpdate)
+                            {
+                                existingFiles.Add(file);
+                            }
+                        }
 
                         _mapper.Map(request, marketplaceProject);
 
-                        marketplaceProject.MarketplaceFiles = addFiles(request.MarketplaceFiles, id);
+                        marketplaceProject.MarketplaceFiles = existingFiles;
 
                         _unitOfWork.MarketplaceRepository.Update(marketplaceProject);
                         await _unitOfWork.CommitAsync();
