@@ -1,5 +1,5 @@
 using AutoMapper;
-using Fun_Funding.Application.Resolver;
+using Fun_Funding.Application.Mapper.Resolver;
 using Fun_Funding.Application.ViewModel.BankAccountDTO;
 using Fun_Funding.Application.ViewModel.CartDTO;
 using Fun_Funding.Application.ViewModel.CategoryDTO;
