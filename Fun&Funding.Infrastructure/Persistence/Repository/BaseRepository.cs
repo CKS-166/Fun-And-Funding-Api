@@ -38,8 +38,11 @@ namespace Fun_Funding.Infrastructure.Persistence.Repository
 
         public virtual IEnumerable<T> GetAll(Expression<Func<T, bool>> predicate = null)
         {
-            if (predicate == null) return _entitySet.ToList();
-            return _entitySet.Where(predicate).ToList();
+            if (predicate == null) return _entitySet.AsNoTracking().ToList();
+            return _entitySet
+                .Where(predicate)
+                .Where(e => EF.Property<bool>(e, "IsDeleted") == false)
+                .ToList();
         }
 
         public virtual T Get(Expression<Func<T, bool>> predicate)
@@ -49,17 +52,17 @@ namespace Fun_Funding.Infrastructure.Persistence.Repository
 
         public IEnumerable<T> GetAll()
         {
-            return _entitySet.ToList();
+            return _entitySet.Where(e => EF.Property<bool>(e, "IsDeleted") == false).ToList();
         }
 
         public virtual async Task<IEnumerable<T>> GetAllAsync(CancellationToken cancellationToken = default)
         {
-            return await _entitySet.ToListAsync(cancellationToken);
+            return await _entitySet.Where(e => EF.Property<bool>(e, "IsDeleted") == false).ToListAsync(cancellationToken);
         }
 
         public virtual async Task<IEnumerable<T>> GetAllAsync()
         {
-            return await _entitySet.ToListAsync();
+            return await _entitySet.Where(e => EF.Property<bool>(e, "IsDeleted") == false).ToListAsync();
         }
 
         public virtual async Task<IEnumerable<T>> GetAllAsync(
@@ -71,7 +74,7 @@ namespace Fun_Funding.Infrastructure.Persistence.Repository
             int? pageSize = 10,
             CancellationToken cancellationToken = default)
         {
-            IQueryable<T> query = _entitySet;
+            IQueryable<T> query = _entitySet.Where(e => EF.Property<bool>(e, "IsDeleted") == false);
 
             if (filter != null) { query = query.Where(filter); }
 
@@ -117,34 +120,62 @@ namespace Fun_Funding.Infrastructure.Persistence.Repository
             _context.Remove(entity);
         }
 
-        // Retrieve deleted entities
-        public IEnumerable<T> GetAllDeleted()
+        // Retrieve deleted entities no pagination
+        public async Task<IEnumerable<T>> GetAllDeletedNoPaginationAsync(Expression<Func<T, bool>>? predicate = null)
         {
-            return _entitySet.AsNoTracking().IgnoreQueryFilters().ToList();
+            if (predicate == null) return await _entitySet.AsNoTracking().ToListAsync();
+            return await _entitySet
+                .Where(predicate)
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         // Asynchronously retrieve deleted entities
-        public async Task<IEnumerable<T>> GetAllDeletedAsync(CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<T>> GetAllDeletedAsync(
+            Expression<Func<T, bool>> filter = null,
+            Expression<Func<T, object>> orderBy = null,
+            bool isAscending = false,
+            string includeProperties = "",
+            int? pageIndex = null,
+            int? pageSize = null,
+            CancellationToken cancellationToken = default)
         {
-            return await _entitySet.AsNoTracking()
-                .IgnoreQueryFilters()
-                .ToListAsync(cancellationToken);
+            IQueryable<T> query = _entitySet.AsNoTracking();
+
+            if (filter != null) { query = query.Where(filter); }
+
+            if (orderBy != null)
+            {
+                query = isAscending ? query.OrderBy(orderBy) : query.OrderByDescending(orderBy);
+            }
+
+            if (includeProperties != "")
+            {
+                foreach (var includeProperty in includeProperties.Split
+                    (new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    query = query.Include(includeProperty);
+                }
+            }
+
+            if (pageIndex.HasValue && pageSize.HasValue)
+            {
+                query = query.Skip((pageIndex.Value - 1) * pageSize.Value).Take(pageSize.Value);
+            }
+
+            return await query.ToListAsync();
         }
 
         // Get a single deleted entity by a condition
         public T GetDeleted(Expression<Func<T, bool>> predicate)
         {
-            return _entitySet.AsNoTracking()
-                .IgnoreQueryFilters()
-                .FirstOrDefault(predicate);
+            return _entitySet.AsNoTracking().FirstOrDefault(predicate);
         }
 
         // Asynchronously get a single deleted entity by a condition
         public async Task<T> GetDeletedAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default)
         {
-            return await _entitySet.AsNoTracking()
-                .IgnoreQueryFilters()
-                .FirstOrDefaultAsync(predicate, cancellationToken);
+            return await _entitySet.AsNoTracking().FirstOrDefaultAsync(predicate, cancellationToken);
         }
         public virtual void RemoveRange(IEnumerable<T> entities)
         {

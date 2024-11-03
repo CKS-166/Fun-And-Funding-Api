@@ -20,10 +20,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Fun_Funding.Application.ExternalServices.SoftDeleteService;
-using Fun_Funding.Application.Interfaces.IRepository;
-using Fun_Funding.Application.Interfaces.IEntityService;
-using Microsoft.AspNetCore.SignalR;
 
 namespace Fun_Funding.Infrastructure.Dependency_Injection
 {
@@ -157,9 +153,10 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
 
             service.AddScoped<ICartService, CartService>();
             service.AddScoped<INotificationService, NotificationService>();
+            service.AddScoped<IMarketplaceFileService, MarketplaceFileService>();
             #endregion
 
-            
+
 
             //BaseRepository          
             service.AddTransient(typeof(IBaseRepository<>), typeof(BaseRepository<>));
