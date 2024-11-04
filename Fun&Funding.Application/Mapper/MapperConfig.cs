@@ -1,5 +1,5 @@
 using AutoMapper;
-using Fun_Funding.Application.Resolver;
+using Fun_Funding.Application.Mapper.Resolver;
 using Fun_Funding.Application.ViewModel.BankAccountDTO;
 using Fun_Funding.Application.ViewModel.CartDTO;
 using Fun_Funding.Application.ViewModel.CategoryDTO;
@@ -201,8 +201,12 @@ namespace Fun_Funding.Application.Mapper
                 .ForMember(dest => dest.Categories, opt => opt.MapFrom(src => src.FundingProject.Categories))
                 .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.FundingProject.User))
                 .ReverseMap();
-            CreateMap<MarketplaceProjectAddRequest, MarketplaceProject>().ReverseMap();
-            CreateMap<MarketplaceProjectUpdateRequest, MarketplaceProject>().ReverseMap();
+            CreateMap<MarketplaceProjectAddRequest, MarketplaceProject>()
+                .ForMember(dest => dest.MarketplaceFiles, opt => opt.Ignore())
+                .ReverseMap();
+            CreateMap<MarketplaceProjectUpdateRequest, MarketplaceProject>()
+                .ForMember(dest => dest.MarketplaceFiles, opt => opt.Ignore())
+                .ReverseMap();
             CreateMap<MarketplaceProjectAddRequest, MarketplaceProjectUpdateRequest>().ReverseMap();
         }
 
@@ -210,6 +214,7 @@ namespace Fun_Funding.Application.Mapper
         {
             CreateMap<MarketplaceFile, MarketplaceFileInfoResponse>().ReverseMap();
             CreateMap<MarketplaceFileRequest, MarketplaceFile>().ReverseMap();
+            CreateMap<MarketplaceGameFileRequest, MarketplaceFile>().ReverseMap();
         }
 
         public void MappingChat()

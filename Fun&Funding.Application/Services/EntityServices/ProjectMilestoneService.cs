@@ -213,9 +213,10 @@ namespace Fun_Funding.Application.Services.EntityServices
                 // check project milestone current status
                 // ...
                 var pendingStatusList = new List<ProjectMilestoneStatus>() { ProjectMilestoneStatus.Processing };
+                var processingStatusList = new List<ProjectMilestoneStatus>() { ProjectMilestoneStatus.Submitted };
                 var approvedStatusList = new List<ProjectMilestoneStatus>()
                 {
-                    ProjectMilestoneStatus.Completed ,
+                    ProjectMilestoneStatus.Completed,
                     ProjectMilestoneStatus.Warning
                 };
                 var warnStatusList = new List<ProjectMilestoneStatus>()
@@ -231,7 +232,12 @@ namespace Fun_Funding.Application.Services.EntityServices
                     projectMilestone.Status = request.Status;
                     statusChanged = true;
                 }
-                else if (projectMilestone.Status == ProjectMilestoneStatus.Processing && approvedStatusList.Contains(request.Status))
+                else if (projectMilestone.Status == ProjectMilestoneStatus.Processing && processingStatusList.Contains(request.Status))
+                {
+                    projectMilestone.Status = request.Status;
+                    statusChanged = true;
+                }
+                else if (projectMilestone.Status == ProjectMilestoneStatus.Submitted && approvedStatusList.Contains(request.Status))
                 {
                     projectMilestone.Status = request.Status;
                     statusChanged = true;
@@ -329,8 +335,6 @@ namespace Fun_Funding.Application.Services.EntityServices
                     includeProperties: "Milestone,ProjectMilestoneRequirements.RequirementFiles,ProjectMilestoneRequirements.Requirement"
                 );
 
-                if (list != null && list.Any())
-                {
                     var totalItems = _unitOfWork.ProjectMilestoneRepository.GetAll(filter).Count();
                     var totalPages = (int)Math.Ceiling((double)totalItems / (request.PageSize ?? 10));
 
@@ -347,11 +351,8 @@ namespace Fun_Funding.Application.Services.EntityServices
                     };
 
                     return ResultDTO<PaginatedResponse<ProjectMilestoneResponse>>.Success(response);
-                }
-                else
-                {
-                    throw new ExceptionError((int)HttpStatusCode.NotFound, "No project milestones found.");
-                }
+                
+
             }
             catch (Exception ex)
             {
@@ -363,5 +364,6 @@ namespace Fun_Funding.Application.Services.EntityServices
                 throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
             }
         }
+
     }
 }

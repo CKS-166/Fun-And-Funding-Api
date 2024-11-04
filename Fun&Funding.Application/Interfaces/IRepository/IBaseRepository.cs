@@ -10,8 +10,15 @@ namespace Fun_Funding.Application.IRepository
         IEnumerable<T> GetAll();
         IEnumerable<T> GetAll(Expression<Func<T, bool>> predicate = null);
         // Soft delete-related methods
-        IEnumerable<T> GetAllDeleted(); // Retrieve deleted entities
-        Task<IEnumerable<T>> GetAllDeletedAsync(CancellationToken cancellationToken = default);
+        Task<IEnumerable<T>> GetAllDeletedNoPaginationAsync(Expression<Func<T, bool>>? predicate = null); // Retrieve deleted entities no pagination
+        Task<IEnumerable<T>> GetAllDeletedAsync(
+            Expression<Func<T, bool>> filter = null,
+            Expression<Func<T, object>> orderBy = null,
+            bool isAscending = false,
+            string includeProperties = "",
+            int? pageIndex = null,
+            int? pageSize = null,
+            CancellationToken cancellationToken = default);
         T GetDeleted(Expression<Func<T, bool>> predicate); // Get deleted by condition
         Task<T> GetDeletedAsync(Expression<Func<T, bool>> predicate, CancellationToken cancellationToken = default);
         void Add(T entity);

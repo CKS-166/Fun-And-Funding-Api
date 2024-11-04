@@ -30,6 +30,7 @@ namespace Fun_Funding.Application.Services.ExternalServices
                 case EmailType.Register:
                     body = GenerateRegisterEmailBody(content);
                     break;
+                           
                 default:
                     body = GenerateResetPasswordEmailBody(content);
                     break;
@@ -396,6 +397,196 @@ namespace Fun_Funding.Application.Services.ExternalServices
 ";
         }
 
-
+        private string GenerateMilestoneStatusUpdateEmailBody(string milestoneName, string newStatus, string ownerName)
+        {
+            return $@"
+    <!DOCTYPE html>
+    <html lang='en'>
+    <head>
+        <meta charset='UTF-8'>
+        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+        <title>Milestone Status Update</title>
+        <link href='https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap' rel='stylesheet'>
+        <style>
+            body {{ 
+                font-family: 'Poppins', sans-serif; 
+                background-color: #EAEAEA; 
+                color: #2F3645; 
+                margin: 0; 
+                padding: 20px 0;
+            }}
+            table {{
+                width: 100%;
+                height: 100%;
+                background-color: #EAEAEA;
+                text-align: center;
+            }}
+            .container {{
+                max-width: 450px;
+                background-color: #FFFFFF;
+                border-radius: 10px;
+                padding: 20px;
+                border: 1px solid #FFFFFF;
+                margin: 30px auto;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            }}
+            h1 {{ 
+                color: #2F3645; 
+                font-size: 18px;
+                margin-bottom: 15px;
+            }}
+            p {{ 
+                line-height: 1.4;
+                font-size: 14px;
+                color: #2F3645;
+                margin-left: 30px;
+                margin-right: 30px;
+            }}
+            .status-badge {{ 
+                display: inline-block; 
+                padding: 10px 20px;
+                font-size: 18px;
+                font-weight: 600;
+                background-color: #1BAA64; 
+                color: #F5F7F8; 
+                text-decoration: none; 
+                border-radius: 5px; 
+                margin-top: 25px;
+                width: auto;
+            }}
+            footer {{ 
+                margin-top: 30px;
+                font-size: 12px;
+                color: #777; 
+            }}
+        </style>
+    </head>
+    <body>
+        <table>
+            <tr>
+                <td>
+                    <div class='container'>
+                        <img src='https://i.ibb.co/SxKvYLH/Frame-155.png' alt='Fun&Funding Logo' width='200px' style='margin-bottom: 20px; margin-top: 10px' />
+                        <h1>Your Project Milestone Has Been Updated</h1>
+                        <p>Dear {ownerName},</p>
+                        <p>We wanted to inform you that the status of your milestone <strong>{milestoneName}</strong> has been updated due to your milestone deadline has been reached. The new status is:</p>
+                        <div class='status-badge'>{newStatus}</div>
+                        <p>Please log in to your account to review the milestone details and take any necessary actions. If you have any questions or require assistance, feel free to reach out to our support team.</p>
+                        <footer>
+                            <p>Thank you,<br>The Fun&Funding Team</p>
+                            <p>&copy; 2024 Fun&Funding</p>
+                        </footer>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </body>
+    </html>";
+        }
+        private string GenerateMilestoneReminderEmailBody(string milestoneName, int? daysRemaining, string ownerName)
+        {
+            return $@"
+    <!DOCTYPE html>
+    <html lang='en'>
+    <head>
+        <meta charset='UTF-8'>
+        <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+        <title>Milestone Completion Reminder</title>
+        <link href='https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap' rel='stylesheet'>
+        <style>
+            body {{ 
+                font-family: 'Poppins', sans-serif; 
+                background-color: #EAEAEA; 
+                color: #2F3645; 
+                margin: 0; 
+                padding: 20px 0;
+            }}
+            table {{
+                width: 100%;
+                height: 100%;
+                background-color: #EAEAEA;
+                text-align: center;
+            }}
+            .container {{
+                max-width: 450px;
+                background-color: #FFFFFF;
+                border-radius: 10px;
+                padding: 20px;
+                border: 1px solid #FFFFFF;
+                margin: 30px auto;
+                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            }}
+            h1 {{ 
+                color: #2F3645; 
+                font-size: 18px;
+                margin-bottom: 15px;
+            }}
+            p {{ 
+                line-height: 1.4;
+                font-size: 14px;
+                color: #2F3645;
+                margin-left: 30px;
+                margin-right: 30px;
+            }}
+            .reminder-badge {{ 
+                display: inline-block; 
+                padding: 10px 20px;
+                font-size: 18px;
+                font-weight: 600;
+                background-color: #FFA500; 
+                color: #FFFFFF; 
+                text-decoration: none; 
+                border-radius: 5px; 
+                margin-top: 25px;
+                width: auto;
+            }}
+            footer {{ 
+                margin-top: 30px;
+                font-size: 12px;
+                color: #777; 
+            }}
+        </style>
+    </head>
+    <body>
+        <table>
+            <tr>
+                <td>
+                    <div class='container'>
+                        <img src='https://i.ibb.co/SxKvYLH/Frame-155.png' alt='Fun&Funding Logo' width='200px' style='margin-bottom: 20px; margin-top: 10px' />
+                        <h1>Milestone Completion Reminder</h1>
+                        <p>Dear {ownerName},</p>
+                        <p>This is a reminder that your milestone <strong>{milestoneName}</strong> has <strong>{daysRemaining} days</strong> remaining to complete. Please ensure all necessary actions are taken to meet the milestone requirements by the deadline.</p>
+                        <div class='reminder-badge'>{daysRemaining} Days Left</div>
+                        <p>Log in to your account to review the milestone progress and make any necessary updates. If you need assistance, please contact our support team.</p>
+                        <footer>
+                            <p>Thank you,<br>The Fun&Funding Team</p>
+                            <p>&copy; 2024 Fun&Funding</p>
+                        </footer>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </body>
+    </html>";
+        }
+        public async Task SendMilestoneAsync(string toEmail,string projectName, string milestoneName, string ownerName, string? newStatus,int? timeSpan, DateTime reportedDate, EmailType type)
+        {
+            string body = string.Empty;
+            switch (type)
+            {
+                case EmailType.MilestoneExpired:
+                    body = GenerateMilestoneStatusUpdateEmailBody(milestoneName, newStatus, ownerName);
+                    break;
+                case EmailType.MilestoneReminder:
+                    body = GenerateMilestoneReminderEmailBody(milestoneName, timeSpan , ownerName);
+                    break;
+            }
+                
+            await _fluentEmail
+                .To(toEmail)
+                .Subject($@"[UPDATES] - MILESTONE {milestoneName} of PROJECT {projectName} HAS BEEN UPDATED")
+                .Body(body, isHtml: true)
+                .SendAsync();
+        }
     }
 }

@@ -11,5 +11,6 @@ namespace Fun_Funding.Application.Interfaces.IExternalServices
     {
         Task SendEmailAsync(string toEmail, string subject, string body, EmailType type);
         Task SendReportAsync(string toEmail, string projectName, string userName, DateTime reportedDate, string reporter, string reason);
+        Task SendMilestoneAsync(string toEmail,string projectName, string milestoneName, string ownerName, string? newStatus,int? timeSpan, DateTime reportedDate, EmailType type);
     }
 }

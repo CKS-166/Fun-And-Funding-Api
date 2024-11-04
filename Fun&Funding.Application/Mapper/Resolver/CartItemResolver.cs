@@ -11,7 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Fun_Funding.Application.Resolver
+namespace Fun_Funding.Application.Mapper.Resolver
 {
     public class CartItemResolver : IValueResolver<Cart, CartInfoResponse, List<ItemInfoResponse>>
     {
