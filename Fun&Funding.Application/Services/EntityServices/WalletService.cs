@@ -2,19 +2,12 @@
 using Fun_Funding.Application.ExceptionHandler;
 using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel;
-using Fun_Funding.Application.ViewModel.PackageBackerDTO;
 using Fun_Funding.Application.ViewModel.WalletDTO;
-using Fun_Funding.Domain.Entity;
 using Fun_Funding.Domain.Enum;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fun_Funding.Application.Services.EntityServices
 {
@@ -68,6 +61,11 @@ namespace Fun_Funding.Application.Services.EntityServices
             {
                 throw new Exception(ex.Message);
             }
+        }
+
+        public Task<ResultDTO<WalletInfoResponse>> GetMarketplaceProject(Guid marketplaceProjectId)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<ResultDTO<WalletInfoResponse>> GetWalletByUser()
