@@ -5,6 +5,10 @@ namespace Fun_Funding.Application.Interfaces.IEntityService
 {
     public interface IMarketplaceFileService
     {
-        Task<ResultDTO<MarketplaceFileInfoResponse>> UploadUpdateGameFile(MarketplaceGameFileRequest request);
+        Task<ResultDTO<MarketplaceFileInfoResponse>> UploadGameUpdateFile
+            (Guid marketplaceProjectId, MarketplaceGameFileRequest request);
+
+        Task<ResultDTO<PaginatedResponse<MarketplaceFileInfoResponse>>> GetGameFiles
+            (Guid marketplaceProjectId, ListRequest request);
     }
 }

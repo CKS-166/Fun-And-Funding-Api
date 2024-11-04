@@ -26,6 +26,7 @@ namespace Fun_Funding.Api.Controllers
             return Ok(result);
         }
 
+        [Authorize(Roles = Role.GameOwner)]
         [HttpPost]
         public async Task<IActionResult> CreateMarketplaceProject([FromForm] MarketplaceProjectAddRequest request)
         {
@@ -43,6 +44,7 @@ namespace Fun_Funding.Api.Controllers
             return Ok(response);
         }
 
+        [Authorize(Roles = Role.GameOwner)]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMarketplaceProject([FromRoute] Guid id)
         {
@@ -50,6 +52,7 @@ namespace Fun_Funding.Api.Controllers
             return NoContent();
         }
 
+        [Authorize(Roles = Role.GameOwner)]
         [HttpPatch("{id}")]
         public async Task<IActionResult> UpdateMarketplaceProject([FromRoute] Guid id,
             [FromForm] MarketplaceProjectUpdateRequest request)

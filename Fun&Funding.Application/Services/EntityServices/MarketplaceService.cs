@@ -163,7 +163,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 {
                     var totalItems = _unitOfWork.MarketplaceRepository.GetAll(filter).Count();
                     var totalPages = (int)Math.Ceiling((double)totalItems / (int)request.PageSize);
-                    IEnumerable<MarketplaceProject> categories = _mapper.Map<IEnumerable<MarketplaceProject>>(list);
+                    IEnumerable<MarketplaceProject> marketplaceProjects = _mapper.Map<IEnumerable<MarketplaceProject>>(list);
 
                     PaginatedResponse<MarketplaceProject> response = new PaginatedResponse<MarketplaceProject>
                     {
@@ -171,7 +171,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                         PageIndex = request.PageIndex.Value,
                         TotalItems = totalItems,
                         TotalPages = totalPages,
-                        Items = categories
+                        Items = marketplaceProjects
                     };
 
                     return ResultDTO<PaginatedResponse<MarketplaceProject>>.Success(response);
