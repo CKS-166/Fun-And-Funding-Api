@@ -66,8 +66,8 @@ namespace Fun_Funding.Application.Services.EntityServices
                 Transaction transaction = new Transaction
                 {
                     Id = new Guid(),
-                    TotalAmount = request.Amount,
-                    Description = $"Admin id: {admin._data.Id} just APPROVED withdraw id: {request.Id} with amount: {request.Amount}",
+                    TotalAmount = -request.Amount,
+                    Description = $"Admin just APPROVED withdraw request id: {request.Id} with amount: {request.Amount}",
                     CreatedDate = DateTime.UtcNow,
                     WalletId = request.WalletId,
                     TransactionType = TransactionTypes.FundingWithdraw,
