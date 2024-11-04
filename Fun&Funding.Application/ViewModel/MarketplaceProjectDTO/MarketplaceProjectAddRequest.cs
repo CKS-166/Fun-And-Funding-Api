@@ -1,4 +1,5 @@
-﻿using Fun_Funding.Application.ViewModel.MarketplaceFileDTO;
+﻿using Fun_Funding.Application.ViewModel.BankAccountDTO;
+using Fun_Funding.Application.ViewModel.MarketplaceFileDTO;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -20,5 +21,7 @@ namespace Fun_Funding.Application.ViewModel.MarketplaceProjectDTO
         public Guid FundingProjectId { get; set; }
         [Required]
         public required List<MarketplaceFileRequest> MarketplaceFiles { get; set; }
+        [Required]
+        public required BankAccountRequest BankAccount { get; set; }
     }
 }

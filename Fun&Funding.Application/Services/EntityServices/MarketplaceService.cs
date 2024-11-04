@@ -106,8 +106,28 @@ namespace Fun_Funding.Application.Services.EntityServices
                     marketplaceProject.Status = ProjectStatus.Pending;
                     marketplaceProject.CreatedDate = DateTime.Now;
 
+                    //create a wallet
+                    Wallet wallet = new Wallet
+                    {
+                        MarketplaceProject = marketplaceProject,
+                        Balance = 0,
+                        CreatedDate = DateTime.Now
+                    };
+
+                    //bank account for wallet
+                    BankAccount bankAccount = new BankAccount
+                    {
+                        Wallet = wallet,
+                        BankCode = request.BankAccount.BankCode,
+                        BankNumber = request.BankAccount.BankNumber,
+                        CreatedDate = DateTime.Now
+                    };
+
                     //save to db
                     await _unitOfWork.MarketplaceRepository.AddAsync(marketplaceProject);
+                    await _unitOfWork.WalletRepository.AddAsync(wallet);
+                    await _unitOfWork.BankAccountRepository.AddAsync(bankAccount);
+
                     await _unitOfWork.CommitAsync();
 
                     //response
@@ -230,7 +250,8 @@ namespace Fun_Funding.Application.Services.EntityServices
         {
             try
             {
-                var marketPlaceProject = await _unitOfWork.MarketplaceRepository.GetQueryable()
+                var marketPlaceProject = await _unitOfWork.MarketplaceRepository
+                    .GetQueryable()
                     .Where(p => p.Id == id)
                     .Include(p => p.MarketplaceFiles)
                     .Include(p => p.ProjectCoupons)
@@ -242,16 +263,31 @@ namespace Fun_Funding.Application.Services.EntityServices
                     throw new ExceptionError((int)HttpStatusCode.BadRequest, "Marketplace Project cannot be deleted.");
                 else
                 {
+                    //remove related files
                     if (marketPlaceProject.MarketplaceFiles != null
                         && marketPlaceProject.MarketplaceFiles.Count > 0)
                     {
                         _unitOfWork.MarketplaceFileRepository.RemoveRange(marketPlaceProject.MarketplaceFiles);
                     }
 
+                    //remove related coupons
                     if (marketPlaceProject.ProjectCoupons != null
                         && marketPlaceProject.ProjectCoupons.Count > 0)
                     {
                         _unitOfWork.ProjectCouponRepository.RemoveRange(marketPlaceProject.ProjectCoupons);
+                    }
+
+                    //remove related wallet
+                    var wallet = await getMarketplaceProjectWallet(id);
+
+                    if (wallet != null)
+                    {
+                        _unitOfWork.WalletRepository.Remove(wallet);
+
+                        //remove related bank account
+                        var bankAccount = await getBankAccountById(wallet.BankAccountId);
+
+                        if (bankAccount != null) _unitOfWork.BankAccountRepository.Remove(bankAccount);
                     }
 
                     _unitOfWork.MarketplaceRepository.Remove(marketPlaceProject);
@@ -277,7 +313,8 @@ namespace Fun_Funding.Application.Services.EntityServices
         {
             try
             {
-                MarketplaceProject marketplaceProject = await _unitOfWork.MarketplaceRepository.GetQueryable()
+                MarketplaceProject marketplaceProject = await _unitOfWork.MarketplaceRepository
+                                        .GetQueryable()
                                         .Where(p => p.Id == id)
                                         .Include(p => p.MarketplaceFiles)
                                         .Include(p => p.FundingProject.Categories)
@@ -291,14 +328,28 @@ namespace Fun_Funding.Application.Services.EntityServices
                 {
                     if (isDeleted != null && isDeleted == true)
                     {
-                        /*//add files 
-                        var files = addFiles(request.MarketplaceFiles, id);*/
-
                         marketplaceProject.Status = ProjectStatus.Pending;
                         marketplaceProject.IsDeleted = false;
                         marketplaceProject.DeletedAt = null;
                         marketplaceProject.CreatedDate = DateTime.Now;
-                        /*marketplaceProject.MarketplaceFiles = files;*/
+
+                        //restore wallet
+                        var wallet = await getMarketplaceProjectWallet(id);
+                        if (wallet != null)
+                        {
+                            wallet.IsDeleted = false;
+                            wallet.DeletedAt = null;
+                            wallet.CreatedDate = DateTime.Now;
+
+                            //restore bank account
+                            var bankAccount = await getBankAccountById(wallet.BankAccountId);
+                            if (bankAccount != null)
+                            {
+                                bankAccount.IsDeleted = false;
+                                bankAccount.DeletedAt = null;
+                                bankAccount.CreatedDate = DateTime.Now;
+                            }
+                        }
                     }
 
                     if (marketplaceProject.Status == ProjectStatus.Pending)
@@ -543,6 +594,25 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
 
             return files;
+        }
+
+        //get marketplace project wallet
+        private async Task<Wallet?> getMarketplaceProjectWallet(Guid marketplaceProjectId)
+        {
+            return await _unitOfWork.WalletRepository
+                .GetQueryable()
+                .Include(w => w.MarketplaceProject)
+                .Where(w => w.MarketplaceProject.Id == marketplaceProjectId)
+                .FirstOrDefaultAsync();
+        }
+
+        //get bank account by wallet id
+        private async Task<BankAccount?> getBankAccountById(Guid id)
+        {
+            return await _unitOfWork.BankAccountRepository
+                .GetQueryable()
+                .Where(a => a.Id == id)
+                .FirstOrDefaultAsync();
         }
     }
 }
