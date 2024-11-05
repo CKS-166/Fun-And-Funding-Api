@@ -38,7 +38,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 TransactionType = transactionType,
                 PackageId = packageId,
                 WalletId = walletId,
-                Wallet = wallet,
+                //Wallet = wallet,
                 SystemWalletId = systemWalletId,
                 CommissionFeeId = commissionFeeId,
                 OrderId = orderId,

@@ -55,7 +55,15 @@ namespace Fun_Funding.Api.Controllers
         [HttpPut("{id}/status")]
         public async Task<IActionResult> UpdateProjectStatus([FromRoute] Guid id, [FromQuery] ProjectStatus status)
         {
-            var response = await _fundingProjectService.UpdateFundingProjectStatus(id, status);
+            var response = await _fundingProjectService.UpdateFundingProjectStatus(id, status);           
+            return Ok(response);
+        }
+
+        [HttpGet("project-owner")]
+        [Authorize]
+        public async Task<IActionResult> CheckProjectOwner([FromQuery] Guid projectId)
+        {
+            var response = _fundingProjectService.CheckProjectOwner(projectId);
             return Ok(response);
         }
     }
