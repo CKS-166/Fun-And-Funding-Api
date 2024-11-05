@@ -6,6 +6,7 @@ using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.CategoryDTO;
 using Fun_Funding.Application.ViewModel.FundingFileDTO;
 using Fun_Funding.Application.ViewModel.FundingProjectDTO;
+using Fun_Funding.Application.ViewModel.PackageBackerDTO;
 using Fun_Funding.Application.ViewModel.PackageDTO;
 using Fun_Funding.Domain.Entity;
 using Fun_Funding.Domain.Enum;
@@ -25,12 +26,14 @@ namespace Fun_Funding.Application.Services.EntityServices
         public IAzureService _azureService;
         private int maxDays = 60;
         private int minDays = 1;
-        public FundingProjectManagementService(IUnitOfWork unitOfWork, IMapper mapper, IAzureService azureService, IHttpContextAccessor httpContextAccessor)
+        public IUserService _userService;
+        public FundingProjectManagementService(IUnitOfWork unitOfWork, IMapper mapper, IAzureService azureService, IHttpContextAccessor httpContextAccessor, IUserService userService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _azureService = azureService;
             _claimsPrincipal = httpContextAccessor.HttpContext.User;
+            _userService = userService;
         }
         public async Task<ResultDTO<FundingProjectResponse>> CreateFundingProject(FundingProjectAddRequest projectRequest)
         {
@@ -648,6 +651,30 @@ namespace Fun_Funding.Application.Services.EntityServices
                     throw exceptionError;
                 }
                 throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
+
+        public async Task<ResultDTO<bool>> CheckProjectOwner(Guid projectId)
+        {
+            try
+            {
+                var authorUser = _userService.GetUserInfo().Result;
+                User user = _mapper.Map<User>(authorUser._data);
+                //user = _unitOfWork.UserFileRepository.GetQueryable()
+                if (authorUser is null)
+                    return ResultDTO<bool>.Fail("can not found user");
+                var project = _unitOfWork.FundingProjectRepository.GetQueryable()
+                    .Include(p => p.User)
+                    .FirstOrDefault(p => p.Id == projectId && p.User.Id == user.Id);
+                if (project == null)
+                {
+                    return ResultDTO<bool>.Success(false);
+                }
+                return ResultDTO<bool>.Success(true);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
             }
         }
     }

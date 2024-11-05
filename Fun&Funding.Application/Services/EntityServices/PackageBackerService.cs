@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Fun_Funding.Application.ExceptionHandler;
 using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.PackageBackerDTO;
@@ -8,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -18,11 +20,13 @@ namespace Fun_Funding.Application.Services.EntityServices
         private IUnitOfWork _unitOfWork;
         private readonly ITransactionService _transactionService;
         private IMapper _mapper;
-
-        public PackageBackerService(IUnitOfWork unitOfWork, ITransactionService transactionService)
+        private readonly IUserService _userService;
+        public PackageBackerService(IUnitOfWork unitOfWork, ITransactionService transactionService, IUserService userService, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _transactionService = transactionService;
+            _userService = userService;
+            _mapper = mapper;
         }
         public async Task<ResultDTO<PackageBackerResponse>> DonateFundingProject(PackageBackerRequest packageBackerRequest)
         {
@@ -31,16 +35,18 @@ namespace Fun_Funding.Application.Services.EntityServices
 
             try
             {
-                // Validations
-                var user = await _unitOfWork.UserRepository.GetByIdAsync(packageBackerRequest.UserId);
-                if (user == null)
-                    return ResultDTO<PackageBackerResponse>.Fail("User not found!");
-
+               var authorUser = _userService.GetUserInfo().Result;
+                User mapUser = _mapper.Map<User>(authorUser._data);
+                
+                User user = _unitOfWork.UserRepository.GetById(mapUser.Id);
+                if (authorUser is null)
+                    return ResultDTO<PackageBackerResponse>.Fail("can not found user");
+                
                 var package = await _unitOfWork.PackageRepository.GetByIdAsync(packageBackerRequest.PackageId);
                 if (package == null)
                     return ResultDTO<PackageBackerResponse>.Fail("Package not found!");
 
-                var wallet = await _unitOfWork.WalletRepository.GetAsync(w => w.Backer.Id == packageBackerRequest.UserId);
+                var wallet = await _unitOfWork.WalletRepository.GetAsync(w => w.Backer.Id == user.Id);
                 if (wallet == null)
                     return ResultDTO<PackageBackerResponse>.Fail("Wallet not found");
 
@@ -57,16 +63,20 @@ namespace Fun_Funding.Application.Services.EntityServices
                     if (packageBackerRequest.DonateAmount <= 0)
                         return ResultDTO<PackageBackerResponse>.Fail("Invalid donate amount");
                 }
-
+                //add project balance
+                var project = _unitOfWork.FundingProjectRepository.GetById(package.ProjectId);
+                project.Balance += packageBackerRequest.DonateAmount;
+                _unitOfWork.FundingProjectRepository.Update(project);
                 // add donation
                 var packageBacker = new PackageBacker
                 {
-                    UserId = packageBackerRequest.UserId,
+                    UserId = user.Id,
                     PackageId = packageBackerRequest.PackageId,
                     User = user,
                     Package = package,
                     DonateAmount = packageBackerRequest.DonateAmount,
-                    IsHidden = false
+                    IsHidden = false,
+                    CreatedDate = DateTime.Now
                 };
                 // add donation amount to project wallet
                 var projectWallet = _unitOfWork.WalletRepository.GetQueryable()
@@ -74,12 +84,21 @@ namespace Fun_Funding.Application.Services.EntityServices
                     .FirstOrDefault(w => w.FundingProject.Id == package.ProjectId);
 
                 projectWallet.Balance += packageBackerRequest.DonateAmount;
-
+                if (wallet.Balance > 0)
+                {
+                    wallet.Balance -= packageBackerRequest.DonateAmount;
+                }
+                else
+                {
+                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "Backer wallet is not enough money for donation! Please charge more");
+                }
+               
                 Package donatedPack = _unitOfWork.PackageRepository.GetById(packageBackerRequest.PackageId);
                 donatedPack.LimitQuantity -= 1;
                 await _unitOfWork.PackageBackerRepository.AddAsync(packageBacker);
                 _unitOfWork.PackageRepository.Update(donatedPack);
                 _unitOfWork.WalletRepository.Update(projectWallet);
+                _unitOfWork.WalletRepository.Update(wallet);
                 // add transaction
                 var description = $"Donation to package: {package.Name}";
                 await _transactionService.CreateTransactionAsync(
