@@ -74,5 +74,11 @@ namespace Fun_Funding.Api.Controllers
             var response = await _userService.UploadUserAvatar(userFileRequest);
             return Ok(response);
         }
+        [HttpGet("top4")]
+        public async Task<IActionResult> GetTop4Backer()
+        {
+            var response = await _userService.GetTop4Backer();
+            return Ok(response);
+        }
     }
 }

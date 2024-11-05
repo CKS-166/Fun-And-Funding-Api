@@ -488,7 +488,7 @@ namespace Fun_Funding.Application.Services.EntityServices
             {
                 return ResultDTO<string>.Fail("No User Found");
             }
-            var roles = await _userManager.GetRolesAsync(user); // Get the roles for this user
+            var roles = await _userManager.GetRolesAsync(user);
             if (roles.Contains(Role.Admin))
             {
                 // User is an Admin
@@ -503,5 +503,60 @@ namespace Fun_Funding.Application.Services.EntityServices
             return ResultDTO<string>.Success(Role.GameOwner, "logged as Owner");
         }
 
+        public async Task<ResultDTO<List<TopBackerResponse>>> GetTop4Backer()
+        {
+            try
+            {
+                var allBackers = await _unitOfWork.PackageBackerRepository
+                    .GetQueryable()
+                    .AsNoTracking()
+                    .Include(pb => pb.User)
+                    .ToListAsync();
+
+                var nonAdminBackers = new List<PackageBacker>();
+
+                foreach (var backer in allBackers)
+                {
+                    var roles = await _userManager.GetRolesAsync(backer.User);
+                    if (!roles.Contains(Role.Admin))
+                    {
+                        nonAdminBackers.Add(backer);
+                    }
+                }
+
+                var topBackers = nonAdminBackers
+                    .GroupBy(b => b.UserId)
+                    .Select(group => new
+                    {
+                        UserId = group.Key,
+                        TotalDonation = group.Sum(b => b.DonateAmount)
+                    })
+                    .OrderByDescending(x => x.TotalDonation)
+                    .Take(4)
+                    .ToList();
+
+                var result = topBackers.Select(tb => new TopBackerResponse
+                {
+                    Id = tb.UserId,
+                    UserName = _unitOfWork.UserRepository.GetById(tb.UserId).UserName,
+                    TotalDonation = tb.TotalDonation
+                }).ToList();
+
+                if (!result.Any())
+                {
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "No backer found.");
+                }
+
+                return ResultDTO<List<TopBackerResponse>>.Success(result, "Backer Found!");
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
     }
 }
