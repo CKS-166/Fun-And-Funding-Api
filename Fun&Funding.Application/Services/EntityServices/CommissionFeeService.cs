@@ -27,7 +27,7 @@ namespace Fun_Funding.Application.Services.EntityServices
             {
                 var commission = _mapper.Map<CommissionFee>(request);
                 commission.CreatedDate = commission.UpdateDate = DateTime.Now;
-
+                commission.Rate = request.Rate / 100;
                 _unitOfWork.CommissionFeeRepository.Add(commission);
                 await _unitOfWork.CommitAsync();
 
