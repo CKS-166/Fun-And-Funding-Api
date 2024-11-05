@@ -16,6 +16,7 @@ namespace Fun_Funding.Application.ViewModel.ProjectMilestoneRequirementDTO
         public DateTime UpdateDate { get; set; }
         public string Content { get; set; }
         public Guid RequirementId { get; set; }
+        public string RequirementTitle { get; set; }
         public Guid ProjectMilestoneId { get; set; }
         public string ReqDescription { get; set; }
 
