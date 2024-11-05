@@ -63,7 +63,14 @@ namespace Fun_Funding.Api.Controllers
         [Authorize]
         public async Task<IActionResult> CheckProjectOwner([FromQuery] Guid projectId)
         {
-            var response = _fundingProjectService.CheckProjectOwner(projectId);
+            var response = await _fundingProjectService.CheckProjectOwner(projectId);
+            return Ok(response);
+        }
+
+        [HttpGet("top3")]
+        public async Task<IActionResult> GetTop3MostFundedOngoingProject()
+        {
+            var response = await _fundingProjectService.GetTop3MostFundedOngoingProject();
             return Ok(response);
         }
     }
