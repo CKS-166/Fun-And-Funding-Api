@@ -332,7 +332,8 @@ namespace Fun_Funding.Application.Services.EntityServices
                     isAscending: request.IsAscending ?? true,
                     pageIndex: request.PageIndex ?? 1,
                     pageSize: request.PageSize ?? 10,
-                    includeProperties: "Milestone,ProjectMilestoneRequirements.RequirementFiles,ProjectMilestoneRequirements.Requirement"
+                    includeProperties: "Milestone,FundingProject,FundingProject.SourceFiles,FundingProject.User,FundingProject.Wallet,FundingProject.Wallet.BankAccount" +
+                    ",ProjectMilestoneRequirements.RequirementFiles,ProjectMilestoneRequirements.Requirement"
                 );
 
                     var totalItems = _unitOfWork.ProjectMilestoneRepository.GetAll(filter).Count();

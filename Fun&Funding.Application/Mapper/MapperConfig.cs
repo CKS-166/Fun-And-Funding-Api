@@ -152,9 +152,12 @@ namespace Fun_Funding.Application.Mapper
                 .ForMember(des => des.ProjectMilestoneRequirements, src => src.MapFrom(x => x.ProjectMilestoneRequirements))
                 .ForMember(des => des.MilestoneName, src => src.MapFrom(x => x.Milestone.MilestoneName))
                 .ForMember(des => des.Description, src => src.MapFrom(x => x.Milestone.Description))
+                .ForMember(des => des.FundingProject, src => src.MapFrom(x => x.FundingProject))
+                .ForMember(des => des.Milestone, src => src.MapFrom(x => x.Milestone))
                 .ReverseMap();
             CreateMap<ProjectMilestoneRequirement, ProjectMilestoneRequirementResponse>()
                 .ForMember(des => des.ReqDescription, src => src.MapFrom(x => x.Requirement.Description))
+                .ForMember(des => des.RequirementTitle, src => src.MapFrom(x => x.Requirement.Title))
                 .ReverseMap();
         }
 
