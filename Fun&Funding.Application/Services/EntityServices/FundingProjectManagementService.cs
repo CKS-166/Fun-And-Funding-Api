@@ -676,7 +676,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 throw new Exception(ex.Message, ex);
             }
         }
-        public async Task<ResultDTO<List<FundingProjectResponse>>> GetTop3MostFundedOngoingProject()
+        public async Task<ResultDTO<List<FundingProjectResponse>>> GetTop3MostFundedOngoingFundingProject()
         {
             try
             {

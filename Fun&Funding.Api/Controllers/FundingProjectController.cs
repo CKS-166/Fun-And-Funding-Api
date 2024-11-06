@@ -68,9 +68,9 @@ namespace Fun_Funding.Api.Controllers
         }
 
         [HttpGet("top3")]
-        public async Task<IActionResult> GetTop3MostFundedOngoingProject()
+        public async Task<IActionResult> GetTop3MostFundedOngoingFundingProject()
         {
-            var response = await _fundingProjectService.GetTop3MostFundedOngoingProject();
+            var response = await _fundingProjectService.GetTop3MostFundedOngoingFundingProject();
             return Ok(response);
         }
     }
