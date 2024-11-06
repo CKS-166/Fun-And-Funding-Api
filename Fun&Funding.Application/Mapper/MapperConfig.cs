@@ -7,6 +7,7 @@ using Fun_Funding.Application.ViewModel.ChatDTO;
 using Fun_Funding.Application.ViewModel.CommissionDTO;
 using Fun_Funding.Application.ViewModel.CouponDTO;
 using Fun_Funding.Application.ViewModel.DigitalKeyDTO;
+using Fun_Funding.Application.ViewModel.FeedbackDTO;
 using Fun_Funding.Application.ViewModel.FundingFileDTO;
 using Fun_Funding.Application.ViewModel.FundingProjectDTO;
 using Fun_Funding.Application.ViewModel.MarketplaceFileDTO;
@@ -57,6 +58,7 @@ namespace Fun_Funding.Application.Mapper
             MappingDigitalKey();
             MappingCart();
             MappingWithdraw();
+            MappingFeedback();
         }
         public void MappingFundingProject()
         {
@@ -251,6 +253,10 @@ namespace Fun_Funding.Application.Mapper
             CreateMap<Cart, CartInfoResponse>()
                 .ForMember(dest => dest.Items, opt => opt.MapFrom<CartItemResolver>())
                 .ReverseMap();
+        }
+        public void MappingFeedback()
+        {
+            CreateMap<Feedback, FeedbackRequest>().ReverseMap();
         }
     }
 }

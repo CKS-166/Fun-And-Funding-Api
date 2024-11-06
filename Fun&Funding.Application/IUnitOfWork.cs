@@ -7,6 +7,7 @@ namespace Fun_Funding.Application
     {
         // Repository interfaces
         ILikeRepository LikeRepository { get; }
+        IFeedbackRepository FeedbackRepository { get; }
         ICommentRepository CommentRepository { get; }
         IFollowRepository FollowRepository { get; }
         IReportRepository ReportRepository { get; }
