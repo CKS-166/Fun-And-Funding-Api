@@ -13,6 +13,7 @@ namespace Fun_Funding.Infrastructure
 
         // Repositories
         private ILikeRepository _likeRepository;
+        private IFeedbackRepository _feedbackRepository;
         private ICommentRepository _commentRepository;
         private IFollowRepository _followRepository;
         private IReportRepository _reportRepository;
@@ -249,6 +250,9 @@ namespace Fun_Funding.Infrastructure
 
         public INotificationRepository NotificationRepository =>
             _notificationRepository ??= new NotificationRepository(_mongoDBContext);
+
+        public IFeedbackRepository FeedbackRepository => 
+            _feedbackRepository ??= new FeedbackRepository(_mongoDBContext);
 
         // Commit and rollback methods
         public void Commit()
