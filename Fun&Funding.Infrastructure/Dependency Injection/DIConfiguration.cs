@@ -148,12 +148,11 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             service.AddScoped<IOrderService, OrderService>();
             service.AddScoped<ICreatorContractService, CreatorContractService>();
             service.AddScoped<IDigitalKeyService, DigitalKeyService>();
-
             service.AddScoped<IBankAccountService, BankAccountService>();
-
             service.AddScoped<ICartService, CartService>();
             service.AddScoped<INotificationService, NotificationService>();
             service.AddScoped<IMarketplaceFileService, MarketplaceFileService>();
+            service.AddScoped<ISystemWalletService, SystemWalletService>();
             #endregion
 
 

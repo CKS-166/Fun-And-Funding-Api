@@ -3,6 +3,7 @@ using Fun_Funding.Application.ExceptionHandler;
 using Fun_Funding.Application.Interfaces.IExternalServices;
 using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel;
+using Fun_Funding.Application.ViewModel.FundingProjectDTO;
 using Fun_Funding.Application.ViewModel.MarketplaceFileDTO;
 using Fun_Funding.Application.ViewModel.MarketplaceProjectDTO;
 using Fun_Funding.Domain.Entity;
@@ -613,6 +614,60 @@ namespace Fun_Funding.Application.Services.EntityServices
                 .GetQueryable()
                 .Where(a => a.Id == id)
                 .FirstOrDefaultAsync();
+        }
+
+        public async Task<ResultDTO<List<MarketplaceProjectInfoResponse>>> GetTop3MostFundedOngoingMarketplaceProject()
+        {
+            try
+            {
+                var projects = await _unitOfWork.MarketplaceRepository.GetQueryable()
+                    .AsNoTracking()
+                    .Include(p => p.MarketplaceFiles)
+                    .Include(p => p.DigitalKeys)
+                    .Include(p => p.FundingProject.Categories)
+                    .Include(p => p.FundingProject)
+                        .ThenInclude(p => p.User)
+                    .Where(mp => mp.Status == ProjectStatus.Processing)
+                    .OrderByDescending(p => p.DigitalKeys.Count())
+                    .Take(3)
+                    .ToListAsync();
+
+                if (!projects.Any())
+                {
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "No Marketplace Project Found");
+                }
+
+                List<MarketplaceProjectInfoResponse> result = _mapper.Map<List<MarketplaceProjectInfoResponse>>(projects);
+
+                return ResultDTO<List<MarketplaceProjectInfoResponse>>.Success(result, "Marketplace Project Found!");
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
+
+        public async Task<ResultDTO<decimal>> CountPlatformProjects()
+        {
+            try
+            {
+                var marketplaceProjects = await _unitOfWork.MarketplaceRepository.GetQueryable().CountAsync();
+                var fundingProjects = await _unitOfWork.FundingProjectRepository.GetQueryable().CountAsync();
+
+                return ResultDTO<decimal>.Success(marketplaceProjects + fundingProjects, "Found total project!");
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
         }
     }
 }
