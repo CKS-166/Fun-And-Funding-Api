@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Fun_Funding.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateMigration : Migration
+    public partial class AddWalletToMarketplaceProjecy : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -1046,7 +1046,9 @@ namespace Fun_Funding.Infrastructure.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Wallet_MarketplaceProjectId",
                 table: "Wallet",
-                column: "MarketplaceProjectId");
+                column: "MarketplaceProjectId",
+                unique: true,
+                filter: "[MarketplaceProjectId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
                 name: "IX_WithdrawRequest_WalletId",

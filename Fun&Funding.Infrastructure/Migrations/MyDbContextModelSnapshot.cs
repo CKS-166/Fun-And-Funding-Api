@@ -1043,7 +1043,9 @@ namespace Fun_Funding.Infrastructure.Migrations
                         .IsUnique()
                         .HasFilter("[FundingProjectId] IS NOT NULL");
 
-                    b.HasIndex("MarketplaceProjectId");
+                    b.HasIndex("MarketplaceProjectId")
+                        .IsUnique()
+                        .HasFilter("[MarketplaceProjectId] IS NOT NULL");
 
                     b.ToTable("Wallet");
                 });
@@ -1493,8 +1495,8 @@ namespace Fun_Funding.Infrastructure.Migrations
                         .HasForeignKey("Fun_Funding.Domain.Entity.Wallet", "FundingProjectId");
 
                     b.HasOne("Fun_Funding.Domain.Entity.MarketplaceProject", "MarketplaceProject")
-                        .WithMany()
-                        .HasForeignKey("MarketplaceProjectId");
+                        .WithOne("Wallet")
+                        .HasForeignKey("Fun_Funding.Domain.Entity.Wallet", "MarketplaceProjectId");
 
                     b.Navigation("Backer");
 
@@ -1595,6 +1597,8 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Navigation("MarketplaceFiles");
 
                     b.Navigation("ProjectCoupons");
+
+                    b.Navigation("Wallet");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.Milestone", b =>
