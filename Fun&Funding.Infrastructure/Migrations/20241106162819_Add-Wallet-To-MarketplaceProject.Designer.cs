@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fun_Funding.Infrastructure.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20241106160855_Add-Wallet-To-MarketplaceProjecy")]
-    partial class AddWalletToMarketplaceProjecy
+    [Migration("20241106162819_Add-Wallet-To-MarketplaceProject")]
+    partial class AddWalletToMarketplaceProject
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
