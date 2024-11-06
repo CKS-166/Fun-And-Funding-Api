@@ -17,10 +17,10 @@ namespace Fun_Funding.Api.Controllers
             _commissionFeeService = commissionFeeService;
         }
 
-        [HttpGet("applied-commission-fee")]
-        public IActionResult GetAppliedCommissionFee([FromQuery] CommissionType type)
+        [HttpGet("list-applied-commission-fee")]
+        public IActionResult GetAppliedCommissionFee()
         {
-            var response = _commissionFeeService.GetAppliedCommissionFee(type);
+            var response = _commissionFeeService.GetListAppliedCommissionFee();
             return Ok(response);
         }
 

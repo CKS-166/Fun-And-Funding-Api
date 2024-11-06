@@ -5,6 +5,7 @@ using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.CommissionDTO;
 using Fun_Funding.Domain.Entity;
 using Fun_Funding.Domain.Enum;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Net;
 
@@ -27,7 +28,6 @@ namespace Fun_Funding.Application.Services.EntityServices
             {
                 var commission = _mapper.Map<CommissionFee>(request);
                 commission.CreatedDate = commission.UpdateDate = DateTime.Now;
-                commission.Rate = request.Rate / 100;
                 _unitOfWork.CommissionFeeRepository.Add(commission);
                 await _unitOfWork.CommitAsync();
 
@@ -125,6 +125,40 @@ namespace Fun_Funding.Application.Services.EntityServices
                 {
                     throw new ExceptionError((int)HttpStatusCode.NotFound, "Commission Fee Not Found.");
                 }
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
+
+        public ResultDTO<List<CommissionFeeResponse>> GetListAppliedCommissionFee()
+        {
+            try
+            {
+                var commissionFees = _unitOfWork.CommissionFeeRepository.GetQueryable()
+                     .OrderByDescending(c => c.UpdateDate) // Order by UpdateDate in descending order
+                     .AsEnumerable()                        // Switch to in-memory processing
+                     .DistinctBy(c => c.CommissionType)     // Get distinct records by CommissionType
+                     .Take(2)                               // Take the top 2 records
+                     .ToList();
+
+                if (commissionFees != null)
+                {
+                    var response = _mapper.Map<List<CommissionFeeResponse>>(commissionFees);
+
+                    return ResultDTO<List<CommissionFeeResponse>>.Success(response);
+                }
+                else
+                {
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "No Commission Fee in Database.");
+                }
+
             }
             catch (Exception ex)
             {
