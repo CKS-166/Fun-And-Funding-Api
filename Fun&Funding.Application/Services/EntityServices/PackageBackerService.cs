@@ -157,5 +157,20 @@ namespace Fun_Funding.Application.Services.EntityServices
                 throw new Exception(ex.Message);
             }
         }
+
+        public async Task<ResultDTO<List<PackageBackerGroupedResponse>>> GetGroupedPackageBackersAsync(Guid projectId)
+        {
+            var packageBackers =  _unitOfWork.PackageBackerRepository.GetQueryable()
+            .Where(pb => pb.Package.Project.Id == projectId) // Filter by project ID
+            .GroupBy(pb => pb.CreatedDate.Date) // Group by CreatedDate (date only)
+            .Select(group => new PackageBackerGroupedResponse
+            {
+            CreatedDate = group.Key,
+            TotalDonateAmount = group.Sum(pb => pb.DonateAmount)
+            })
+            .ToList();
+
+            return ResultDTO<List<PackageBackerGroupedResponse>>.Success(packageBackers, "");
+        }
     }
 }
