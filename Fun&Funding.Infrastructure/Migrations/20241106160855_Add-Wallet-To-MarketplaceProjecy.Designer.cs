@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fun_Funding.Infrastructure.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20241101152032_Update-Migration")]
-    partial class UpdateMigration
+    [Migration("20241106160855_Add-Wallet-To-MarketplaceProjecy")]
+    partial class AddWalletToMarketplaceProjecy
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1046,7 +1046,9 @@ namespace Fun_Funding.Infrastructure.Migrations
                         .IsUnique()
                         .HasFilter("[FundingProjectId] IS NOT NULL");
 
-                    b.HasIndex("MarketplaceProjectId");
+                    b.HasIndex("MarketplaceProjectId")
+                        .IsUnique()
+                        .HasFilter("[MarketplaceProjectId] IS NOT NULL");
 
                     b.ToTable("Wallet");
                 });
@@ -1496,8 +1498,8 @@ namespace Fun_Funding.Infrastructure.Migrations
                         .HasForeignKey("Fun_Funding.Domain.Entity.Wallet", "FundingProjectId");
 
                     b.HasOne("Fun_Funding.Domain.Entity.MarketplaceProject", "MarketplaceProject")
-                        .WithMany()
-                        .HasForeignKey("MarketplaceProjectId");
+                        .WithOne("Wallet")
+                        .HasForeignKey("Fun_Funding.Domain.Entity.Wallet", "MarketplaceProjectId");
 
                     b.Navigation("Backer");
 
@@ -1598,6 +1600,8 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Navigation("MarketplaceFiles");
 
                     b.Navigation("ProjectCoupons");
+
+                    b.Navigation("Wallet");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.Milestone", b =>
