@@ -60,6 +60,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 FundingProject project = _mapper.Map<FundingProject>(projectRequest);
                 project.User = owner;
                 //validate category
+                project.Categories.Clear();
                 foreach (CategoryProjectRequest cate in projectRequest.Categories)
                 {
                     Category category = _unitOfWork.CategoryRepository.GetById(cate.Id);
@@ -68,8 +69,6 @@ namespace Fun_Funding.Application.Services.EntityServices
                         throw new ExceptionError((int)HttpStatusCode.NotFound, "Category not found");
                     }
                     project.Categories.Add(category);
-
-
                 }
                 //validate package amount
                 var packageNames = new HashSet<string>();

@@ -115,9 +115,9 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             service.AddScoped<ICreatorContractRepository, CreatorContractRepository>();
             service.AddScoped<IChatRepository, ChatRepository>();
             service.AddScoped<ICartRepository, CartRepository>();
-            service.AddScoped<IProjectCouponService, ProjectCouponService>();
             service.AddScoped<IMarketplaceFileRepository, MarketplaceFileRepository>();
             service.AddScoped<INotificationRepository, NotificationRepository>();
+            service.AddScoped<IFeedbackRepository, FeedbackRepository>();
             #endregion
 
             #region Sevices
@@ -149,6 +149,9 @@ namespace Fun_Funding.Infrastructure.Dependency_Injection
             service.AddScoped<ICreatorContractService, CreatorContractService>();
             service.AddScoped<IDigitalKeyService, DigitalKeyService>();
             service.AddScoped<IBankAccountService, BankAccountService>();
+            service.AddScoped<IProjectCouponService, ProjectCouponService>();
+            service.AddScoped<IBankAccountService, BankAccountService>();
+            service.AddScoped<IFeedbackService, FeedbackService>();
             service.AddScoped<ICartService, CartService>();
             service.AddScoped<INotificationService, NotificationService>();
             service.AddScoped<IMarketplaceFileService, MarketplaceFileService>();
