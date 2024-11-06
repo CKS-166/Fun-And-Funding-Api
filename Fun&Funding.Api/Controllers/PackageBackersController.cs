@@ -10,6 +10,7 @@ using Fun_Funding.Application.Services.ExternalServices;
 using Fun_Funding.Application.ViewModel.PackageBackerDTO;
 using Fun_Funding.Application.IService;
 using Azure.Core;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Fun_Funding.Api.Controllers
 {
@@ -33,6 +34,7 @@ namespace Fun_Funding.Api.Controllers
         }
 
         [HttpPost]
+        [Authorize (Roles = "Backer, Owner")]
         public async Task<IActionResult> DonateFundingProject([FromBody] PackageBackerRequest packageBackerRequest)
         {
             var result = await _packageBackerService.DonateFundingProject(packageBackerRequest);

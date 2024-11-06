@@ -43,9 +43,9 @@ namespace Fun_Funding.Api.Controllers
 
         // api update status projectmilestone
         [HttpPut]
-        public IActionResult UpdateProjectMilestone([FromBody] ProjectMilestoneStatusUpdateRequest req)
+        public async Task<IActionResult> UpdateProjectMilestone([FromBody] ProjectMilestoneStatusUpdateRequest req)
         {
-            var res = _projectMilestoneService.UpdateProjectMilestoneStatus(req);
+            var res = await _projectMilestoneService.UpdateProjectMilestoneStatus(req);
             return Ok(res);
         }
 
