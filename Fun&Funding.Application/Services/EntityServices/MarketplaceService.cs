@@ -3,7 +3,6 @@ using Fun_Funding.Application.ExceptionHandler;
 using Fun_Funding.Application.Interfaces.IExternalServices;
 using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel;
-using Fun_Funding.Application.ViewModel.FundingProjectDTO;
 using Fun_Funding.Application.ViewModel.MarketplaceFileDTO;
 using Fun_Funding.Application.ViewModel.MarketplaceProjectDTO;
 using Fun_Funding.Domain.Entity;
@@ -124,6 +123,9 @@ namespace Fun_Funding.Application.Services.EntityServices
                         CreatedDate = DateTime.Now
                     };
 
+                    marketplaceProject.Wallet = wallet;
+                    marketplaceProject.Wallet.BankAccount = bankAccount;
+
                     //save to db
                     await _unitOfWork.MarketplaceRepository.AddAsync(marketplaceProject);
                     await _unitOfWork.WalletRepository.AddAsync(wallet);
@@ -219,6 +221,8 @@ namespace Fun_Funding.Application.Services.EntityServices
                     .Include(p => p.FundingProject.Categories)
                     .Include(p => p.FundingProject)
                     .ThenInclude(p => p.User)
+                    .Include(p => p.Wallet)
+                    .ThenInclude(p => p.BankAccount)
                     .FirstOrDefaultAsync();
 
                 if (marketplaceProject == null)
@@ -256,6 +260,8 @@ namespace Fun_Funding.Application.Services.EntityServices
                     .Where(p => p.Id == id)
                     .Include(p => p.MarketplaceFiles)
                     .Include(p => p.ProjectCoupons)
+                    .Include(p => p.Wallet)
+                    .ThenInclude(p => p.BankAccount)
                     .FirstOrDefaultAsync();
 
                 if (marketPlaceProject == null)
@@ -279,14 +285,14 @@ namespace Fun_Funding.Application.Services.EntityServices
                     }
 
                     //remove related wallet
-                    var wallet = await getMarketplaceProjectWallet(id);
+                    var wallet = marketPlaceProject.Wallet;
 
                     if (wallet != null)
                     {
                         _unitOfWork.WalletRepository.Remove(wallet);
 
                         //remove related bank account
-                        var bankAccount = await getBankAccountById(wallet.BankAccountId);
+                        var bankAccount = marketPlaceProject.Wallet.BankAccount;
 
                         if (bankAccount != null) _unitOfWork.BankAccountRepository.Remove(bankAccount);
                     }
@@ -321,7 +327,9 @@ namespace Fun_Funding.Application.Services.EntityServices
                                         .Include(p => p.FundingProject.Categories)
                                         .Include(p => p.FundingProject)
                                         .ThenInclude(p => p.User)
-                                        .FirstOrDefaultAsync(); ;
+                                        .Include(p => p.Wallet)
+                                        .ThenInclude(p => p.BankAccount)
+                                        .FirstOrDefaultAsync();
 
                 if (marketplaceProject == null)
                     throw new ExceptionError((int)HttpStatusCode.NotFound, "Marketplace Project not found.");
@@ -335,20 +343,20 @@ namespace Fun_Funding.Application.Services.EntityServices
                         marketplaceProject.CreatedDate = DateTime.Now;
 
                         //restore wallet
-                        var wallet = await getMarketplaceProjectWallet(id);
+                        var wallet = marketplaceProject.Wallet;
                         if (wallet != null)
                         {
-                            wallet.IsDeleted = false;
-                            wallet.DeletedAt = null;
-                            wallet.CreatedDate = DateTime.Now;
+                            marketplaceProject.Wallet.IsDeleted = false;
+                            marketplaceProject.Wallet.DeletedAt = null;
+                            marketplaceProject.Wallet.CreatedDate = DateTime.Now;
 
                             //restore bank account
-                            var bankAccount = await getBankAccountById(wallet.BankAccountId);
+                            var bankAccount = marketplaceProject.Wallet.BankAccount;
                             if (bankAccount != null)
                             {
-                                bankAccount.IsDeleted = false;
-                                bankAccount.DeletedAt = null;
-                                bankAccount.CreatedDate = DateTime.Now;
+                                marketplaceProject.Wallet.BankAccount.IsDeleted = false;
+                                marketplaceProject.Wallet.BankAccount.DeletedAt = null;
+                                marketplaceProject.Wallet.BankAccount.CreatedDate = DateTime.Now;
                             }
                         }
                     }
@@ -367,7 +375,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                         if (existingFiles != null && existingFiles.Count() > 0)
                         {
                             _unitOfWork.MarketplaceFileRepository.RemoveRange(existingFiles);
-                            await _unitOfWork.CommitAsync();
+                            /*await _unitOfWork.CommitAsync();*/
                         }
 
                         //files to be update
@@ -382,6 +390,16 @@ namespace Fun_Funding.Application.Services.EntityServices
                         }
 
                         _mapper.Map(request, marketplaceProject);
+
+                        if (marketplaceProject.Wallet != null)
+                        {
+                            var bankAccount = marketplaceProject.Wallet.BankAccount;
+                            _mapper.Map(request.BankAccount, bankAccount);
+
+                            _unitOfWork.BankAccountRepository.Update(bankAccount);
+
+                            marketplaceProject.Wallet.BankAccount = bankAccount;
+                        }
 
                         marketplaceProject.MarketplaceFiles = existingFiles;
 
