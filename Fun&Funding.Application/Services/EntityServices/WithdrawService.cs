@@ -3,12 +3,14 @@ using Azure;
 using Fun_Funding.Application.ExceptionHandler;
 using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel;
+using Fun_Funding.Application.ViewModel.CommissionDTO;
 using Fun_Funding.Application.ViewModel.WithdrawDTO;
 using Fun_Funding.Domain.Entity;
 using Fun_Funding.Domain.Enum;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 using System.Net;
 using System.Security.Claims;
 
@@ -162,7 +164,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 _unitOfWork.WithdrawRequestRepository.Update(request);
 
                 //get BankAccount
-                var bankAccount = await _unitOfWork.BankAccountRepository.GetAsync(x=>x.Wallet!.Id.Equals(request.WalletId));
+                var bankAccount = await _unitOfWork.BankAccountRepository.GetAsync(x => x.Wallet!.Id.Equals(request.WalletId));
                 await _unitOfWork.CommitAsync();
                 AdminResponse response = new AdminResponse
                 {
@@ -180,17 +182,53 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
-        public async Task<ResultDTO<List<WithdrawRequest>>> GetAllRequest()
+        public async Task<ResultDTO<PaginatedResponse<WithdrawRequest>>> GetAllRequest(ListRequest request)
         {
+
             try
             {
-                var list = await _unitOfWork.WithdrawRequestRepository.GetAllAsync();
-                return ResultDTO<List<WithdrawRequest>>.Success(list.ToList(), "list of withdraw request");
+                Expression<Func<WithdrawRequest, bool>> filter = null;
+                Expression<Func<WithdrawRequest, object>> orderBy = c => c.ExpiredDate;
+
+                if (!string.IsNullOrEmpty(request.SearchValue))
+                {
+                    filter = c => c.Status.ToString().Contains(request.SearchValue.ToLower());
+                }
+
+                var list = await _unitOfWork.WithdrawRequestRepository.GetAllAsync(
+                    filter: filter,
+                    orderBy: orderBy,
+                    isAscending: request.IsAscending.Value,
+                    pageIndex: request.PageIndex,
+                    pageSize: request.PageSize
+                    );
+                if (list != null)
+                {
+                    var totalItems = _unitOfWork.WithdrawRequestRepository.GetAll(filter).Count();
+                    var totalPages = (int)Math.Ceiling((double)totalItems / (int)request.PageSize);
+
+                    
+
+                    PaginatedResponse<WithdrawRequest> response = new PaginatedResponse<WithdrawRequest>
+                    {
+                        PageSize = request.PageSize.Value,
+                        PageIndex = request.PageIndex.Value,
+                        TotalItems = totalItems,
+                        TotalPages = totalPages,
+                        Items = list
+                    };
+
+                    return ResultDTO<PaginatedResponse<WithdrawRequest>>.Success(response,"Successfull");
+                }
+                else
+                {
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "Commission Fee Not Found.");
+                }
 
             }
             catch (Exception ex)
             {
-                return ResultDTO<List<WithdrawRequest>>.Fail($"error: {ex.Message}");
+                return ResultDTO<PaginatedResponse<WithdrawRequest>>.Fail($"error: {ex.Message}");
             }
         }
 
@@ -331,6 +369,6 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
-        
+
     }
 }

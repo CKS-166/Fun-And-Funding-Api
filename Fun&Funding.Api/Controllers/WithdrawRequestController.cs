@@ -1,4 +1,5 @@
 ﻿using Fun_Funding.Application.IService;
+using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.WithdrawDTO;
 using Fun_Funding.Domain.Constrain;
 using Microsoft.AspNetCore.Authorization;
@@ -18,9 +19,9 @@ namespace Fun_Funding.Api.Controllers
             _withdrawService = withdrawService;
         }
         [HttpGet("all")]
-        public async Task<IActionResult> GetAllRequest()
+        public async Task<IActionResult> GetAllRequest([FromQuery]ListRequest request)
         {
-            var result = await _withdrawService.GetAllRequest();
+            var result = await _withdrawService.GetAllRequest(request);
             if(result == null) return NotFound();
             return Ok(result);
         }
