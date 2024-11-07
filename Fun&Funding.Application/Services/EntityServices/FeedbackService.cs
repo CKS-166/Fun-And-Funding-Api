@@ -33,6 +33,7 @@ namespace Fun_Funding.Application.Services.EntityServices
         {
             try
             {
+
                 var feedback = GetFeedbackById(id).Result._data;
                 if (feedback.Status)
                 {
@@ -41,11 +42,17 @@ namespace Fun_Funding.Application.Services.EntityServices
                 }
                 else
                 {
+                    var listFeedback = _unitOfWork.FeedbackRepository.GetList(x => x.Status);
+                    if (listFeedback.Count >= 4)
+                    {
+                        return ResultDTO<Feedback>.Fail("Maximum approved feedback, please change status");
+                    }
                     _unitOfWork.FeedbackRepository.Update(x => x.Id == feedback.Id, Builders<Feedback>.Update.Set(x => x.Status, true));
                     await _unitOfWork.CommitAsync();
                 }
+                var resFeedback = GetFeedbackById(id).Result._data;
+                return ResultDTO<Feedback>.Success(resFeedback, "Successfull Approved Query");
 
-                return ResultDTO<Feedback>.Success(feedback);
             }
             catch (Exception ex)
             {
@@ -126,16 +133,27 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
-        public async Task<ResultDTO<PaginatedResponse<Feedback>>> GetAllFeedback(ListRequest request)
+        public async Task<ResultDTO<List<FeedbackResponse>>> GetAllFeedback()
         {
             try
             {
-                var list = _unitOfWork.FeedbackRepository.GetAllPaged(request);
-                return ResultDTO<PaginatedResponse<Feedback>>.Success(list, "Successfull querry");
+                var listFeedback = _unitOfWork.FeedbackRepository.GetList(x => x.Status);
+                var responseList = new List<FeedbackResponse>();
+                foreach (var feedback in listFeedback)
+                {
+                    var user = await _unitOfWork.UserRepository.GetByIdAsync(feedback.UserID);
+                    responseList.Add(new FeedbackResponse
+                    {
+                        Name = user?.FullName,
+                        Content = feedback.Content
+                    });
+                }
+
+                return ResultDTO<List<FeedbackResponse>>.Success(responseList, "Successfull querry");
             }
             catch (Exception ex)
             {
-                return ResultDTO<PaginatedResponse<Feedback>>.Fail("something wrong!");
+                return ResultDTO<List<FeedbackResponse>>.Fail("something wrong!");
             }
         }
 
@@ -145,7 +163,7 @@ namespace Fun_Funding.Application.Services.EntityServices
             {
                 var exitedFeedback = _unitOfWork.FeedbackRepository.Get(x => x.Id == id);
                 if (exitedFeedback == null) return ResultDTO<Feedback>.Fail($"not found any feedback");
-                return ResultDTO<Feedback>.Success(exitedFeedback);
+                return ResultDTO<Feedback>.Success(exitedFeedback, "Successfull get feedback");
             }
             catch (Exception ex)
             {

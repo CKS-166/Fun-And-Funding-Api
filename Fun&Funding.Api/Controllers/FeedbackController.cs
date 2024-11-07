@@ -17,9 +17,9 @@ namespace Fun_Funding.Api.Controllers
             _feedbackService = feedbackService;
         }
         [HttpGet]
-        public async Task<IActionResult> GetAllFeedback([FromQuery]ListRequest request)
+        public async Task<IActionResult> GetAllFeedback()
         {
-            var result = await _feedbackService.GetAllFeedback(request);
+            var result = await _feedbackService.GetAllFeedback();
             if (!result._isSuccess)
             {
                 NotFound();
