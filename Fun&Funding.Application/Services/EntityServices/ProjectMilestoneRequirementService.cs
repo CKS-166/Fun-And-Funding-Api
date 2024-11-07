@@ -40,15 +40,16 @@ namespace Fun_Funding.Application.Services.EntityServices
                     .Include( x => x.Milestone )
                     .Include(x =>  x.FundingProject)
                     .FirstOrDefault(pm => pm.FundingProjectId == request[0].FundingProjectId && pm.MilestoneId == request[0].MilestoneId);
-                FundingProject project = _unitOfWork.FundingProjectRepository
-                    .GetQueryable().Include(p => p.ProjectMilestones)
-                    .ThenInclude(pm => pm.Milestone).FirstOrDefault(p => p.Id == projectMilestone.FundingProjectId);
+                
                 if (projectMilestone == null)
                 {
                     throw new ExceptionError((int)HttpStatusCode.NotFound, "Milestone for this project not found");
                 }
                 else
                 {
+                    FundingProject project = _unitOfWork.FundingProjectRepository
+                    .GetQueryable().Include(p => p.ProjectMilestones)
+                    .ThenInclude(pm => pm.Milestone).FirstOrDefault(p => p.Id == projectMilestone.FundingProjectId);
                     var checkValidateMilstone = _projectMilestoneService.CanCreateProjectMilestone(project, projectMilestone.Milestone.MilestoneOrder, projectMilestone.CreatedDate);
                     if (checkValidateMilstone != null)
                     {
