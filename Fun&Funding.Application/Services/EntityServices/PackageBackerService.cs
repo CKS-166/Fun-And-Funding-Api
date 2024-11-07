@@ -166,11 +166,35 @@ namespace Fun_Funding.Application.Services.EntityServices
             .Select(group => new PackageBackerGroupedResponse
             {
             CreatedDate = group.Key,
+
             TotalDonateAmount = group.Sum(pb => pb.DonateAmount)
             })
             .ToList();
 
             return ResultDTO<List<PackageBackerGroupedResponse>>.Success(packageBackers, "");
+        }
+
+        public async Task<ResultDTO<List<PackageBackerCountResponse>>> GetPackageBackerGroups(Guid projectId)
+        {
+            try
+            {
+                var groupedResult = _unitOfWork.PackageBackerRepository.GetQueryable()
+                    .Where(pb => pb.Package.Project.Id == projectId)
+                    .GroupBy(pb => new { pb.PackageId, pb.Package.Name }) // Group by PackageId and PackageName
+                    .Select(group => new PackageBackerCountResponse
+                    {
+                        PackageId = group.Key.PackageId,
+                        PackageName = group.Key.Name,
+                        Count = group.Count() // Count the number of records in each group
+                    })
+                    .ToList();
+
+                return ResultDTO<List<PackageBackerCountResponse>>.Success(groupedResult);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
     }
 }

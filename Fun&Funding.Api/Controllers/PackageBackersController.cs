@@ -51,5 +51,12 @@ namespace Fun_Funding.Api.Controllers
             var result = _packageBackerService.GetGroupedPackageBackersAsync(projectId);
             return Ok(result);
         }
+
+        [HttpGet("package-backer-count")]
+        public async Task<IActionResult> GetPackageBackersCountByProject([FromQuery] Guid projectId)
+        {
+            var res = _packageBackerService.GetPackageBackerGroups(projectId);
+            return Ok(res);
+        }
     }
 }
