@@ -34,9 +34,17 @@ namespace Fun_Funding.Application.Services.EntityServices
             try
             {
                 var feedback = GetFeedbackById(id).Result._data;
-                feedback.Status = true;
-                _unitOfWork.FeedbackRepository.Update(x => x.Id == feedback.Id, Builders<Feedback>.Update.Set(x => x.Status, true));
-                await _unitOfWork.CommitAsync();
+                if (feedback.Status)
+                {
+                    _unitOfWork.FeedbackRepository.Update(x => x.Id == feedback.Id, Builders<Feedback>.Update.Set(x => x.Status, false));
+                    await _unitOfWork.CommitAsync();
+                }
+                else
+                {
+                    _unitOfWork.FeedbackRepository.Update(x => x.Id == feedback.Id, Builders<Feedback>.Update.Set(x => x.Status, true));
+                    await _unitOfWork.CommitAsync();
+                }
+
                 return ResultDTO<Feedback>.Success(feedback);
             }
             catch (Exception ex)
