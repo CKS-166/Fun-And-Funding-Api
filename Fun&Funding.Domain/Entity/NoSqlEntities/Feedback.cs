@@ -16,6 +16,7 @@ namespace Fun_Funding.Domain.Entity.NoSqlEntities
         public string? Content { get; set; }
         public DateTime CreateDate { get; set; }
         public Guid UserID { get; set; }
+        public bool Status { get; set; }
         public bool IsDelete { get; set; }
     }
 }

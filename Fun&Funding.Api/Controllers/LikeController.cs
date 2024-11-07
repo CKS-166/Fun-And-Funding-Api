@@ -49,7 +49,7 @@ namespace Fun_Funding.Api.Controllers
         {
             try
             {
-                var result = _likeService.GetLikesByProject(id);
+                var result = await _likeService.GetLikesByProject(id);
                 return Ok(result);
             }
             catch (ExceptionError ex)

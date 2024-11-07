@@ -6,9 +6,11 @@ using Fun_Funding.Application.ViewModel.FeedbackDTO;
 using Fun_Funding.Domain.Entity;
 using Fun_Funding.Domain.Entity.NoSqlEntities;
 using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -26,6 +28,23 @@ namespace Fun_Funding.Application.Services.EntityServices
             _mapper = mapper;
             _userService = userService;
         }
+
+        public async Task<ResultDTO<Feedback>> ApprovedById(Guid id)
+        {
+            try
+            {
+                var feedback = GetFeedbackById(id).Result._data;
+                feedback.Status = true;
+                _unitOfWork.FeedbackRepository.Update(x => x.Id == feedback.Id, Builders<Feedback>.Update.Set(x => x.Status, true));
+                await _unitOfWork.CommitAsync();
+                return ResultDTO<Feedback>.Success(feedback);
+            }
+            catch (Exception ex)
+            {
+                return ResultDTO<Feedback>.Fail($"somethings wrong: {ex.Message}");
+            }
+        }
+
         public async Task<ResultDTO<Feedback>> CreateFeedBack(FeedbackRequest request)
         {
             try
@@ -43,6 +62,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                     CreateDate = DateTime.Now,
                     IsDelete = false,
                     UserID = existUser.Id,
+                    Status = false,
                 };
                 _unitOfWork.FeedbackRepository.Create(feedback);
                 await _unitOfWork.CommitAsync();
@@ -87,7 +107,7 @@ namespace Fun_Funding.Application.Services.EntityServices
 
                 // Get the randomly selected feedback items
                 var feedbackList = _unitOfWork.FeedbackRepository.GetQueryable()
-                    .Where(f => randomIds.Contains(f.Id))
+                    .Where(f => randomIds.Contains(f.Id) && f.Status)
                     .ToList();
 
                 return ResultDTO<List<Feedback>>.Success(feedbackList);
@@ -95,6 +115,33 @@ namespace Fun_Funding.Application.Services.EntityServices
             catch (Exception ex)
             {
                 return ResultDTO<List<Feedback>>.Fail($"Something went wrong: {ex.Message}");
+            }
+        }
+
+        public async Task<ResultDTO<PaginatedResponse<Feedback>>> GetAllFeedback(ListRequest request)
+        {
+            try
+            {
+                var list = _unitOfWork.FeedbackRepository.GetAllPaged(request);
+                return ResultDTO<PaginatedResponse<Feedback>>.Success(list, "Successfull querry");
+            }
+            catch (Exception ex)
+            {
+                return ResultDTO<PaginatedResponse<Feedback>>.Fail("something wrong!");
+            }
+        }
+
+        public async Task<ResultDTO<Feedback>> GetFeedbackById(Guid id)
+        {
+            try
+            {
+                var exitedFeedback = _unitOfWork.FeedbackRepository.Get(x => x.Id == id);
+                if (exitedFeedback == null) return ResultDTO<Feedback>.Fail($"not found any feedback");
+                return ResultDTO<Feedback>.Success(exitedFeedback);
+            }
+            catch (Exception ex)
+            {
+                return ResultDTO<Feedback>.Fail($"somethings wrong: {ex.Message}");
             }
         }
     }

@@ -37,7 +37,7 @@ namespace Fun_Funding.Api.Controllers
         {
             try
             {
-                var result = _commentService.GetCommentsByProject(id);
+                var result = await _commentService.GetCommentsByProject(id);
                 return Ok(result);
             }
             catch (ExceptionError ex)
