@@ -1,6 +1,7 @@
 ﻿using Fun_Funding.Application.ViewModel.CategoryDTO;
 using Fun_Funding.Application.ViewModel.MarketplaceFileDTO;
 using Fun_Funding.Application.ViewModel.UserDTO;
+using Fun_Funding.Application.ViewModel.WalletDTO;
 using Fun_Funding.Domain.Enum;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -20,5 +21,6 @@ namespace Fun_Funding.Application.ViewModel.MarketplaceProjectDTO
         public required virtual ICollection<MarketplaceFileInfoResponse> MarketplaceFiles { get; set; }
         public required virtual ICollection<CategoryResponse> Categories { get; set; }
         public ProjectStatus Status { get; set; }
+        public required WalletFundingResponse Wallet { get; set; }
     }
 }

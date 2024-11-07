@@ -53,7 +53,7 @@ namespace Fun_Funding.Api.Controllers
         }
 
         [Authorize(Roles = Role.GameOwner)]
-        [HttpPatch("{id}")]
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdateMarketplaceProject([FromRoute] Guid id,
             [FromForm] MarketplaceProjectUpdateRequest request)
         {
