@@ -14,7 +14,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace Fun_Funding.Api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/package-backers")]
     [ApiController]
     public class PackageBackersController : ControllerBase
     {
@@ -43,6 +43,20 @@ namespace Fun_Funding.Api.Controllers
                 return Ok(result);
             else
                 return BadRequest(result);
+        }
+
+        [HttpGet("project-backers")]
+        public async Task<IActionResult> GetPackageBackersByProject([FromQuery] Guid projectId)
+        {
+            var result = _packageBackerService.GetGroupedPackageBackersAsync(projectId);
+            return Ok(result);
+        }
+
+        [HttpGet("package-backer-count")]
+        public async Task<IActionResult> GetPackageBackersCountByProject([FromQuery] Guid projectId)
+        {
+            var res = _packageBackerService.GetPackageBackerGroups(projectId);
+            return Ok(res);
         }
     }
 }

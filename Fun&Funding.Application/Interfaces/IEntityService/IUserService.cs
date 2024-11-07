@@ -21,5 +21,6 @@ namespace Fun_Funding.Application.IService
         Task<ResultDTO<string>> CheckUserPassword(string password);
         Task<ResultDTO<string>> CheckUserRole(User user);
         Task<ResultDTO<List<TopBackerResponse>>> GetTop4Backer();
+        Task<ResultDTO<decimal>> CountPlatformUsers();
     }
 }

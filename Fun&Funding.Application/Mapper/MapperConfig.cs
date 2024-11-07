@@ -75,7 +75,8 @@ namespace Fun_Funding.Application.Mapper
             CreateMap<ItemResponse, RewardItem>().ReverseMap();
             CreateMap<PackageResponse, Package>().ReverseMap();
             CreateMap<FundingProjectAddRequest, FundingProject>()
-                .ForMember(des => des.Packages, src => src.MapFrom(x => x.Packages)).ReverseMap();
+                .ForMember(des => des.Packages, src => src.MapFrom(x => x.Packages))
+                .ReverseMap();
             // UserInfoResponse -> User
             CreateMap<UserInfoResponse, User>()
                 .ForPath(des => des.File.URL, src => src.MapFrom(x => x.Avatar))
@@ -129,6 +130,7 @@ namespace Fun_Funding.Application.Mapper
         {
             CreateMap<Category, CategoryResponse>().ReverseMap();
             CreateMap<CategoryRequest, Category>().ReverseMap();
+            CreateMap<CategoryProjectRequest, Category>().ReverseMap();
         }
 
         public void MappingCommissionFee()
@@ -205,6 +207,7 @@ namespace Fun_Funding.Application.Mapper
                 .ForMember(dest => dest.MarketplaceFiles, opt => opt.MapFrom(src => src.MarketplaceFiles))
                 .ForMember(dest => dest.Categories, opt => opt.MapFrom(src => src.FundingProject.Categories))
                 .ForMember(dest => dest.User, opt => opt.MapFrom(src => src.FundingProject.User))
+                .ForMember(dest => dest.Wallet, opt => opt.MapFrom(src => src.Wallet))
                 .ReverseMap();
             CreateMap<MarketplaceProjectAddRequest, MarketplaceProject>()
                 .ForMember(dest => dest.MarketplaceFiles, opt => opt.Ignore())

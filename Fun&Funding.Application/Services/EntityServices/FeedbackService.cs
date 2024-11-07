@@ -52,6 +52,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 }
                 var resFeedback = GetFeedbackById(id).Result._data;
                 return ResultDTO<Feedback>.Success(resFeedback, "Successfull Approved Query");
+
             }
             catch (Exception ex)
             {

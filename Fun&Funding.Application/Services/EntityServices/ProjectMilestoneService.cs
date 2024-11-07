@@ -287,16 +287,23 @@ namespace Fun_Funding.Application.Services.EntityServices
                     filter = u => u.Status == status;
                 }
 
-                // Apply FundingProjectId filter.
-                if (fundingProjectId != null)
+                // Apply FundingProjectId and milestoneId filters.
+                if (fundingProjectId != null && milestoneId != null)
                 {
+                    // Both parameters are provided, so combine them with &&.
+                    filter = u => u.FundingProjectId == fundingProjectId && u.MilestoneId == milestoneId;
+                }
+                else if (fundingProjectId != null)
+                {
+                    // Only FundingProjectId is provided.
                     filter = u => u.FundingProjectId == fundingProjectId;
                 }
-                //Apply milestoneId
-                if (milestoneId != null)
+                else if (milestoneId != null)
                 {
+                    // Only milestoneId is provided.
                     filter = u => u.MilestoneId == milestoneId;
                 }
+
                 // Apply date filters.
                 if (request.From is DateTime fromDate)
                 {

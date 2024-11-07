@@ -80,5 +80,11 @@ namespace Fun_Funding.Api.Controllers
             var response = await _userService.GetTop4Backer();
             return Ok(response);
         }
+        [HttpGet("number-of-users")]
+        public async Task<IActionResult> CountPlatformUsers()
+        {
+            var response = await _userService.CountPlatformUsers();
+            return Ok(response);
+        }
     }
 }

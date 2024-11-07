@@ -5,6 +5,7 @@ using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.ChatDTO;
 using Fun_Funding.Domain.Entity.NoSqlEntities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;  // Import for IServiceScopeFactory
 using MongoDB.Driver;
 using System.Net;
@@ -77,7 +78,9 @@ namespace Fun_Funding.Application.Services.EntityServices
                         .Distinct();
 
                     var users = unitOfWork.UserRepository
-                        .GetAll(user => userIds.Contains(user.Id));
+                        .GetQueryable()
+                        .Include(user => user.File)
+                        .Where(user => userIds.Contains(user.Id));
 
                     var contactedUsers = new List<ContactedUserResponse>();
 
@@ -97,14 +100,12 @@ namespace Fun_Funding.Application.Services.EntityServices
                         contactedUsers.Add(contactedUser);
                     }
 
-                    var response = contactedUsers.ToList();
-
                     if (!string.IsNullOrEmpty(name))
                     {
-                        response = response.Where(x => x.Name.ToLower().Contains(name.ToLower())).ToList();
+                        contactedUsers = contactedUsers.Where(x => x.Name.ToLower().Contains(name.ToLower())).ToList();
                     }
 
-                    response.OrderByDescending(x => x.CreatedDate);
+                    var response = contactedUsers.OrderByDescending(x => x.CreatedDate).ToList();
 
                     return ResultDTO<IEnumerable<ContactedUserResponse>>.Success(response);
                 }

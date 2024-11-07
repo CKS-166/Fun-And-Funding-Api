@@ -12,5 +12,8 @@ namespace Fun_Funding.Application.IService
     {
         Task<ResultDTO<PackageBackerResponse>> DonateFundingProject(PackageBackerRequest packageBackerRequest);
         Task<ResultDTO<List<DonationResponse>>> ViewDonationById(Guid id);
+        Task<ResultDTO<List<PackageBackerGroupedResponse>>> GetGroupedPackageBackersAsync(Guid projectId);
+
+        Task<ResultDTO<List<PackageBackerCountResponse>>> GetPackageBackerGroups(Guid projectId);
     }
 }

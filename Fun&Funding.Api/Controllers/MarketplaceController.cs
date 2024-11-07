@@ -53,7 +53,7 @@ namespace Fun_Funding.Api.Controllers
         }
 
         [Authorize(Roles = Role.GameOwner)]
-        [HttpPatch("{id}")]
+        [HttpPut("{id}")]
         public async Task<IActionResult> UpdateMarketplaceProject([FromRoute] Guid id,
             [FromForm] MarketplaceProjectUpdateRequest request)
         {
@@ -66,6 +66,18 @@ namespace Fun_Funding.Api.Controllers
             [FromForm] MarketplaceProjectUpdateRequest request)
         {
             var response = await _marketplace.UpdateMarketplaceProjectStatus(id, Domain.Enum.ProjectStatus.Approved);
+            return Ok(response);
+        }
+        [HttpGet("top3")]
+        public async Task<IActionResult> GetTop3MostFundedOngoingMarketplaceProject()
+        {
+            var response = await _marketplace.GetTop3MostFundedOngoingMarketplaceProject();
+            return Ok(response);
+        }
+        [HttpGet("number-of-projects")]
+        public async Task<IActionResult> CountPlatformProject()
+        {
+            var response = await _marketplace.CountPlatformProjects();
             return Ok(response);
         }
     }

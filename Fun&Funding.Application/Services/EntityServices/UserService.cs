@@ -538,6 +538,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 var result = topBackers.Select(tb => new TopBackerResponse
                 {
                     Id = tb.UserId,
+                    AvatarURL = _unitOfWork.UserRepository.GetById(tb.UserId).File?.URL ?? "",
                     UserName = _unitOfWork.UserRepository.GetById(tb.UserId).UserName,
                     TotalDonation = tb.TotalDonation
                 }).ToList();
@@ -548,6 +549,23 @@ namespace Fun_Funding.Application.Services.EntityServices
                 }
 
                 return ResultDTO<List<TopBackerResponse>>.Success(result, "Backer Found!");
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
+
+        public async Task<ResultDTO<decimal>> CountPlatformUsers()
+        {
+            try
+            {
+                var count = await _unitOfWork.UserRepository.GetQueryable().CountAsync();
+                return ResultDTO<decimal>.Success(count, "Count number of users");
             }
             catch (Exception ex)
             {

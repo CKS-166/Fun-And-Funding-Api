@@ -123,6 +123,9 @@ namespace Fun_Funding.Application.Services.EntityServices
                         CreatedDate = DateTime.Now
                     };
 
+                    marketplaceProject.Wallet = wallet;
+                    marketplaceProject.Wallet.BankAccount = bankAccount;
+
                     //save to db
                     await _unitOfWork.MarketplaceRepository.AddAsync(marketplaceProject);
                     await _unitOfWork.WalletRepository.AddAsync(wallet);
@@ -218,6 +221,8 @@ namespace Fun_Funding.Application.Services.EntityServices
                     .Include(p => p.FundingProject.Categories)
                     .Include(p => p.FundingProject)
                     .ThenInclude(p => p.User)
+                    .Include(p => p.Wallet)
+                    .ThenInclude(p => p.BankAccount)
                     .FirstOrDefaultAsync();
 
                 if (marketplaceProject == null)
@@ -255,6 +260,8 @@ namespace Fun_Funding.Application.Services.EntityServices
                     .Where(p => p.Id == id)
                     .Include(p => p.MarketplaceFiles)
                     .Include(p => p.ProjectCoupons)
+                    .Include(p => p.Wallet)
+                    .ThenInclude(p => p.BankAccount)
                     .FirstOrDefaultAsync();
 
                 if (marketPlaceProject == null)
@@ -278,14 +285,14 @@ namespace Fun_Funding.Application.Services.EntityServices
                     }
 
                     //remove related wallet
-                    var wallet = await getMarketplaceProjectWallet(id);
+                    var wallet = marketPlaceProject.Wallet;
 
                     if (wallet != null)
                     {
                         _unitOfWork.WalletRepository.Remove(wallet);
 
                         //remove related bank account
-                        var bankAccount = await getBankAccountById(wallet.BankAccountId);
+                        var bankAccount = marketPlaceProject.Wallet.BankAccount;
 
                         if (bankAccount != null) _unitOfWork.BankAccountRepository.Remove(bankAccount);
                     }
@@ -320,7 +327,9 @@ namespace Fun_Funding.Application.Services.EntityServices
                                         .Include(p => p.FundingProject.Categories)
                                         .Include(p => p.FundingProject)
                                         .ThenInclude(p => p.User)
-                                        .FirstOrDefaultAsync(); ;
+                                        .Include(p => p.Wallet)
+                                        .ThenInclude(p => p.BankAccount)
+                                        .FirstOrDefaultAsync();
 
                 if (marketplaceProject == null)
                     throw new ExceptionError((int)HttpStatusCode.NotFound, "Marketplace Project not found.");
@@ -334,20 +343,20 @@ namespace Fun_Funding.Application.Services.EntityServices
                         marketplaceProject.CreatedDate = DateTime.Now;
 
                         //restore wallet
-                        var wallet = await getMarketplaceProjectWallet(id);
+                        var wallet = marketplaceProject.Wallet;
                         if (wallet != null)
                         {
-                            wallet.IsDeleted = false;
-                            wallet.DeletedAt = null;
-                            wallet.CreatedDate = DateTime.Now;
+                            marketplaceProject.Wallet.IsDeleted = false;
+                            marketplaceProject.Wallet.DeletedAt = null;
+                            marketplaceProject.Wallet.CreatedDate = DateTime.Now;
 
                             //restore bank account
-                            var bankAccount = await getBankAccountById(wallet.BankAccountId);
+                            var bankAccount = marketplaceProject.Wallet.BankAccount;
                             if (bankAccount != null)
                             {
-                                bankAccount.IsDeleted = false;
-                                bankAccount.DeletedAt = null;
-                                bankAccount.CreatedDate = DateTime.Now;
+                                marketplaceProject.Wallet.BankAccount.IsDeleted = false;
+                                marketplaceProject.Wallet.BankAccount.DeletedAt = null;
+                                marketplaceProject.Wallet.BankAccount.CreatedDate = DateTime.Now;
                             }
                         }
                     }
@@ -366,7 +375,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                         if (existingFiles != null && existingFiles.Count() > 0)
                         {
                             _unitOfWork.MarketplaceFileRepository.RemoveRange(existingFiles);
-                            await _unitOfWork.CommitAsync();
+                            /*await _unitOfWork.CommitAsync();*/
                         }
 
                         //files to be update
@@ -381,6 +390,16 @@ namespace Fun_Funding.Application.Services.EntityServices
                         }
 
                         _mapper.Map(request, marketplaceProject);
+
+                        if (marketplaceProject.Wallet != null)
+                        {
+                            var bankAccount = marketplaceProject.Wallet.BankAccount;
+                            _mapper.Map(request.BankAccount, bankAccount);
+
+                            _unitOfWork.BankAccountRepository.Update(bankAccount);
+
+                            marketplaceProject.Wallet.BankAccount = bankAccount;
+                        }
 
                         marketplaceProject.MarketplaceFiles = existingFiles;
 
@@ -613,6 +632,60 @@ namespace Fun_Funding.Application.Services.EntityServices
                 .GetQueryable()
                 .Where(a => a.Id == id)
                 .FirstOrDefaultAsync();
+        }
+
+        public async Task<ResultDTO<List<MarketplaceProjectInfoResponse>>> GetTop3MostFundedOngoingMarketplaceProject()
+        {
+            try
+            {
+                var projects = await _unitOfWork.MarketplaceRepository.GetQueryable()
+                    .AsNoTracking()
+                    .Include(p => p.MarketplaceFiles)
+                    .Include(p => p.DigitalKeys)
+                    .Include(p => p.FundingProject.Categories)
+                    .Include(p => p.FundingProject)
+                        .ThenInclude(p => p.User)
+                    .Where(mp => mp.Status == ProjectStatus.Processing)
+                    .OrderByDescending(p => p.DigitalKeys.Count())
+                    .Take(3)
+                    .ToListAsync();
+
+                if (!projects.Any())
+                {
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "No Marketplace Project Found");
+                }
+
+                List<MarketplaceProjectInfoResponse> result = _mapper.Map<List<MarketplaceProjectInfoResponse>>(projects);
+
+                return ResultDTO<List<MarketplaceProjectInfoResponse>>.Success(result, "Marketplace Project Found!");
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
+
+        public async Task<ResultDTO<decimal>> CountPlatformProjects()
+        {
+            try
+            {
+                var marketplaceProjects = await _unitOfWork.MarketplaceRepository.GetQueryable().CountAsync();
+                var fundingProjects = await _unitOfWork.FundingProjectRepository.GetQueryable().CountAsync();
+
+                return ResultDTO<decimal>.Success(marketplaceProjects + fundingProjects, "Found total project!");
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
         }
     }
 }
