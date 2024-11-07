@@ -12,7 +12,7 @@ namespace Fun_Funding.Application.Interfaces.IEntityService
     public interface IFeedbackService
     {
         public Task<ResultDTO<List<Feedback>>> Get4RandomFeedback();
-        public Task<ResultDTO<PaginatedResponse<Feedback>>> GetAllFeedback(ListRequest request);
+        public Task<ResultDTO<List<FeedbackResponse>>> GetAllFeedback();
         public Task<ResultDTO<Feedback>> GetFeedbackById(Guid id);
         public Task<ResultDTO<Feedback>> ApprovedById(Guid id);
         public Task<ResultDTO<Feedback>> CreateFeedBack(FeedbackRequest request);
