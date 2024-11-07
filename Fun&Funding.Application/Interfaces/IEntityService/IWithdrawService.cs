@@ -12,7 +12,7 @@ namespace Fun_Funding.Application.IService
     public interface IWithdrawService
     {
 
-        public Task<ResultDTO<List<WithdrawRequest>>> GetAllRequest();
+        public Task<ResultDTO<PaginatedResponse<WithdrawRequest>>> GetAllRequest(ListRequest request);
         public Task<ResultDTO<WithdrawRequest>> GetWithdrawRequestById(Guid Id);
         public Task<ResultDTO<WithdrawResponse>>CreateMarketplaceRequest(Guid MarketplaceId);
         public Task<ResultDTO<AdminResponse>> AdminProcessingRequest(Guid id);
