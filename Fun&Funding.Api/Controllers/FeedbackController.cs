@@ -37,7 +37,7 @@ namespace Fun_Funding.Api.Controllers
         public async Task<IActionResult> ApprovedFeedBack(Guid id)
         {
             var result = await _feedbackService.ApprovedById(id);
-            if (!result._isSuccess) return NotFound();
+            if (!result._isSuccess) return NotFound(result);
             return Ok(result);
         }
         [HttpPost]
