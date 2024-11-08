@@ -14,6 +14,7 @@ namespace Fun_Funding.Application.ViewModel.OrderDTO
     {
         public Guid Id { get; set; }
         public DateTime CreatedDate { get; set; }
+        public decimal TotalPrice { get; set; }
         public UserInfoResponse? User {  get; set; }
         public ICollection<OrderDetailInfoResponse>? OrderDetails { get; set; }
     }
