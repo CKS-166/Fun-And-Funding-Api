@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Fun_Funding.Application.ViewModel.MarketplaceFileDTO;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,5 +13,6 @@ namespace Fun_Funding.Application.ViewModel.MarketplaceProjectDTO
         public DateTime CreatedDate { get; set; }
         public string? Name { get; set; }
         public decimal Price { get; set; }
+        public required virtual ICollection<MarketplaceFileInfoResponse> MarketplaceFiles { get; set; }
     }
 }
