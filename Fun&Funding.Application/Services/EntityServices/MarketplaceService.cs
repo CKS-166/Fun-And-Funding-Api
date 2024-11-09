@@ -3,6 +3,7 @@ using Fun_Funding.Application.ExceptionHandler;
 using Fun_Funding.Application.Interfaces.IExternalServices;
 using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel;
+using Fun_Funding.Application.ViewModel.BankAccountDTO;
 using Fun_Funding.Application.ViewModel.MarketplaceFileDTO;
 using Fun_Funding.Application.ViewModel.MarketplaceProjectDTO;
 using Fun_Funding.Domain.Entity;
@@ -42,12 +43,25 @@ namespace Fun_Funding.Application.Services.EntityServices
             try
             {
                 //check if marketplace project is deleted
-                var mp = _unitOfWork.MarketplaceRepository
-                    .GetDeleted(p => p.FundingProjectId == request.FundingProjectId);
+                var mp = await _unitOfWork.MarketplaceRepository
+                    .GetQueryable()
+                    .Where(p => p.FundingProjectId == request.FundingProjectId)
+                    .Include(p => p.Wallet)
+                    .ThenInclude(p => p.BankAccount)
+                    .FirstOrDefaultAsync();
 
-                if (mp != null)
+                if (mp != null && (mp.Status == ProjectStatus.Deleted || mp.IsDeleted == true))
                 {
                     var updateRequest = _mapper.Map<MarketplaceProjectUpdateRequest>(request);
+
+                    //map bank account
+                    BankAccountUpdateRequest bankAccount = new BankAccountUpdateRequest
+                    {
+                        Id = mp.Wallet.BankAccount.Id,
+                        BankCode = request.BankAccount.BankCode,
+                        BankNumber = request.BankAccount.BankNumber
+                    };
+                    updateRequest.BankAccount = bankAccount;
 
                     var response = UpdateMarketplaceProject(mp.Id, updateRequest, true).Result._data;
 
@@ -61,82 +75,91 @@ namespace Fun_Funding.Application.Services.EntityServices
                         .Where(p => p.Id == request.FundingProjectId)
                         .Include(p => p.User)
                         .Include(p => p.Categories)
+                        .Include(p => p.MarketplaceProject)
                         .FirstOrDefaultAsync();
 
                     if (fundingProject == null)
                         throw new ExceptionError((int)HttpStatusCode.NotFound, "Funding Project not found.");
-
-                    //validate
-                    var errorMessages = validateCommonFields(request);
-                    if (errorMessages != null && errorMessages.Count > 0)
+                    else if (fundingProject.Status != ProjectStatus.Successful)
+                        throw new ExceptionError((int)HttpStatusCode.BadRequest
+                            , "The project cannot be published to marketplace if it has not complete crowdfunding on Fun&Funding platform.");
+                    else if (fundingProject.MarketplaceProject != null)
+                        throw new ExceptionError((int)HttpStatusCode.BadRequest,
+                            "There is already a project promoted to the marketplace from the same funding project.");
+                    else
                     {
-                        throw new ExceptionError((int)HttpStatusCode.BadRequest, string.Join("\n", errorMessages));
-                    }
-
-                    //add files 
-                    List<MarketplaceFile> files = new List<MarketplaceFile>();
-
-                    foreach (MarketplaceFileRequest file in request.MarketplaceFiles)
-                    {
-                        if (file.URL.Length > 0)
+                        //validate
+                        var errorMessages = validateCommonFields(request);
+                        if (errorMessages != null && errorMessages.Count > 0)
                         {
-                            var result = _azureService.UploadUrlSingleFiles(file.URL);
-
-                            if (result == null)
-                            {
-                                throw new ExceptionError((int)HttpStatusCode.BadRequest, "Fail to upload file");
-                            }
-
-                            MarketplaceFile media = new MarketplaceFile
-                            {
-                                Name = file.Name,
-                                URL = result.Result,
-                                FileType = file.FileType,
-                                CreatedDate = DateTime.Now
-                            };
-
-                            files.Add(media);
+                            throw new ExceptionError((int)HttpStatusCode.BadRequest, string.Join("\n", errorMessages));
                         }
+
+                        //add files 
+                        List<MarketplaceFile> files = new List<MarketplaceFile>();
+
+                        foreach (MarketplaceFileRequest file in request.MarketplaceFiles)
+                        {
+                            if (file.URL.Length > 0)
+                            {
+                                var result = _azureService.UploadUrlSingleFiles(file.URL);
+
+                                if (result == null)
+                                {
+                                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "Fail to upload file");
+                                }
+
+                                MarketplaceFile media = new MarketplaceFile
+                                {
+                                    Name = file.Name,
+                                    URL = result.Result,
+                                    FileType = file.FileType,
+                                    CreatedDate = DateTime.Now
+                                };
+
+                                files.Add(media);
+                            }
+                        }
+
+                        //map project
+                        var marketplaceProject = _mapper.Map<MarketplaceProject>(request);
+                        marketplaceProject.MarketplaceFiles = files;
+                        marketplaceProject.FundingProject = fundingProject;
+                        marketplaceProject.Status = ProjectStatus.Pending;
+                        marketplaceProject.CreatedDate = DateTime.Now;
+
+                        //create a wallet
+                        Wallet wallet = new Wallet
+                        {
+                            MarketplaceProject = marketplaceProject,
+                            Balance = 0,
+                            CreatedDate = DateTime.Now
+                        };
+
+                        //bank account for wallet
+                        BankAccount bankAccount = new BankAccount
+                        {
+                            Wallet = wallet,
+                            BankCode = request.BankAccount.BankCode,
+                            BankNumber = request.BankAccount.BankNumber,
+                            CreatedDate = DateTime.Now
+                        };
+
+                        marketplaceProject.Wallet = wallet;
+                        marketplaceProject.Wallet.BankAccount = bankAccount;
+
+                        //save to db
+                        await _unitOfWork.MarketplaceRepository.AddAsync(marketplaceProject);
+                        await _unitOfWork.WalletRepository.AddAsync(wallet);
+                        await _unitOfWork.BankAccountRepository.AddAsync(bankAccount);
+
+                        await _unitOfWork.CommitAsync();
+
+                        //response
+                        var response = _mapper.Map<MarketplaceProjectInfoResponse>(marketplaceProject);
+                        return new ResultDTO<MarketplaceProjectInfoResponse>(true, "Create successfully.",
+                            response, (int)HttpStatusCode.Created);
                     }
-
-                    //map project
-                    var marketplaceProject = _mapper.Map<MarketplaceProject>(request);
-                    marketplaceProject.MarketplaceFiles = files;
-                    marketplaceProject.FundingProject = fundingProject;
-                    marketplaceProject.Status = ProjectStatus.Pending;
-                    marketplaceProject.CreatedDate = DateTime.Now;
-
-                    //create a wallet
-                    Wallet wallet = new Wallet
-                    {
-                        MarketplaceProject = marketplaceProject,
-                        Balance = 0,
-                        CreatedDate = DateTime.Now
-                    };
-
-                    //bank account for wallet
-                    BankAccount bankAccount = new BankAccount
-                    {
-                        Wallet = wallet,
-                        BankCode = request.BankAccount.BankCode,
-                        BankNumber = request.BankAccount.BankNumber,
-                        CreatedDate = DateTime.Now
-                    };
-
-                    marketplaceProject.Wallet = wallet;
-                    marketplaceProject.Wallet.BankAccount = bankAccount;
-
-                    //save to db
-                    await _unitOfWork.MarketplaceRepository.AddAsync(marketplaceProject);
-                    await _unitOfWork.WalletRepository.AddAsync(wallet);
-                    await _unitOfWork.BankAccountRepository.AddAsync(bankAccount);
-
-                    await _unitOfWork.CommitAsync();
-
-                    //response
-                    var response = _mapper.Map<MarketplaceProjectInfoResponse>(marketplaceProject);
-                    return new ResultDTO<MarketplaceProjectInfoResponse>(true, "Create successfully.",
-                        response, (int)HttpStatusCode.Created);
                 }
             }
             catch (Exception ex)
@@ -361,7 +384,9 @@ namespace Fun_Funding.Application.Services.EntityServices
                         }
                     }
 
-                    if (marketplaceProject.Status == ProjectStatus.Pending)
+                    if (marketplaceProject.Status != ProjectStatus.Deleted
+                        && marketplaceProject.Status != ProjectStatus.Reported
+                        && marketplaceProject.Status != ProjectStatus.Rejected)
                     {
                         //validate
                         var errorMessages = validateCommonFields(request);

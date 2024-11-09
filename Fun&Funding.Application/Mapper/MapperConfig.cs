@@ -215,7 +215,8 @@ namespace Fun_Funding.Application.Mapper
             CreateMap<MarketplaceProjectUpdateRequest, MarketplaceProject>()
                 .ForMember(dest => dest.MarketplaceFiles, opt => opt.Ignore())
                 .ReverseMap();
-            CreateMap<MarketplaceProjectAddRequest, MarketplaceProjectUpdateRequest>().ReverseMap();
+            CreateMap<MarketplaceProjectAddRequest, MarketplaceProjectUpdateRequest>()
+                .ForMember(dest => dest.BankAccount, opt => opt.Ignore());
         }
 
         public void MappingMarketplaceFile()
