@@ -10,6 +10,7 @@ namespace Fun_Funding.Application.ViewModel.FeedbackDTO
     public class FeedbackResponse
     {
         public string? Name {  get; set; }
+        public string? Avatar { get; set; }
         public string? Content { get; set; }
     }
 }

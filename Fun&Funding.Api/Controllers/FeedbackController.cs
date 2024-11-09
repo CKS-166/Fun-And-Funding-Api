@@ -17,9 +17,9 @@ namespace Fun_Funding.Api.Controllers
             _feedbackService = feedbackService;
         }
         [HttpGet]
-        public async Task<IActionResult> GetAllFeedback()
+        public async Task<IActionResult> GetAllFeedback([FromQuery] ListRequest request)
         {
-            var result = await _feedbackService.GetAllFeedback();
+            var result = await _feedbackService.GetAllFeedback(request);
             if (!result._isSuccess)
             {
                 NotFound();
@@ -27,7 +27,7 @@ namespace Fun_Funding.Api.Controllers
             return Ok(result);
         }
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(Guid id)
+        public async Task<IActionResult> GetFeedbackById(Guid id)
         {
             var result = await _feedbackService.GetFeedbackById(id);
             if (!result._isSuccess) return NotFound();
@@ -48,6 +48,13 @@ namespace Fun_Funding.Api.Controllers
             {
                 NotFound();
             }
+            return Ok(result);
+        }
+        [HttpGet("top4")]
+        public async Task<IActionResult> GetTop4Feedback()
+        {
+            var result = await _feedbackService.GetTop4Feedback();
+            if (!result._isSuccess) return NotFound(result);
             return Ok(result);
         }
     }

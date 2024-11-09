@@ -9,5 +9,6 @@ namespace Fun_Funding.Application.IRepository
 {
     public interface ISystemWalletRepository:IBaseRepository<SystemWallet>
     {
+        void UpdateSystemWallet(Guid id, SystemWallet systemWallet);
     }
 }

@@ -89,71 +89,16 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
-        public async Task<ResultDTO<List<Feedback>>> Get4RandomFeedback()
+        public async Task<ResultDTO<PaginatedResponse<Feedback>>> GetAllFeedback(ListRequest request)
         {
             try
             {
-                // Get total count first to handle edge cases
-                var totalCount = _unitOfWork.FeedbackRepository.GetQueryable().Count();
-
-                // Handle case where there are fewer than 4 items
-                var itemsToTake = Math.Min(4, totalCount);
-
-                if (totalCount == 0)
-                {
-                    return ResultDTO<List<Feedback>>.Success(new List<Feedback>());
-                }
-
-                // Get all IDs
-                var allIds = _unitOfWork.FeedbackRepository.GetQueryable()
-                    .Select(f => f.Id)
-                    .ToList();
-
-                // Use modern RandomNumberGenerator
-                using var rng = System.Security.Cryptography.RandomNumberGenerator.Create();
-                var randomIds = allIds.OrderBy(id =>
-                {
-                    byte[] randomBytes = new byte[4];
-                    rng.GetBytes(randomBytes);
-                    return BitConverter.ToInt32(randomBytes, 0);
-                })
-                .Take(itemsToTake)
-                .ToList();
-
-                // Get the randomly selected feedback items
-                var feedbackList = _unitOfWork.FeedbackRepository.GetQueryable()
-                    .Where(f => randomIds.Contains(f.Id) && f.Status)
-                    .ToList();
-
-                return ResultDTO<List<Feedback>>.Success(feedbackList);
+                var list = _unitOfWork.FeedbackRepository.GetAllPaged(request);
+                return ResultDTO<PaginatedResponse<Feedback>>.Success(list, "Successfull querry");
             }
             catch (Exception ex)
             {
-                return ResultDTO<List<Feedback>>.Fail($"Something went wrong: {ex.Message}");
-            }
-        }
-
-        public async Task<ResultDTO<List<FeedbackResponse>>> GetAllFeedback()
-        {
-            try
-            {
-                var listFeedback = _unitOfWork.FeedbackRepository.GetList(x => x.Status);
-                var responseList = new List<FeedbackResponse>();
-                foreach (var feedback in listFeedback)
-                {
-                    var user = await _unitOfWork.UserRepository.GetByIdAsync(feedback.UserID);
-                    responseList.Add(new FeedbackResponse
-                    {
-                        Name = user?.FullName,
-                        Content = feedback.Content
-                    });
-                }
-
-                return ResultDTO<List<FeedbackResponse>>.Success(responseList, "Successfull querry");
-            }
-            catch (Exception ex)
-            {
-                return ResultDTO<List<FeedbackResponse>>.Fail("something wrong!");
+                return ResultDTO<PaginatedResponse<Feedback>>.Fail("something wrong!");
             }
         }
 
@@ -168,6 +113,31 @@ namespace Fun_Funding.Application.Services.EntityServices
             catch (Exception ex)
             {
                 return ResultDTO<Feedback>.Fail($"somethings wrong: {ex.Message}");
+            }
+        }
+
+        public async Task<ResultDTO<List<FeedbackResponse>>> GetTop4Feedback()
+        {
+            try
+            {
+                var listFeedback = _unitOfWork.FeedbackRepository.GetList(x => x.Status);
+                var responseList = new List<FeedbackResponse>();
+                foreach (var feedback in listFeedback)
+                {
+                    var user = await _unitOfWork.UserRepository.GetByIdAsync(feedback.UserID);
+                    responseList.Add(new FeedbackResponse
+                    {
+                        Name = user?.FullName ?? null,
+                        Avatar = user?.File?.URL ?? null,
+                        Content = feedback.Content ?? null
+                    });
+                }
+
+                return ResultDTO<List<FeedbackResponse>>.Success(responseList, "Successfull querry");
+            }
+            catch (Exception ex)
+            {
+                return ResultDTO<List<FeedbackResponse>>.Fail("something wrong!");
             }
         }
     }
