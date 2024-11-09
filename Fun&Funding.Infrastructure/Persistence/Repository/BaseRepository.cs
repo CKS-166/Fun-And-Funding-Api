@@ -198,5 +198,19 @@ namespace Fun_Funding.Infrastructure.Persistence.Repository
         {
             return _entitySet.AsQueryable();
         }
+
+        public virtual void Attach(T entity)
+        {
+            _context.Attach(entity);
+        }
+
+        public virtual void Detach(T entity)
+        {
+            var entry = _context.Entry(entity);
+            if (entry != null)
+            {
+                entry.State = EntityState.Detached;
+            }
+        }
     }
 }

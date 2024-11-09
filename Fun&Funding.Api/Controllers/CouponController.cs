@@ -15,16 +15,16 @@ namespace Fun_Funding.Api.Controllers
             _couponService = couponService;
         }
         [HttpGet("get-by-code")]
-        public async Task<IActionResult> GetCouponsByCode(string couponCode)
+        public async Task<IActionResult> GetCouponsByCode(string couponCode, Guid marketplaceProjectId)
         {
-            var result = await _couponService.GetCouponByCode(couponCode);
+            var result = await _couponService.GetCouponByCode(couponCode, marketplaceProjectId);
             if (!result._isSuccess) return BadRequest(result);
             return Ok(result);
-        } 
+        }
         [HttpGet("check-avaliable-coupons")]
-        public async Task<IActionResult> CheckCouponsUsed(Guid couponId)
+        public async Task<IActionResult> CheckCouponValid(string couponCode, Guid marketplaceProjectId)
         {
-            var result = await _couponService.CheckCouponUsed(couponId);
+            var result = await _couponService.CheckCouponValid(couponCode, marketplaceProjectId);
             if (!result._isSuccess) return BadRequest(result);
             return Ok(result);
         }

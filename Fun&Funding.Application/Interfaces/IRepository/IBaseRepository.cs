@@ -41,5 +41,8 @@ namespace Fun_Funding.Application.IRepository
         Task AddAsync(T entity, CancellationToken cancellationToken = default);
         Task AddRangeAsync(IEnumerable<T> entities, CancellationToken cancellationToken = default);
         IQueryable<T> GetQueryable();
+
+        void Attach(T entity);
+        void Detach(T entity);
     }
 }

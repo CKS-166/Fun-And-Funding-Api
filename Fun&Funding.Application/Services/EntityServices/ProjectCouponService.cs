@@ -61,28 +61,28 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
-        public async Task<ResultDTO<ProjectCoupon>> CheckCouponUsed(Guid couponId)
+        public async Task<ResultDTO<ProjectCoupon>> CheckCouponValid(string couponCode, Guid marketplaceProjectId)
         {
             try
             {
-                var exitedCoupon = await _unitOfWork.ProjectCouponRepository.GetAsync(x => x.Id == couponId);
+                var exitedCoupon = await _unitOfWork.ProjectCouponRepository.GetAsync(x => x.CouponKey == couponCode && x.MarketplaceProjectId == marketplaceProjectId);
                 if (exitedCoupon is null)
                 {
-                    return ResultDTO<ProjectCoupon>.Fail("can not found any coupons");
+                    return ResultDTO<ProjectCoupon>.Fail("Invalid Coupon Key for Project");
                 }
                 if (exitedCoupon.Status.Equals(ProjectCouponStatus.Disable))
                 {
-                    return ResultDTO<ProjectCoupon>.Success(exitedCoupon, "coupon is disable");
+                    return ResultDTO<ProjectCoupon>.Fail("Coupon is already been used.");
                 }
                 if (exitedCoupon.IsDeleted)
                 {
-                    return ResultDTO<ProjectCoupon>.Fail("coupon is deleted");
+                    return ResultDTO<ProjectCoupon>.Fail("Coupon is deleted.");
                 }
-                return ResultDTO<ProjectCoupon>.Success(exitedCoupon, "this coupon is avaliable");
+                return ResultDTO<ProjectCoupon>.Success(exitedCoupon, "Successfully found coupon");
             }
             catch (Exception ex)
             {
-                return ResultDTO<ProjectCoupon>.Fail("somethings wrong please try again");
+                return ResultDTO<ProjectCoupon>.Fail("Something went wrong. Please try again later.");
             }
         }
 
@@ -109,21 +109,21 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
-        public async Task<ResultDTO<ProjectCoupon>> GetCouponByCode(string couponCode)
+        public async Task<ResultDTO<ProjectCoupon>> GetCouponByCode(string couponCode, Guid marketplaceProjectId)
         {
             try
             {
-                var exitedCoupon = await _unitOfWork.ProjectCouponRepository.GetAsync(x => x.CouponKey == couponCode);
-                if (exitedCoupon is null)
+                var existedCoupon = await _unitOfWork.ProjectCouponRepository.GetAsync(x => x.CouponKey == couponCode && x.MarketplaceProjectId == marketplaceProjectId);
+                if (existedCoupon is null)
                 {
-                    return ResultDTO<ProjectCoupon>.Fail("can not found any coupons");
+                    return ResultDTO<ProjectCoupon>.Fail("Invalid Coupon Key for Project");
                 }
-                return ResultDTO<ProjectCoupon>.Success(exitedCoupon, "successfully found coupon");
+                return ResultDTO<ProjectCoupon>.Success(existedCoupon, "Successfully found coupon");
 
             }
             catch (Exception ex)
             {
-                return ResultDTO<ProjectCoupon>.Fail("somethings wrong please try again");
+                return ResultDTO<ProjectCoupon>.Fail("Something went wrong. Please try again later.");
             }
         }
 
