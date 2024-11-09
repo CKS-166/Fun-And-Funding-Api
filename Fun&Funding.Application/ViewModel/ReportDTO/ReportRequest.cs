@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
+﻿using Microsoft.AspNetCore.Http;
+using MongoDB.Bson.Serialization.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,9 @@ namespace Fun_Funding.Application.ViewModel.ReportDTO
     public class ReportRequest
     { 
         public Guid ProjectId { get; set; }
-        public string Content { get; set; }
-        public List<string> FileUrls { get; set; }
+        public string? Content { get; set; }
+        public List<IFormFile>? FileUrls { get; set; }
+        public List<string>? FaultCauses { get; set; }
+
     }
 }

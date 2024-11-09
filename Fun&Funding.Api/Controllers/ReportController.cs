@@ -1,6 +1,8 @@
 ﻿using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.ReportDTO;
+using Fun_Funding.Domain.Constrain;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,7 +27,8 @@ namespace Fun_Funding.Api.Controllers
             return Ok(result);
         }
         [HttpPost]
-        public async Task<IActionResult> CreateReport(ReportRequest request)
+        [Authorize(Roles = Role.Backer)]
+        public async Task<IActionResult> CreateReport([FromForm]ReportRequest request)
         {
             var result = await _reportService.CreateReportRequest(request);
             if (!result._isSuccess)

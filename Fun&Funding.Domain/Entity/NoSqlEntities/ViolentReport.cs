@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace Fun_Funding.Domain.Entity.NoSqlEntities
 {
@@ -27,6 +28,9 @@ namespace Fun_Funding.Domain.Entity.NoSqlEntities
         public DateTime Date { get; set; }
 
         [BsonElement("FileUrls")]
-        public List<string> FileUrls { get; set; }
+        public List<string>? FileUrls { get; set; }
+        [BsonElement("FaultCauses")]
+        public List<string>? FaultCauses { get; set; }
+
     }
 }

@@ -5,6 +5,7 @@ using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.ReportDTO;
 using Fun_Funding.Domain.Entity;
 using Fun_Funding.Domain.Entity.NoSqlEntities;
+using Microsoft.AspNetCore.Http;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -20,19 +21,22 @@ namespace Fun_Funding.Application.Services.EntityServices
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IEmailService _emailService;
+        private readonly IAzureService _azureService;
 
-        public ReportService(IUserService userService, IUnitOfWork unitOfWork, IMapper mapper, IEmailService emailService)
+        public ReportService(IUserService userService, IUnitOfWork unitOfWork, IMapper mapper, IEmailService emailService, IAzureService azureService)
         {
             _userService = userService;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _emailService = emailService;
+            _azureService = azureService;
         }
 
         public async Task<ResultDTO<ViolentReport>> CreateReportRequest(ReportRequest request)
         {
-            var user = _userService.GetUserInfo().Result;
+            var user = await _userService.GetUserInfo();
             User exitUser = _mapper.Map<User>(user._data);
+
             if (exitUser == null)
             {
                 return ResultDTO<ViolentReport>.Fail("user must be authenticate");
@@ -48,15 +52,24 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
             try
             {
+                // Upload files and get their URLs
+                List<string> fileUrls = new List<string>();
+                foreach (var file in request.FileUrls) // `Files` would be of type `IFormFile[]`
+                {
+                    // Upload each file and get its URL (pseudo-code)
+                    string fileUrl = await _azureService.UploadUrlSingleFiles(file);
+                    fileUrls.Add(fileUrl);
+                }
                 ViolentReport report = new ViolentReport
                 {
                     Id = Guid.NewGuid(),
-                    FileUrls = request.FileUrls,
+                    FileUrls = fileUrls,
                     ProjectId = request.ProjectId,
                     ReporterId = exitUser.Id,
                     Content = request.Content,
                     IsHandle = false,
                     Date = DateTime.Now,
+                    FaultCauses = request.FaultCauses,
                 };
                 _unitOfWork.ReportRepository.Create(report);
                 return ResultDTO<ViolentReport>.Success(report, "Successfull to create report");
