@@ -109,9 +109,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 wallet.Balance -= totalCost;
 
                 // Update Backer's Wallet
-                _unitOfWork.WalletRepository.Update(wallet);
-                // Detach wallet
-                _unitOfWork.WalletRepository.Detach(wallet);
+                _unitOfWork.WalletRepository.UpdateWallet(wallet.Id, wallet);
                 // Create new Order
                 Order order = new Order
                 {
@@ -289,13 +287,9 @@ namespace Fun_Funding.Application.Services.EntityServices
                         // Save System Transaction
                         _unitOfWork.TransactionRepository.Add(systemTransaction);
                         // Update GameOwner Wallet
-                        _unitOfWork.WalletRepository.Update(gameWallet);
-                        // Detach GameOwner wallet
-                        _unitOfWork.WalletRepository.Detach(gameWallet);
+                        _unitOfWork.WalletRepository.UpdateWallet(gameWallet.Id, gameWallet);
                         // Save SystemWallet
-                        _unitOfWork.SystemWalletRepository.Update(systemWallet);
-                        // Detach SystemWallet
-                        _unitOfWork.SystemWalletRepository.Detach(systemWallet);
+                        _unitOfWork.SystemWalletRepository.UpdateSystemWallet(systemWallet.Id, systemWallet);
                     }
                 }
                 // Add Backer's Order

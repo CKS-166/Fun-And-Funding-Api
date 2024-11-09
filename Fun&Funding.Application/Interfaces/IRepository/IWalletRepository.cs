@@ -1,4 +1,5 @@
 ﻿using Fun_Funding.Domain.Entity;
+using MathNet.Numerics.Statistics.Mcmc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,5 +10,6 @@ namespace Fun_Funding.Application.IRepository
 {
     public interface IWalletRepository : IBaseRepository<Wallet>
     {
+        void UpdateWallet(Guid id, Wallet wallet);
     }
 }
