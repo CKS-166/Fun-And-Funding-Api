@@ -94,15 +94,13 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
-        public async Task<ResultDTO<ViolentReport>> UpdateHandleReport(HandleRequest request)
+        public async Task<ResultDTO<ViolentReport>> UpdateHandleReport(Guid id)
         {
-            var user = _userService.GetUserInfo().Result;
+            var user = await _userService.GetUserInfo();
             User exitUser = _mapper.Map<User>(user._data);
             if (exitUser == null)
                 return ResultDTO<ViolentReport>.Fail("user not authenticate");
-            if (request == null)
-                return ResultDTO<ViolentReport>.Fail("request null");
-            var exitedReport = _unitOfWork.ReportRepository.Get(x => x.Id == request.ReportId);
+            var exitedReport = _unitOfWork.ReportRepository.Get(x => x.Id == id);
             if (exitedReport == null)
                 return ResultDTO<ViolentReport>.Fail("reportId null");
             var project = await _unitOfWork.FundingProjectRepository.GetByIdAsync(exitedReport.ProjectId);
@@ -115,8 +113,8 @@ namespace Fun_Funding.Application.Services.EntityServices
             {
                 var reporter = await _unitOfWork.UserRepository.GetByIdAsync(exitedReport.ReporterId);
                 var update = Builders<ViolentReport>.Update.Set(x => x.IsHandle, true);
-                _unitOfWork.ReportRepository.Update(x => x.Id == request.ReportId, update);
-                var response = _unitOfWork.ReportRepository.Get(x => x.Id == request.ReportId);
+                _unitOfWork.ReportRepository.Update(x => x.Id == id, update);
+                var response = _unitOfWork.ReportRepository.Get(x => x.Id == id);
 
                 //email
                 await _emailService.SendReportAsync(owner.Email, project.Name, owner.FullName, exitedReport.Date, reporter.FullName, exitedReport.Content);

@@ -36,9 +36,10 @@ namespace Fun_Funding.Api.Controllers
             return Ok(result);
         }
         [HttpPatch]
-        public async Task<IActionResult> UpdateReport(HandleRequest request)
+        [Authorize(Roles =Role.Admin)]
+        public async Task<IActionResult> UpdateReport(Guid id)
         {
-            var result = await _reportService.UpdateHandleReport(request);
+            var result = await _reportService.UpdateHandleReport(id);
             if (!result._isSuccess)
                 return BadRequest(result);
             return Ok(result);

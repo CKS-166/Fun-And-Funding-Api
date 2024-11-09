@@ -13,7 +13,7 @@ namespace Fun_Funding.Application.IService
     {
         Task<ResultDTO<ViolentReport>> CreateReportRequest(ReportRequest request);
         Task<ResultDTO<PaginatedResponse<ViolentReport>>> GetAllReport(ListRequest request);
-        Task<ResultDTO<ViolentReport>> UpdateHandleReport(HandleRequest request);
+        Task<ResultDTO<ViolentReport>> UpdateHandleReport(Guid id);
 
     }
 }
