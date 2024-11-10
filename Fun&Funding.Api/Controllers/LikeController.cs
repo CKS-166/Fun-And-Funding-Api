@@ -19,13 +19,13 @@ namespace Fun_Funding.Api.Controllers
     {
         private readonly ILikeService _likeService;
         private readonly IUnitOfWork _unitOfWork;
-        
 
-        public LikeController(ILikeService likeService,IUnitOfWork unitOfWork)
+
+        public LikeController(ILikeService likeService, IUnitOfWork unitOfWork)
         {
             _likeService = likeService;
             _unitOfWork = unitOfWork;
-            
+
         }
 
         [HttpGet("all")]
@@ -34,10 +34,20 @@ namespace Fun_Funding.Api.Controllers
             var result = await _likeService.GetAll();
             return Ok(result);
         }
-        [HttpPost("like")]
-        public async Task<IActionResult> likeProject([FromBody] LikeRequest likeRequest)
+        [HttpPost("/funding/like")]
+        public async Task<IActionResult> likeFundingProject([FromBody] LikeRequest likeRequest)
         {
-            var result = await _likeService.LikeProject(likeRequest);
+            var result = await _likeService.LikeFundingProject(likeRequest);
+            if (!result._isSuccess)
+            {
+                return BadRequest(result._message);
+            }
+            return Ok(result);
+        }
+        [HttpPost("/marketplace/like")]
+        public async Task<IActionResult> likeMarketplaceProject([FromBody] LikeRequest likeRequest)
+        {
+            var result = await _likeService.LikeMarketplaceProject(likeRequest);
             if (!result._isSuccess)
             {
                 return BadRequest(result._message);
@@ -50,6 +60,19 @@ namespace Fun_Funding.Api.Controllers
             try
             {
                 var result = await _likeService.GetLikesByProject(id);
+                return Ok(result);
+            }
+            catch (ExceptionError ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpGet("check-project-like/{id}")]
+        public async Task<IActionResult> CheckProjectLike(Guid id)
+        {
+            try
+            {
+                var result = await _likeService.CheckIsLike(id);
                 return Ok(result);
             }
             catch (ExceptionError ex)

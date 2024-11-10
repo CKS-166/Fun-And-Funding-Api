@@ -12,8 +12,10 @@ namespace Fun_Funding.Application.IService
     public interface ILikeService
     {
         Task<List<Like>> GetAll();
-        Task<ResultDTO<LikeResponse>> LikeProject(LikeRequest likeRequest);
+        Task<ResultDTO<LikeResponse>> LikeFundingProject(LikeRequest likeRequest);
+        Task<ResultDTO<LikeResponse>> LikeMarketplaceProject(LikeRequest likeRequest);
         Task<List<Like>> GetLikesByProject(Guid id);
         Task<List<Like>> CheckUserLike(Guid id);
+        Task<ResultDTO<List<Like>>> CheckIsLike(Guid projectId);
     }
 }
