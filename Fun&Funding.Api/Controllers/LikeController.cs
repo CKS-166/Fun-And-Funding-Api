@@ -13,7 +13,7 @@ using MongoDB.Driver;
 
 namespace Fun_Funding.Api.Controllers
 {
-    [Route("api/like")]
+    [Route("api/likes")]
     [ApiController]
     public class LikeController : ControllerBase
     {
