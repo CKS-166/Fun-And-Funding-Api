@@ -100,7 +100,7 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
-        public async Task<ResultDTO<List<MilestoneResponse>>> GetListLastestMilestone()
+        public async Task<ResultDTO<List<MilestoneResponse>>> GetListLastestMilestone(bool? status)
         {
             try
             {
@@ -120,7 +120,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                             DisbursementPercentage = milestone.DisbursementPercentage,
                             UpdateDate = milestone.UpdateDate,
                             Requirements = milestone.Requirements
-                                .Where(req => req.IsDeleted == false)
+                                .Where(req => status == null || req.IsDeleted == status.Value)
                                 .OrderByDescending(req => req.Version)
                                 .Select(req => new RequirementResponse
                                 {
