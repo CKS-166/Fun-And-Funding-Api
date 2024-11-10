@@ -16,9 +16,9 @@ namespace Fun_Funding.Api.Controllers
             _milestoneService = milestoneService;
         }
         [HttpGet("group-latest-milestone")]
-        public async Task<IActionResult> GetAllMilestoneOrder()
+        public async Task<IActionResult> GetAllMilestoneOrder([FromQuery] bool? status)
         {
-            var result = await _milestoneService.GetListLastestMilestone();
+            var result = await _milestoneService.GetListLastestMilestone(status);
             if (!result._isSuccess)
                 return Ok(StatusCode(result._statusCode, result));
             return Ok(result);
