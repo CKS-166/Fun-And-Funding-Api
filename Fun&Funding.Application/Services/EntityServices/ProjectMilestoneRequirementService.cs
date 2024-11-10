@@ -113,11 +113,39 @@ namespace Fun_Funding.Application.Services.EntityServices
         {
             try
             {
+
+                ProjectMilestoneRequirement sampleReq = _unitOfWork.ProjectMilestoneRequirementRepository
+                    .GetQueryable().Include(pmr => pmr.RequirementFiles).FirstOrDefault(pmr => pmr.Id == request[0].Id);
+                var projectMilestone = _unitOfWork.ProjectMilestoneRepository.GetQueryable()
+                    .Include(x => x.Milestone)
+                    .Include(x => x.FundingProject)
+                    .FirstOrDefault(pm => pm.Id == sampleReq.ProjectMilestoneId);
+
+                if (projectMilestone == null)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "Milestone for this project not found");
+                }
+                else
+                {
+                    FundingProject project = _unitOfWork.FundingProjectRepository
+                    .GetQueryable().Include(p => p.ProjectMilestones)
+                    .ThenInclude(pm => pm.Milestone).FirstOrDefault(p => p.Id == projectMilestone.FundingProjectId);
+                    var checkValidateMilstone = _projectMilestoneService.CanCreateProjectMilestone(project, projectMilestone.Milestone.MilestoneOrder, projectMilestone.CreatedDate);
+                    if (checkValidateMilstone != null)
+                    {
+                        throw new ExceptionError((int)HttpStatusCode.BadRequest, checkValidateMilstone);
+                    }
+                    if (projectMilestone.Status != ProjectMilestoneStatus.Processing)
+                    {
+                        throw new ExceptionError((int)HttpStatusCode.BadRequest, "Milestone for this project is not approved yet");
+                    }
+                }
                 //Projec
                 foreach (var requestItem in request)
                 {
                     ProjectMilestoneRequirement req = _unitOfWork.ProjectMilestoneRequirementRepository
                         .GetQueryable().Include(pmr => pmr.RequirementFiles).FirstOrDefault(pmr => pmr.Id == requestItem.Id);
+                    
                     req.Content = requestItem.Content;
                     req.UpdateDate = requestItem.UpdateDate;
                     req.RequirementStatus = requestItem.RequirementStatus;
