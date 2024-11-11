@@ -11,7 +11,8 @@ namespace Fun_Funding.Application.IService
 {
     public interface IFollowService
     {
-        Task<ResultDTO<Follow>> FollowUser(FollowRequest request);
+        Task<ResultDTO<Follow>> FollowUser(Guid userId);
+        Task<ResultDTO<Follow>> FollowProject(Guid projectId);
         Task<ResultDTO<List<Follow>>> GetListFollower(Guid UserId);
     }
 }

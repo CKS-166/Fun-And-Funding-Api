@@ -25,10 +25,20 @@ namespace Fun_Funding.Api.Controllers
             }
             return Ok(result);
         }
-        [HttpPost]
-        public async Task<IActionResult> FollowUser(FollowRequest request)
+        [HttpPost("{id}/user")]
+        public async Task<IActionResult> FollowUser(Guid id)
         {
-            var result = await _followService.FollowUser(request);
+            var result = await _followService.FollowUser(id);
+            if (!result._isSuccess)
+            {
+                return BadRequest();
+            }
+            return Ok(result);
+        }
+        [HttpPost("{id}/funding-project")]
+        public async Task<IActionResult> FollowFundingProject(Guid id)
+        {
+            var result = await _followService.FollowProject(id);
             if (!result._isSuccess)
             {
                 return BadRequest();
