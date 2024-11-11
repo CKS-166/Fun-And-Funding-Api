@@ -1,15 +1,10 @@
-﻿using Fun_Funding.Application.ViewModel.OrderDetailDTO;
-using Fun_Funding.Domain.Enum;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Fun_Funding.Domain.Enum;
 
 namespace Fun_Funding.Application.ViewModel.MarketplaceFileDTO
 {
     public class MarketplaceFileInfoResponse
     {
+        public Guid Id { get; set; }
         public string? Name { get; set; }
         public string? URL { get; set; }
         public string? Version { get; set; }
