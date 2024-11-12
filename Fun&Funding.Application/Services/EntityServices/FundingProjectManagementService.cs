@@ -8,6 +8,7 @@ using Fun_Funding.Application.ViewModel.FundingFileDTO;
 using Fun_Funding.Application.ViewModel.FundingProjectDTO;
 using Fun_Funding.Application.ViewModel.PackageBackerDTO;
 using Fun_Funding.Application.ViewModel.PackageDTO;
+using Fun_Funding.Domain.Constrain;
 using Fun_Funding.Domain.Entity;
 using Fun_Funding.Domain.Enum;
 using Microsoft.AspNetCore.Http;
@@ -664,12 +665,31 @@ namespace Fun_Funding.Application.Services.EntityServices
                     return ResultDTO<bool>.Fail("can not found user");
                 var project = _unitOfWork.FundingProjectRepository.GetQueryable()
                     .Include(p => p.User)
-                    .FirstOrDefault(p => p.Id == projectId && p.User.Id == user.Id);
-                if (project == null)
+                    .Include(p => p.Packages)
+                    .ThenInclude(pk => pk.PackageUsers)
+                    
+                    .FirstOrDefault(p => p.Id == projectId);
+                if (_claimsPrincipal.IsInRole(Role.GameOwner))
                 {
-                    return ResultDTO<bool>.Success(false);
+                    if (project.UserId != user.Id)
+                    {
+                        return ResultDTO<bool>.Success(false, "not owner");
+                    }
+                    else
+                    {
+                        return ResultDTO<bool>.Success(true, "owner");
+                    }
                 }
-                return ResultDTO<bool>.Success(true);
+                    bool userExistsInPackageUsers = project.Packages
+                   .Any(pkg => pkg.PackageUsers.Any(pu => pu.UserId == user.Id));
+
+                    if (!userExistsInPackageUsers)
+                    {
+                        return ResultDTO<bool>.Success(false, "not backer of this project");
+                    }
+                     return ResultDTO<bool>.Success(true, "backer of this project");
+                    
+                
             }
             catch (Exception ex)
             {

@@ -196,5 +196,35 @@ namespace Fun_Funding.Application.Services.EntityServices
                 throw new Exception(ex.Message);
             }
         }
+
+        public async Task<ResultDTO<List<ProjectBackerResponse>>> GetProjectBacker(Guid projectId)
+        {
+            try
+            {
+            var groupedResult = _unitOfWork.PackageBackerRepository.GetQueryable()
+            .Include(pb => pb.User)
+            .Where(pb => pb.Package.Project.Id == projectId)
+            .GroupBy(pb => new
+            {
+                UserId = pb.UserId,
+                Name = pb.User.FullName,
+                Avatar = pb.User.File.URL
+            })
+            .Select(g => new ProjectBackerResponse
+            {
+                Id = g.Key.UserId,
+                Name = g.Key.Name,
+                URL = g.Key.Avatar,
+                DonateAmount = g.Sum(pb => pb.DonateAmount)
+            })
+            .ToList();
+            return ResultDTO<List<ProjectBackerResponse>>.Success(groupedResult);
+
+
+            }
+            catch (Exception ex) {
+                throw new Exception(ex.Message);
+            }
+        }
     }
 }

@@ -24,7 +24,7 @@ namespace Fun_Funding.Api.Controllers
         }
 
         [HttpPost]
-        //[Authorize(Roles = Role.GameOwner)]
+        [Authorize(Roles = Role.GameOwner)]
         public async Task<IActionResult> CreateProject([FromForm] FundingProjectAddRequest req)
         {
             var response = await _fundingProjectService.CreateFundingProject(req);
@@ -39,6 +39,7 @@ namespace Fun_Funding.Api.Controllers
         }
 
         [HttpPut]
+        [Authorize (Roles = Role.GameOwner)]
         public async Task<IActionResult> UpdateProject([FromForm] FundingProjectUpdateRequest req)
         {
             var response = await _fundingProjectService.UpdateFundingProject(req);

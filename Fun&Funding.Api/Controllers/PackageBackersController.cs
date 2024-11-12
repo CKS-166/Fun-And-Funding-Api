@@ -58,5 +58,12 @@ namespace Fun_Funding.Api.Controllers
             var res = _packageBackerService.GetPackageBackerGroups(projectId);
             return Ok(res);
         }
+
+        [HttpGet("project-backers-detail")]
+        public async Task<IActionResult> GetProjectBackers([FromQuery] Guid projectId)
+        {
+            var result = _packageBackerService.GetProjectBacker(projectId);
+            return Ok(result);
+        }
     }
 }

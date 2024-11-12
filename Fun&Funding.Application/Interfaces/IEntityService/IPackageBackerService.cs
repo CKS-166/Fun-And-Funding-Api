@@ -15,5 +15,7 @@ namespace Fun_Funding.Application.IService
         Task<ResultDTO<List<PackageBackerGroupedResponse>>> GetGroupedPackageBackersAsync(Guid projectId);
 
         Task<ResultDTO<List<PackageBackerCountResponse>>> GetPackageBackerGroups(Guid projectId);
+
+        Task<ResultDTO<List<ProjectBackerResponse>>> GetProjectBacker(Guid projectId);
     }
 }
