@@ -576,5 +576,28 @@ namespace Fun_Funding.Application.Services.EntityServices
                 throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
             }
         }
+        public async Task<ResultDTO<string>> GetUserRole(Guid id)
+        {
+            var parseUser = await _unitOfWork.UserRepository.GetQueryable().AsNoTracking()
+                                .Include(u => u.Wallet)
+                                .FirstOrDefaultAsync(u => u.Id == id);
+            if (parseUser is null)
+            {
+                throw new ExceptionError((int)HttpStatusCode.NotFound, "User not found.");
+            }
+            var roles = await _userManager.GetRolesAsync(parseUser);
+            if (roles.Contains(Role.Admin))
+            {
+                // User is an Admin
+                return ResultDTO<string>.Success(Role.Admin, "logged as Admin");
+            }
+            else if (roles.Contains(Role.Backer))
+            {
+                // User is a normal User
+                return ResultDTO<string>.Success(Role.Backer, "logged as Backer");
+            }
+
+            return ResultDTO<string>.Success(Role.GameOwner, "logged as Owner");
+        }
     }
 }

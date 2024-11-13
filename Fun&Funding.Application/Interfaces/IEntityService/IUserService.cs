@@ -22,5 +22,6 @@ namespace Fun_Funding.Application.IService
         Task<ResultDTO<string>> CheckUserRole(User user);
         Task<ResultDTO<List<TopBackerResponse>>> GetTop4Backer();
         Task<ResultDTO<decimal>> CountPlatformUsers();
+        Task<ResultDTO<string>> GetUserRole(Guid id);
     }
 }

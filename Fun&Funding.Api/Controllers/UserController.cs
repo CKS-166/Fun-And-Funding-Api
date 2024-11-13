@@ -86,5 +86,11 @@ namespace Fun_Funding.Api.Controllers
             var response = await _userService.CountPlatformUsers();
             return Ok(response);
         }
+        [HttpGet("user-role/{id}")]
+        public async Task<IActionResult> GetUserRole([FromRoute] Guid id)
+        {
+            var response = await _userService.GetUserRole(id);
+            return Ok(response);
+        }
     }
 }
