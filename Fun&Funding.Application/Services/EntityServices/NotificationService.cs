@@ -71,7 +71,7 @@ namespace Fun_Funding.Application.Services.EntityServices
             {
                 notification.Id = Guid.NewGuid();
                 notification.Date = DateTime.UtcNow;
-
+                notification.ObjectId = notification.ObjectId;
                 notification.UserReadStatus = userIds.ToDictionary(userId => userId.ToString(), _ => false);
 
                 await _unitOfWork.NotificationRepository.CreateAsync(notification);
