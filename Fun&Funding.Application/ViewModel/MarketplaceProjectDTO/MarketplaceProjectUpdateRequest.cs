@@ -13,7 +13,8 @@ namespace Fun_Funding.Application.ViewModel.MarketplaceProjectDTO
         [Range(0, (double)decimal.MaxValue)]
         [Column(TypeName = "decimal(18, 2)")]
         public decimal Price { get; set; }
-        public List<MarketplaceFileRequest> MarketplaceFiles { get; set; }
+        public List<MarketplaceFileRequest>? MarketplaceFiles { get; set; }
+        public List<MarketplaceFileInfoResponse>? ExistingFiles { get; set; }
         public BankAccountUpdateRequest BankAccount { get; set; }
     }
 }

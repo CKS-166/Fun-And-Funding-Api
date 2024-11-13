@@ -10,5 +10,6 @@ namespace Fun_Funding.Application.ViewModel.MarketplaceFileDTO
         public string? Version { get; set; }
         public string? Description { get; set; }
         public FileType FileType { get; set; }
+        public bool IsDelete { get; set; }
     }
 }
