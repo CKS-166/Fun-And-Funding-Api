@@ -54,25 +54,13 @@ namespace Fun_Funding.Api.Controllers
             }
             return Ok(result);
         }
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetProjectLike(Guid id)
-        {
-            try
-            {
-                var result = await _likeService.GetLikesByProject(id);
-                return Ok(result);
-            }
-            catch (ExceptionError ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-        [HttpGet("check-project-like/{id}")]
+       
+        [HttpGet("get-project-like/{id}")]
         public async Task<IActionResult> CheckProjectLike(Guid id)
         {
             try
             {
-                var result = await _likeService.CheckIsLike(id);
+                var result = await _likeService.CheckUserLike(id);
                 return Ok(result);
             }
             catch (ExceptionError ex)
@@ -80,20 +68,6 @@ namespace Fun_Funding.Api.Controllers
                 return BadRequest(ex.Message);
             }
         }
-        [HttpGet("user-like/{id}")]
-        [Authorize]
-        public async Task<IActionResult> CheckUserLike(Guid id)
-        {
-            try
-            {
-                var result = _likeService.CheckUserLike(id);
-                return Ok(result);
-            }
-            catch (ExceptionError ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
-
+        
     }
 }

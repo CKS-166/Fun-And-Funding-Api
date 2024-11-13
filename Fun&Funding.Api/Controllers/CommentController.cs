@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Fun_Funding.Api.Controllers
 {
-    [Route("api/comment")]
+    [Route("api/comments")]
     [ApiController]
     public class CommentController : ControllerBase
     {
@@ -22,22 +22,46 @@ namespace Fun_Funding.Api.Controllers
             var result = await _commentService.GetAllComment();
             return Ok(result);
         }
-        [HttpPost]
-        public async Task<IActionResult> commentProject([FromBody] CommentRequest request)
+        [HttpPost("funding")]
+        public async Task<IActionResult> CommentFundingProject([FromBody] CommentRequest request)
         {
-            var result = await _commentService.CommentProject(request);
+            var result = await _commentService.CommentFundingProject(request);
             if (!result._isSuccess)
             {
                 return BadRequest(result._message);
             }
             return Ok(result);
         }
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetProjecComment(Guid id)
+        [HttpPost("marketplace")]
+        public async Task<IActionResult> CommentMarketplaceProject([FromBody] CommentRequest request)
+        {
+            var result = await _commentService.CommentMarketplaceProject(request);
+            if (!result._isSuccess)
+            {
+                return BadRequest(result._message);
+            }
+            return Ok(result);
+        }
+        [HttpGet("funding/{id}")]
+        public async Task<IActionResult> GetFundingProjecComment(Guid id)
+
         {
             try
             {
-                var result = await _commentService.GetCommentsByProject(id);
+                var result = await _commentService.GetCommentsByFundingProject(id);
+                return Ok(result);
+            }
+            catch (ExceptionError ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+        [HttpGet("marketplace/{id}")]
+        public async Task<IActionResult> GetMarketplaceProjecComment(Guid id)
+        {
+            try
+            {
+                var result = await _commentService.GetCommentsByMarketplaceProject(id);
                 return Ok(result);
             }
             catch (ExceptionError ex)
