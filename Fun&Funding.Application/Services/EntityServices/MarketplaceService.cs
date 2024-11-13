@@ -89,7 +89,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                     else
                     {
                         //validate
-                        var errorMessages = validateCommonFields(request);
+                        var errorMessages = ValidateMarketplaceProject(request);
                         if (errorMessages != null && errorMessages.Count > 0)
                         {
                             throw new ExceptionError((int)HttpStatusCode.BadRequest, string.Join("\n", errorMessages));
@@ -116,6 +116,12 @@ namespace Fun_Funding.Application.Services.EntityServices
                                     FileType = file.FileType,
                                     CreatedDate = DateTime.Now
                                 };
+
+                                if (file.FileType == FileType.GameFile)
+                                {
+                                    media.Version = "1";
+                                    media.Description = "First upload";
+                                }
 
                                 files.Add(media);
                             }
@@ -255,7 +261,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                     if (marketplaceProject.MarketplaceFiles != null)
                     {
                         var existingFiles = marketplaceProject.MarketplaceFiles.ToList();
-                        marketplaceProject.MarketplaceFiles = getNonDeletedFiles(existingFiles);
+                        marketplaceProject.MarketplaceFiles = GetNonDeletedFiles(existingFiles);
                     }
 
                     var response = _mapper.Map<MarketplaceProjectInfoResponse>(marketplaceProject);
@@ -389,29 +395,31 @@ namespace Fun_Funding.Application.Services.EntityServices
                         && marketplaceProject.Status != ProjectStatus.Rejected)
                     {
                         //validate
-                        var errorMessages = validateCommonFields(request);
+                        var errorMessages = ValidateMarketplaceProject(request);
                         if (errorMessages != null && errorMessages.Count > 0)
                         {
                             throw new ExceptionError((int)HttpStatusCode.BadRequest, string.Join("\n", errorMessages));
                         }
 
-                        //remove existing files
-                        var existingFiles = marketplaceProject.MarketplaceFiles;
-                        if (existingFiles != null && existingFiles.Count() > 0)
+                        var marketplaceFiles = marketplaceProject.MarketplaceFiles;
+
+                        //remove deleted files
+                        var filesToDelete = _mapper.Map<IEnumerable<MarketplaceFile>>(request.ExistingFiles);
+                        if (filesToDelete != null && filesToDelete.Count() > 0)
                         {
-                            _unitOfWork.MarketplaceFileRepository.RemoveRange(existingFiles);
-                            /*await _unitOfWork.CommitAsync();*/
+                            foreach (var file in filesToDelete)
+                            {
+                                if (file.IsDeleted) _unitOfWork.MarketplaceFileRepository.Remove(file);
+                            }
                         }
 
                         //files to be update
-                        if (existingFiles != null)
+                        var updateFiles = request.MarketplaceFiles;
+                        if (updateFiles != null && updateFiles.Count() > 0)
                         {
-                            var filesToUpdate = addFiles(request.MarketplaceFiles, id);
+                            var filesToUpdate = AddFiles(updateFiles, id);
 
-                            foreach (var file in filesToUpdate)
-                            {
-                                existingFiles.Add(file);
-                            }
+                            marketplaceFiles = marketplaceFiles.Concat(filesToUpdate).ToList();
                         }
 
                         _mapper.Map(request, marketplaceProject);
@@ -426,13 +434,13 @@ namespace Fun_Funding.Application.Services.EntityServices
                             marketplaceProject.Wallet.BankAccount = bankAccount;
                         }
 
-                        marketplaceProject.MarketplaceFiles = existingFiles;
+                        marketplaceProject.MarketplaceFiles = marketplaceFiles;
 
                         _unitOfWork.MarketplaceRepository.Update(marketplaceProject);
                         await _unitOfWork.CommitAsync();
 
                         //return non-deleted files only
-                        marketplaceProject.MarketplaceFiles = getNonDeletedFiles(existingFiles.ToList());
+                        marketplaceProject.MarketplaceFiles = GetNonDeletedFiles(marketplaceFiles.ToList());
 
                         var response = _mapper.Map<MarketplaceProjectInfoResponse>(marketplaceProject);
 
@@ -538,7 +546,7 @@ namespace Fun_Funding.Application.Services.EntityServices
         }
 
         //validation
-        private List<string> validateCommonFields(dynamic request)
+        private List<string> ValidateCommonFields(dynamic request)
         {
             try
             {
@@ -564,11 +572,6 @@ namespace Fun_Funding.Application.Services.EntityServices
                     errorMessages.Add("Invalid price.");
                 }
 
-                if (request.MarketplaceFiles.Count <= 0)
-                {
-                    errorMessages.Add("Missing file(s).");
-                }
-
                 return errorMessages;
             }
             catch (Exception ex)
@@ -582,18 +585,24 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
-        private List<string> validateMarketplaceProject(MarketplaceProjectAddRequest request)
+        private List<string> ValidateMarketplaceProject(MarketplaceProjectAddRequest request)
         {
-            return validateCommonFields(request);
+            var errorMessages = ValidateCommonFields(request);
+            if (request.MarketplaceFiles.Count <= 0)
+            {
+                errorMessages.Add("Missing file(s).");
+            }
+
+            return errorMessages;
         }
 
-        private List<string> validateMarketplaceProject(MarketplaceProjectUpdateRequest request)
+        private List<string> ValidateMarketplaceProject(MarketplaceProjectUpdateRequest request)
         {
-            return validateCommonFields(request);
+            return ValidateCommonFields(request);
         }
 
         //add files
-        private List<MarketplaceFile> addFiles(List<MarketplaceFileRequest> marketplaceFiles, Guid id)
+        private List<MarketplaceFile> AddFiles(List<MarketplaceFileRequest> marketplaceFiles, Guid id)
         {
             List<MarketplaceFile> files = new List<MarketplaceFile>();
 
@@ -625,7 +634,7 @@ namespace Fun_Funding.Application.Services.EntityServices
         }
 
         //get non-deleted files
-        private List<MarketplaceFile> getNonDeletedFiles(List<MarketplaceFile> marketplaceFiles)
+        private List<MarketplaceFile> GetNonDeletedFiles(List<MarketplaceFile> marketplaceFiles)
         {
             List<MarketplaceFile> files = new List<MarketplaceFile>();
 
@@ -641,7 +650,7 @@ namespace Fun_Funding.Application.Services.EntityServices
         }
 
         //get marketplace project wallet
-        private async Task<Wallet?> getMarketplaceProjectWallet(Guid marketplaceProjectId)
+        private async Task<Wallet?> GetMarketplaceProjectWallet(Guid marketplaceProjectId)
         {
             return await _unitOfWork.WalletRepository
                 .GetQueryable()
@@ -651,7 +660,7 @@ namespace Fun_Funding.Application.Services.EntityServices
         }
 
         //get bank account by wallet id
-        private async Task<BankAccount?> getBankAccountById(Guid id)
+        private async Task<BankAccount?> GetBankAccountById(Guid id)
         {
             return await _unitOfWork.BankAccountRepository
                 .GetQueryable()
