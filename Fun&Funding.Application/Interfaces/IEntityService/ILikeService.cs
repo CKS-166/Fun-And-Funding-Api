@@ -13,9 +13,7 @@ namespace Fun_Funding.Application.IService
     {
         Task<List<Like>> GetAll();
         Task<ResultDTO<LikeResponse>> LikeFundingProject(LikeRequest likeRequest);
-        Task<ResultDTO<LikeResponse>> LikeMarketplaceProject(LikeRequest likeRequest);
-        Task<List<Like>> GetLikesByProject(Guid id);
-        Task<List<Like>> CheckUserLike(Guid id);
-        Task<ResultDTO<List<Like>>> CheckIsLike(Guid projectId);
+        Task<ResultDTO<Like>> LikeMarketplaceProject(LikeRequest likeRequest);
+        Task<ResultDTO<Like>> CheckUserLike(Guid projectId);
     }
 }

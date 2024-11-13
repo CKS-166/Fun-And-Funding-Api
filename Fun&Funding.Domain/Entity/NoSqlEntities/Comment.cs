@@ -15,7 +15,8 @@ namespace Fun_Funding.Domain.Entity.NoSqlEntities
         public Guid Id { get; set; }
         public string? Content { get; set; }
         public DateTime CreateDate { get; set; }
-        public Guid ProjectId { get; set; }
+        public Guid FundingProjectId { get; set; }
+        public Guid MarketplaceProjectId { get; set; }
         public Guid UserID { get; set; }
         public bool IsDelete { get; set; }
     }

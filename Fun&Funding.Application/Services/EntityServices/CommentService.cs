@@ -10,6 +10,7 @@ using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -27,40 +28,7 @@ namespace Fun_Funding.Application.Services.EntityServices
             _userService = userService;
             _mapper = mapper;
         }
-        public async Task<ResultDTO<Comment>> CommentProject(CommentRequest request)
-        {
-            try
-            {
-                var user = await _userService.GetUserInfo();
-                User exitUser = _mapper.Map<User>(user._data);
-                var project = await _unitOfWork.FundingProjectRepository.GetAsync(x => x.Id.Equals(request.ProjectId));
-                if (user is null)
-                {
-                    return ResultDTO<Comment>.Fail("User is null");
-                }
-                if (project is null)
-                {
-                    return ResultDTO<Comment>.Fail("Project can not found");
-                }
 
-                // add new comment
-                Comment newComment = new Comment
-                {
-                    Id = Guid.NewGuid(),
-                    Content = request.Content,
-                    CreateDate = DateTime.Now,
-                    ProjectId = project.Id,
-                    UserID = exitUser.Id,
-                    IsDelete = false,
-                };
-                _unitOfWork.CommentRepository.Create(newComment);
-                return ResultDTO<Comment>.Success(newComment, "Successfully Add Comment");
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message, ex);
-            }
-        }
         public async Task<List<CommentViewResponse>> GetAllComment()
         {
             try
@@ -98,11 +66,11 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
-        public async Task<List<CommentViewResponse>> GetCommentsByProject(Guid id)
+        public async Task<List<CommentViewResponse>> GetCommentsByFundingProject(Guid id)
         {
             try
             {
-                var list = _unitOfWork.CommentRepository.GetAll().Where(c => c.ProjectId == id);
+                var list = _unitOfWork.CommentRepository.GetAll().Where(c => c.FundingProjectId == id);
                 List<CommentViewResponse> comments = new List<CommentViewResponse>();
                 foreach (var comment in list)
                 {
@@ -119,7 +87,8 @@ namespace Fun_Funding.Application.Services.EntityServices
                         Content = comment.Content,
                         CreateDate = comment.CreateDate,
                         UserName = user?.UserName,  // Ensure safe navigation
-                        AvatarUrl = avatarUrl       // Use the extracted URL for avatar
+                        AvatarUrl = avatarUrl,
+                        UserId = user.Id
                     });
                 }
 
@@ -131,6 +100,110 @@ namespace Fun_Funding.Application.Services.EntityServices
             {
                 throw new Exception(ex.Message, ex);
 
+            }
+        }
+        public async Task<List<CommentViewResponse>> GetCommentsByMarketplaceProject(Guid id)
+        {
+            try
+            {
+                var list = _unitOfWork.CommentRepository.GetAll().Where(c => c.MarketplaceProjectId == id);
+                List<CommentViewResponse> comments = new List<CommentViewResponse>();
+                foreach (var comment in list)
+                {
+                    // Fetch the user including the file (avatar)
+                    var user = _unitOfWork.UserRepository.GetQueryable()
+                        .Include(x => x.File) // Include the UserFile
+                        .FirstOrDefault(x => x.Id == comment.UserID);
+
+                    // Extract the avatar URL
+                    var avatarUrl = user?.File?.URL;
+
+                    comments.Add(new CommentViewResponse
+                    {
+                        Content = comment.Content,
+                        CreateDate = comment.CreateDate,
+                        UserName = user?.UserName,
+                        AvatarUrl = avatarUrl,
+                        UserId = user.Id
+                    });
+                }
+
+                return comments;
+
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+
+            }
+        }
+        public async Task<ResultDTO<Comment>> CommentFundingProject(CommentRequest request)
+        {
+            try
+            {
+                var user = await _userService.GetUserInfo();
+                User exitUser = _mapper.Map<User>(user._data);
+                var project = await _unitOfWork.FundingProjectRepository.GetAsync(x => x.Id.Equals(request.ProjectId));
+                if (user is null)
+                {
+                    return ResultDTO<Comment>.Fail("User is null");
+                }
+                if (project is null)
+                {
+                    return ResultDTO<Comment>.Fail("Project can not found");
+                }
+
+                // add new comment
+                Comment newComment = new Comment
+                {
+                    Id = Guid.NewGuid(),
+                    Content = request.Content,
+                    CreateDate = DateTime.Now,
+                    FundingProjectId = project.Id,
+                    UserID = exitUser.Id,
+                    IsDelete = false,
+                };
+                _unitOfWork.CommentRepository.Create(newComment);
+                return ResultDTO<Comment>.Success(newComment, "Successfully Add Comment");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+        public async Task<ResultDTO<Comment>> CommentMarketplaceProject(CommentRequest request)
+        {
+            try
+            {
+                var user = await _userService.GetUserInfo();
+                User exitUser = _mapper.Map<User>(user._data);
+                var project = await _unitOfWork.MarketplaceRepository.GetAsync(x => x.Id.Equals(request.ProjectId));
+                if (user is null)
+                {
+                    return ResultDTO<Comment>.Fail("User is null");
+                }
+                if (project is null)
+                {
+                    return ResultDTO<Comment>.Fail("Project can not found");
+                }
+
+                // add new comment
+                Comment newComment = new Comment
+                {
+                    Id = Guid.NewGuid(),
+                    Content = request.Content,
+                    CreateDate = DateTime.Now,
+                    MarketplaceProjectId = project.Id,
+                    UserID = exitUser.Id,
+                    IsDelete = false,
+                };
+                _unitOfWork.CommentRepository.Create(newComment);
+                return ResultDTO<Comment>.Success(newComment, "Successfully Add Comment");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
             }
         }
         public async Task<ResultDTO<Comment>> DeleteComment(Guid id)
@@ -159,5 +232,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 throw new Exception(ex.Message, ex);
             }
         }
+
+
     }
 }

@@ -12,8 +12,10 @@ namespace Fun_Funding.Application.IService
     public interface ICommentService
     {
         Task<List<CommentViewResponse>> GetAllComment();
-        Task<ResultDTO<Comment>> CommentProject(CommentRequest request);
-        Task<List<CommentViewResponse>> GetCommentsByProject(Guid id);
+        Task<ResultDTO<Comment>> CommentFundingProject(CommentRequest request);
+        Task<ResultDTO<Comment>> CommentMarketplaceProject(CommentRequest request);
+        Task<List<CommentViewResponse>> GetCommentsByFundingProject(Guid id);
+        Task<List<CommentViewResponse>> GetCommentsByMarketplaceProject(Guid id);
         Task<ResultDTO<Comment>> DeleteComment(Guid id);
     }
 }
