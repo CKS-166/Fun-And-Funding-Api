@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Fun_Funding.Domain.Enum;
 
 namespace Fun_Funding.Domain.Entity.NoSqlEntities
 {
@@ -16,6 +17,7 @@ namespace Fun_Funding.Domain.Entity.NoSqlEntities
         public string Message { get; set; }
         public DateTime Date { get; set; }
         public Dictionary<string, bool> UserReadStatus { get; set; } = new Dictionary<string, bool>();
-
+        public Guid? ObjectId { get; set; }
+        public NotificationType? NotificationType { get; set; }
     }
 }
