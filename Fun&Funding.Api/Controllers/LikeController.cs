@@ -34,7 +34,7 @@ namespace Fun_Funding.Api.Controllers
             var result = await _likeService.GetAll();
             return Ok(result);
         }
-        [HttpPost("/funding/like")]
+        [HttpPost("funding")]
         public async Task<IActionResult> likeFundingProject([FromBody] LikeRequest likeRequest)
         {
             var result = await _likeService.LikeFundingProject(likeRequest);
@@ -44,7 +44,7 @@ namespace Fun_Funding.Api.Controllers
             }
             return Ok(result);
         }
-        [HttpPost("/marketplace/like")]
+        [HttpPost("marketplace")]
         public async Task<IActionResult> likeMarketplaceProject([FromBody] LikeRequest likeRequest)
         {
             var result = await _likeService.LikeMarketplaceProject(likeRequest);
