@@ -108,28 +108,21 @@ namespace Fun_Funding.Application.Services.EntityServices
                    pageIndex: request.PageIndex,
                    pageSize: request.PageSize);
 
-                if (list != null && list.Count() > 0)
-                {
-                    var totalItems = _unitOfWork.MarketplaceFileRepository.GetAll(filter).Count();
-                    var totalPages = (int)Math.Ceiling((double)totalItems / (int)request.PageSize);
-                    IEnumerable<MarketplaceFileInfoResponse> marketplaceFiles =
-                        _mapper.Map<IEnumerable<MarketplaceFileInfoResponse>>(list);
+                var totalItems = _unitOfWork.MarketplaceFileRepository.GetAll(filter).Count();
+                var totalPages = (int)Math.Ceiling((double)totalItems / (int)request.PageSize);
+                IEnumerable<MarketplaceFileInfoResponse> marketplaceFiles =
+                    _mapper.Map<IEnumerable<MarketplaceFileInfoResponse>>(list);
 
-                    PaginatedResponse<MarketplaceFileInfoResponse> response = new PaginatedResponse<MarketplaceFileInfoResponse>
-                    {
-                        PageSize = request.PageSize.Value,
-                        PageIndex = request.PageIndex.Value,
-                        TotalItems = totalItems,
-                        TotalPages = totalPages,
-                        Items = marketplaceFiles
-                    };
-
-                    return ResultDTO<PaginatedResponse<MarketplaceFileInfoResponse>>.Success(response);
-                }
-                else
+                PaginatedResponse<MarketplaceFileInfoResponse> response = new PaginatedResponse<MarketplaceFileInfoResponse>
                 {
-                    throw new ExceptionError((int)HttpStatusCode.NotFound, "File(s) not found.");
-                }
+                    PageSize = request.PageSize.Value,
+                    PageIndex = request.PageIndex.Value,
+                    TotalItems = totalItems,
+                    TotalPages = totalPages,
+                    Items = marketplaceFiles
+                };
+
+                return ResultDTO<PaginatedResponse<MarketplaceFileInfoResponse>>.Success(response);
 
             }
             catch (Exception ex)

@@ -179,7 +179,7 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
-        public async Task<ResultDTO<PaginatedResponse<MarketplaceProject>>> GetAllMarketplaceProject(ListRequest request)
+        public async Task<ResultDTO<PaginatedResponse<MarketplaceProjectInfoResponse>>> GetAllMarketplaceProject(ListRequest request)
         {
 
             try
@@ -208,35 +208,35 @@ namespace Fun_Funding.Application.Services.EntityServices
                    filter: filter,
                    orderBy: orderBy,
                    isAscending: request.IsAscending.Value,
+                   includeProperties: "MarketplaceFiles,FundingProject.User,FundingProject.Categories,Wallet",
                    pageIndex: request.PageIndex,
                    pageSize: request.PageSize);
 
-                if (list != null && list.Count() > 0)
-                {
-                    var totalItems = _unitOfWork.MarketplaceRepository.GetAll(filter).Count();
-                    var totalPages = (int)Math.Ceiling((double)totalItems / (int)request.PageSize);
-                    IEnumerable<MarketplaceProject> marketplaceProjects = _mapper.Map<IEnumerable<MarketplaceProject>>(list);
+                var totalItems = _unitOfWork.MarketplaceRepository.GetAll(filter).Count();
+                var totalPages = (int)Math.Ceiling((double)totalItems / (int)request.PageSize);
+                IEnumerable<MarketplaceProjectInfoResponse> marketplaceProjects =
+                    _mapper.Map<IEnumerable<MarketplaceProjectInfoResponse>>(list);
 
-                    PaginatedResponse<MarketplaceProject> response = new PaginatedResponse<MarketplaceProject>
-                    {
-                        PageSize = request.PageSize.Value,
-                        PageIndex = request.PageIndex.Value,
-                        TotalItems = totalItems,
-                        TotalPages = totalPages,
-                        Items = marketplaceProjects
-                    };
-
-                    return ResultDTO<PaginatedResponse<MarketplaceProject>>.Success(response);
-                }
-                else
+                PaginatedResponse<MarketplaceProjectInfoResponse> response = new PaginatedResponse<MarketplaceProjectInfoResponse>
                 {
-                    return ResultDTO<PaginatedResponse<MarketplaceProject>>.Fail("Marketplace Not Found");
-                }
+                    PageSize = request.PageSize.Value,
+                    PageIndex = request.PageIndex.Value,
+                    TotalItems = totalItems,
+                    TotalPages = totalPages,
+                    Items = marketplaceProjects
+                };
+
+                return ResultDTO<PaginatedResponse<MarketplaceProjectInfoResponse>>.Success(response);
 
             }
             catch (Exception ex)
             {
-                return ResultDTO<PaginatedResponse<MarketplaceProject>>.Fail("Something wrong");
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
             }
         }
 
