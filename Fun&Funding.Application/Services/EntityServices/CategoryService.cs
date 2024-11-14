@@ -134,27 +134,20 @@ namespace Fun_Funding.Application.Services.EntityServices
                    pageIndex: request.PageIndex,
                    pageSize: request.PageSize);
 
-                if (list != null && list.Count() > 0)
-                {
-                    var totalItems = _unitOfWork.CategoryRepository.GetAll(filter).Count();
-                    var totalPages = (int)Math.Ceiling((double)totalItems / (int)request.PageSize);
-                    IEnumerable<CategoryResponse> categories = _mapper.Map<IEnumerable<CategoryResponse>>(list);
+                var totalItems = _unitOfWork.CategoryRepository.GetAll(filter).Count();
+                var totalPages = (int)Math.Ceiling((double)totalItems / (int)request.PageSize);
+                IEnumerable<CategoryResponse> categories = _mapper.Map<IEnumerable<CategoryResponse>>(list);
 
-                    PaginatedResponse<CategoryResponse> response = new PaginatedResponse<CategoryResponse>
-                    {
-                        PageSize = request.PageSize.Value,
-                        PageIndex = request.PageIndex.Value,
-                        TotalItems = totalItems,
-                        TotalPages = totalPages,
-                        Items = categories
-                    };
-
-                    return ResultDTO<PaginatedResponse<CategoryResponse>>.Success(response);
-                }
-                else
+                PaginatedResponse<CategoryResponse> response = new PaginatedResponse<CategoryResponse>
                 {
-                    throw new ExceptionError((int)HttpStatusCode.NotFound, "Category Not Found.");
-                }
+                    PageSize = request.PageSize.Value,
+                    PageIndex = request.PageIndex.Value,
+                    TotalItems = totalItems,
+                    TotalPages = totalPages,
+                    Items = categories
+                };
+
+                return ResultDTO<PaginatedResponse<CategoryResponse>>.Success(response);
             }
             catch (Exception ex)
             {
