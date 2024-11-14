@@ -409,7 +409,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                         {
                             foreach (var file in filesToDelete)
                             {
-                                if (file.IsDeleted) _unitOfWork.MarketplaceFileRepository.Remove(file);
+                                if (file.IsDeleted) _unitOfWork.MarketplaceFileRepository.DeleteMarketplaceFile(file);
                             }
                         }
 
