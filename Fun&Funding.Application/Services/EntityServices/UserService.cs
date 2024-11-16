@@ -198,6 +198,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                     .AsNoTracking()
                     .Include(u => u.File)
                     .Include(u => u.Wallet)
+                        .ThenInclude(u => u.Transactions)
                     .FirstOrDefaultAsync(u => u.Id == id);
                 if (user is null)
                 {
@@ -264,7 +265,7 @@ namespace Fun_Funding.Application.Services.EntityServices
         {
             try
             {
-                var parseUser = await _unitOfWork.UserRepository.GetQueryable().AsNoTracking()
+                var parseUser = await _unitOfWork.UserRepository.GetQueryable()
                                 .Include(u => u.Wallet)
                                 .FirstOrDefaultAsync(u => u.Id == id);
                 if (parseUser is null)
