@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Fun_Funding.Application.ExceptionHandler;
+using Fun_Funding.Application.Interfaces.IEntityService;
 using Fun_Funding.Application.Interfaces.IExternalServices;
 using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel;
@@ -24,15 +25,16 @@ namespace Fun_Funding.Application.Services.EntityServices
         private IAzureService _azureService;
         private IProjectMilestoneService _projectMilestoneService;
         private readonly IMilestoneService _milestoneService;
-        public ProjectMilestoneRequirementService(IUnitOfWork unitOfWork, IMapper mapper, IAzureService azureService, IProjectMilestoneService projectMilestoneService, IMilestoneService milestoneService)
+        public ProjectMilestoneRequirementService(IUnitOfWork unitOfWork, IMapper mapper, IAzureService azureService, IProjectMilestoneService projectMilestoneService, IMilestoneService milestoneService, ISystemWalletService systemWalletService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _azureService = azureService;
             _projectMilestoneService = projectMilestoneService;
             _milestoneService = milestoneService;
+
         }
-        public async Task<ResultDTO<ProjectMilestoneResponse>> CreateMilestoneRequirements(List<ProjectMilestoneRequirementRequest> request )
+        public async Task<ResultDTO<ProjectMilestoneResponse>> CreateMilestoneRequirements(List<ProjectMilestoneRequirementRequest> request, string? issueLog )
         {
             try
             {
@@ -40,7 +42,9 @@ namespace Fun_Funding.Application.Services.EntityServices
                     .Include( x => x.Milestone )
                     .Include(x =>  x.FundingProject)
                     .FirstOrDefault(pm => pm.FundingProjectId == request[0].FundingProjectId && pm.MilestoneId == request[0].MilestoneId);
-                
+                if (issueLog != null) { 
+                    projectMilestone.IssueLog = issueLog;
+                }
                 if (projectMilestone == null)
                 {
                     throw new ExceptionError((int)HttpStatusCode.NotFound, "Milestone for this project not found");
@@ -109,7 +113,7 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
-        public async Task<ResultDTO<string>> UpdateMilestoneRequirements(List<ProjectMilestoneRequirementUpdateRequest> request)
+        public async Task<ResultDTO<string>> UpdateMilestoneRequirements(List<ProjectMilestoneRequirementUpdateRequest> request, string? issueLog)
         {
             try
             {
@@ -120,7 +124,10 @@ namespace Fun_Funding.Application.Services.EntityServices
                     .Include(x => x.Milestone)
                     .Include(x => x.FundingProject)
                     .FirstOrDefault(pm => pm.Id == sampleReq.ProjectMilestoneId);
-
+                if (issueLog != null)
+                {
+                    projectMilestone.IssueLog = issueLog;
+                }
                 if (projectMilestone == null)
                 {
                     throw new ExceptionError((int)HttpStatusCode.NotFound, "Milestone for this project not found");
@@ -193,5 +200,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 throw new Exception($"Could not update {ex.Message}");
             }
         }
+
+
     }
 }

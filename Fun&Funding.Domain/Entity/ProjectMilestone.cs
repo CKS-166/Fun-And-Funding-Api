@@ -14,6 +14,7 @@ namespace Fun_Funding.Domain.Entity
         public Guid MilestoneId { get; set; }
         public Milestone Milestone { get; set; }
         public Guid FundingProjectId { get; set; }
+        public string? IssueLog { get; set; }
         public FundingProject FundingProject { get; set; }
         public virtual ICollection<Transaction> Transactions { get; set; }
         public virtual ICollection<ProjectMilestoneBacker> ProjectMilestoneBackers { get; set; }

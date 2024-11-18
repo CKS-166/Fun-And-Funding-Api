@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fun_Funding.Infrastructure.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20241106162819_Add-Wallet-To-MarketplaceProject")]
-    partial class AddWalletToMarketplaceProject
+    [Migration("20241118084750_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -585,6 +585,9 @@ namespace Fun_Funding.Infrastructure.Migrations
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
+
+                    b.Property<string>("IssueLog")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("MilestoneId")
                         .HasColumnType("uniqueidentifier");
@@ -1279,7 +1282,7 @@ namespace Fun_Funding.Infrastructure.Migrations
             modelBuilder.Entity("Fun_Funding.Domain.Entity.MarketplaceProject", b =>
                 {
                     b.HasOne("Fun_Funding.Domain.Entity.FundingProject", "FundingProject")
-                        .WithOne("MarketingProject")
+                        .WithOne("MarketplaceProject")
                         .HasForeignKey("Fun_Funding.Domain.Entity.MarketplaceProject", "FundingProjectId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1582,7 +1585,7 @@ namespace Fun_Funding.Infrastructure.Migrations
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.FundingProject", b =>
                 {
-                    b.Navigation("MarketingProject");
+                    b.Navigation("MarketplaceProject");
 
                     b.Navigation("Packages");
 
