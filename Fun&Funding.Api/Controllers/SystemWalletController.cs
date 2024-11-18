@@ -21,5 +21,19 @@ namespace Fun_Funding.Api.Controllers
             var response = await _systemWalletService.GetPlatformRevenue();
             return Ok(response);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateWallet()
+        {
+            var res = await _systemWalletService.CreateWallet();
+            return Ok(res);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetWallet()
+        {
+            var res = _systemWalletService.GetSystemWallet();
+            return Ok(res);
+        }
     }
 }
