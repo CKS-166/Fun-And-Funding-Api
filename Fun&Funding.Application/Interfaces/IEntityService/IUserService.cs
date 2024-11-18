@@ -23,5 +23,6 @@ namespace Fun_Funding.Application.IService
         Task<ResultDTO<List<TopBackerResponse>>> GetTop4Backer();
         Task<ResultDTO<decimal>> CountPlatformUsers();
         Task<ResultDTO<string>> GetUserRole(Guid id);
+        Task<ResultDTO<UserInfoResponse>> CreateUser(UserCreateRequest request);
     }
 }

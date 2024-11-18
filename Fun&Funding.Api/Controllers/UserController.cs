@@ -39,6 +39,13 @@ namespace Fun_Funding.Api.Controllers
             var response = await _userService.GetUserInfoById(id);
             return Ok(response);
         }
+        [HttpPost]
+        [Authorize(Roles = Role.Admin)]
+        public async Task<ActionResult> CreateUser([FromForm] UserCreateRequest userCreateRequest)
+        {
+            var response = await _userService.CreateUser(userCreateRequest);
+            return Ok(response);
+        }
         [HttpPatch("info")]
         [Authorize]
         public async Task<ActionResult> UpdateUser(UserUpdateRequest userUpdateRequest)
