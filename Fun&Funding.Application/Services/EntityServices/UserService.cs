@@ -20,6 +20,8 @@ using System.Linq.Expressions;
 using Fun_Funding.Application.ViewModel.FundingProjectDTO;
 using Fun_Funding.Domain.Constrain;
 using Fun_Funding.Application.Interfaces.IExternalServices;
+using Fun_Funding.Application.Services.ExternalServices;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Fun_Funding.Application.Services.EntityServices
 {
@@ -589,16 +591,140 @@ namespace Fun_Funding.Application.Services.EntityServices
             var roles = await _userManager.GetRolesAsync(parseUser);
             if (roles.Contains(Role.Admin))
             {
-                // User is an Admin
                 return ResultDTO<string>.Success(Role.Admin, "logged as Admin");
             }
             else if (roles.Contains(Role.Backer))
             {
-                // User is a normal User
                 return ResultDTO<string>.Success(Role.Backer, "logged as Backer");
             }
 
             return ResultDTO<string>.Success(Role.GameOwner, "logged as Owner");
+        }
+
+        public async Task<ResultDTO<UserInfoResponse>> CreateUser(UserCreateRequest request)
+        {
+            try
+            {
+                if (request.Password == null)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.InternalServerError, "Password field is required!");
+                }
+                if (request.Email == null)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.InternalServerError, "Email field is required!");
+                }
+                if (request.UserName == null)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.InternalServerError, "Username field is required!");
+                }
+                if (request.FullName == null)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.InternalServerError, "Full name field is required!");
+                }
+
+                var existingUser = await _unitOfWork.UserRepository.GetAsync(x => x.Email == request.Email);
+                if (existingUser != null)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "User already exists with this email.");
+                }
+
+                var newUser = new User
+                {
+                    Id = Guid.NewGuid(),
+                    FullName = request.FullName,
+                    UserName = request.UserName,
+                    PhoneNumber = request.PhoneNumber ?? null,
+                    Address = request.Address ?? null,
+                    DayOfBirth = request.DayOfBirth ?? null,
+                    Email = request.Email,
+                    CreatedDate = DateTime.Now,
+                    Gender = request.Gender ?? null,
+                    UserStatus = request.UserStatus,
+                    NormalizedEmail = request.Email.ToUpper(),
+                    TwoFactorEnabled = false,
+                    EmailConfirmed = true,
+                };
+
+                if(request.File != null)
+                {
+                    if (request.File.URL != null && request.File.URL.Length > 0)
+                    {
+                        UserFile file = new UserFile();
+                        var res = _azureService.UploadUrlSingleFiles(request.File.URL);
+                        if (res == null)
+                        {
+                            throw new ExceptionError((int)HttpStatusCode.BadRequest, "File upload failed. Please try again.");
+                        }
+                        else
+                        {
+                            file.Name = request.File.Name;
+                            file.URL = res.Result;
+                            file.Filetype = 0;
+                            file.UserId = newUser.Id;
+                            file.CreatedDate = DateTime.Now;
+                        }
+                        newUser.File = file;
+                    }
+                }
+
+                var result = await _userManager.CreateAsync(newUser, request.Password);
+                if (!result.Succeeded)
+                {
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    throw new ExceptionError((int)HttpStatusCode.InternalServerError, errors);
+                }
+
+                if (request.Role == 1)
+                {
+                    await _userManager.AddToRoleAsync(newUser, Role.GameOwner);
+                }
+                else
+                {
+                    await _userManager.AddToRoleAsync(newUser, Role.Backer);
+                }
+
+                var bankAccount = new BankAccount
+                {
+                    Id = Guid.NewGuid(),
+                    BankCode = string.Empty,
+                    BankNumber = string.Empty,
+                    CreatedDate = DateTime.Now,
+                };
+
+                var wallet = new Wallet
+                {
+                    Id = Guid.NewGuid(),
+                    Balance = 0,
+                    Backer = newUser,
+                    BankAccountId = bankAccount.Id,
+                    CreatedDate = bankAccount.CreatedDate,
+                };
+
+                await _unitOfWork.BankAccountRepository.AddAsync(bankAccount);
+                await _unitOfWork.WalletRepository.AddAsync(wallet);
+                await _unitOfWork.CommitAsync();
+
+                var user = await _unitOfWork.UserRepository.GetQueryable()
+                   .AsNoTracking()
+                   .Include(u => u.File)
+                   .Include(u => u.Wallet)
+                       .ThenInclude(u => u.Transactions)
+                   .FirstOrDefaultAsync(u => u.Id == newUser.Id);
+                if (user is null)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "User not found.");
+                }
+                var userResponse = _mapper.Map<UserInfoResponse>(user);
+                return ResultDTO<UserInfoResponse>.Success(userResponse, "Add User Successfully");
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
         }
     }
 }
