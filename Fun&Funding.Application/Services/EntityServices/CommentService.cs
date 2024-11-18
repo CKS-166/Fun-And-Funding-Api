@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
+using Fun_Funding.Application.Interfaces.IEntityService;
 using Fun_Funding.Application.IRepository;
 using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.CommentDTO;
 using Fun_Funding.Domain.Entity;
 using Fun_Funding.Domain.Entity.NoSqlEntities;
+using Fun_Funding.Domain.Enum;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;
 using System;
@@ -21,12 +23,14 @@ namespace Fun_Funding.Application.Services.EntityServices
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
+        private readonly INotificationService _notificationService;
 
-        public CommentService(IUnitOfWork unitOfWork, IUserService userService, IMapper mapper)
+        public CommentService(IUnitOfWork unitOfWork, IUserService userService, IMapper mapper, INotificationService notificationService)
         {
             _unitOfWork = unitOfWork;
             _userService = userService;
             _mapper = mapper;
+            _notificationService = notificationService;
         }
 
         public async Task<List<CommentViewResponse>> GetAllComment()
@@ -165,6 +169,25 @@ namespace Fun_Funding.Application.Services.EntityServices
                     IsDelete = false,
                 };
                 _unitOfWork.CommentRepository.Create(newComment);
+
+                    // NOTIFICATION
+                    // 1. get recipientsIds
+                    List<Guid> recipientsId = new List<Guid>();
+                    recipientsId.Add(project.UserId); // project owner
+                                                      // 2. initiate new Notification object
+                    var notification = new Notification
+                    {
+                        Id = new Guid(),
+                        Date = DateTime.Now,
+                        Message = $"commented on project <b>{project.Name}</b>",
+                        NotificationType = NotificationType.FundingProjectInteraction,
+                        Actor = new { user._data.Id, user._data.UserName, user._data.Avatar },
+                        ObjectId = project.Id,
+                    };
+                    // 3. send noti
+                    await _notificationService.SendNotification(notification, recipientsId);
+
+
                 return ResultDTO<Comment>.Success(newComment, "Successfully Add Comment");
             }
             catch (Exception ex)
@@ -178,7 +201,10 @@ namespace Fun_Funding.Application.Services.EntityServices
             {
                 var user = await _userService.GetUserInfo();
                 User exitUser = _mapper.Map<User>(user._data);
-                var project = await _unitOfWork.MarketplaceRepository.GetAsync(x => x.Id.Equals(request.ProjectId));
+                var project = await _unitOfWork.MarketplaceRepository
+                    .GetQueryable()
+                    .Include(m => m.FundingProject)
+                    .FirstOrDefaultAsync(x => x.Id.Equals(request.ProjectId));
                 if (user is null)
                 {
                     return ResultDTO<Comment>.Fail("User is null");
@@ -199,6 +225,24 @@ namespace Fun_Funding.Application.Services.EntityServices
                     IsDelete = false,
                 };
                 _unitOfWork.CommentRepository.Create(newComment);
+
+                    // NOTIFICATION
+                    // 1. get recipientsIds
+                    List<Guid> recipientsId = new List<Guid>();
+                    recipientsId.Add(project.FundingProject.UserId); // project owner
+                    // 2. initiate new Notification object
+                    var notification = new Notification
+                    {
+                        Id = new Guid(),
+                        Date = DateTime.Now,
+                        Message = $"commented on project <b>{project.Name}</b>",
+                        NotificationType = NotificationType.FundingProjectInteraction,
+                        Actor = new { user._data.Id, user._data.UserName, user._data.Avatar },
+                        ObjectId = project.Id,
+                    };
+                    // 3. send noti
+                    await _notificationService.SendNotification(notification, recipientsId);
+
                 return ResultDTO<Comment>.Success(newComment, "Successfully Add Comment");
             }
             catch (Exception ex)

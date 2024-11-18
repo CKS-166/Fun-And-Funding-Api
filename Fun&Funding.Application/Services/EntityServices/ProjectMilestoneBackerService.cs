@@ -1,9 +1,12 @@
 ﻿using AutoMapper;
+using Fun_Funding.Application.Interfaces.IEntityService;
 using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.ProjectMilestoneBackerDTO;
 using Fun_Funding.Application.ViewModel.ProjectMilestoneDTO;
 using Fun_Funding.Domain.Entity;
+using Fun_Funding.Domain.Entity.NoSqlEntities;
+using Fun_Funding.Domain.Enum;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -15,13 +18,15 @@ namespace Fun_Funding.Application.Services.EntityServices
 {
     public class ProjectMilestoneBackerService : IProjectMilestoneBackerService
     {
-        private IUnitOfWork _unitOfWork;
-        private IMapper _mapper;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
+        private readonly INotificationService _notificationService;
 
-        public ProjectMilestoneBackerService(IUnitOfWork unitOfWork, IMapper mapper)
+        public ProjectMilestoneBackerService(IUnitOfWork unitOfWork, IMapper mapper, INotificationService notificationService)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
+            _notificationService = notificationService;
         }
         public async Task<ResultDTO<ProjectMilestoneBackerResponse>> CreateNewProjectMilestoneBackerReview(ProjectMilestoneBackerRequest request)
         {
@@ -66,6 +71,23 @@ namespace Fun_Funding.Application.Services.EntityServices
                     _unitOfWork.ProjectMilestoneBackerRepository.Add(newReview);
 
                     await _unitOfWork.CommitAsync();
+
+                    // NOTIFICATION
+                    // 1. get recipientsIds
+                    List<Guid> recipientsId = new List<Guid>();
+                    recipientsId.Add(fundingProject.UserId); // project owner
+                    // 2. initiate new Notification object
+                    var notification = new Notification
+                    {
+                        Id = new Guid(),
+                        Date = DateTime.Now,
+                        Message = $"post a milestone review of project <b>{fundingProject.Name}</b>",
+                        NotificationType = NotificationType.ProjectMilestoneStatus,
+                        Actor = new { backer.Id, backer.UserName, backer.File?.URL },
+                        ObjectId = fundingProject.Id,
+                    };
+                    // 3. send noti
+                    await _notificationService.SendNotification(notification, recipientsId);
 
                     var response = _mapper.Map<ProjectMilestoneBackerResponse>(newReview);
                     return ResultDTO<ProjectMilestoneBackerResponse>.Success(response, "Add review successfully!");

@@ -28,17 +28,17 @@ namespace Fun_Funding.Api.Controllers
             return Ok(notifications);
         }
 
-        [HttpPost("send")]
-        public async Task<IActionResult> SendNotification([FromBody] NotificationRequest request)
-        {
-            if (request == null || request.Notification == null || request.UserIds == null)
-            {
-                return BadRequest("Invalid request.");
-            }
+        //[HttpPost("send")]
+        //public async Task<IActionResult> SendNotification([FromBody] NotificationRequest request)
+        //{
+        //    if (request == null || request.Notification == null || request.UserIds == null)
+        //    {
+        //        return BadRequest("Invalid request.");
+        //    }
 
-            await _notificationService.SendNotification(request.Notification, request.UserIds);
-            return Ok();
-        }
+        //    await _notificationService.SendNotification(request.Notification, request.UserIds);
+        //    return Ok();
+        //}
 
     }
 }

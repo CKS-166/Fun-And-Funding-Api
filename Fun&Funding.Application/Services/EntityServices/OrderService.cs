@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Azure.Core;
 using Fun_Funding.Application.ExceptionHandler;
+using Fun_Funding.Application.Interfaces.IEntityService;
 using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.FundingProjectDTO;
@@ -8,6 +9,7 @@ using Fun_Funding.Application.ViewModel.OrderDTO;
 using Fun_Funding.Application.ViewModel.PackageBackerDTO;
 using Fun_Funding.Application.ViewModel.UserDTO;
 using Fun_Funding.Domain.Entity;
+using Fun_Funding.Domain.Entity.NoSqlEntities;
 using Fun_Funding.Domain.Enum;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -32,11 +34,12 @@ namespace Fun_Funding.Application.Services.EntityServices
         private readonly IMapper _mapper;
         private readonly IDigitalKeyService _digitalKeyService;
         private readonly ICommissionFeeService _commissionFeeService;
-
+        private readonly INotificationService _notificationService;
         public OrderService(IUnitOfWork unitOfWork, UserManager<User> userManager,
             RoleManager<IdentityRole<Guid>> roleManager,
             IHttpContextAccessor httpContextAccessor,
-            IMapper mapper, IDigitalKeyService digitalKeyService, ICommissionFeeService commissionFeeService)
+            IMapper mapper, IDigitalKeyService digitalKeyService, ICommissionFeeService commissionFeeService,
+            INotificationService notificationService)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
@@ -45,6 +48,7 @@ namespace Fun_Funding.Application.Services.EntityServices
             _mapper = mapper;
             _digitalKeyService = digitalKeyService;
             _commissionFeeService = commissionFeeService;
+            _notificationService = notificationService;
         }
 
         public async Task<ResultDTO<Guid>> CreateOrder(CreateOrderRequest createOrderRequest)
@@ -297,6 +301,36 @@ namespace Fun_Funding.Application.Services.EntityServices
                 // Add Backer's Transaction
                 _unitOfWork.TransactionRepository.Add(purchaseTransaction);
                 await _unitOfWork.CommitAsync();
+
+                // NOTIFICATION
+                List<Guid> recipientsId = new List<Guid>();
+                foreach (var cartItem in createOrderRequest.CartItems)
+                {
+                    // 1. get recipientsIds
+                    var marketplaceProject = await _unitOfWork.MarketplaceRepository
+                        .GetQueryable()
+                        .Include(m => m.FundingProject)
+                        .FirstOrDefaultAsync(m => m.Id == cartItem.MarketplaceProjectId);
+                    if(marketplaceProject != null)
+                    {
+                        recipientsId.Add(marketplaceProject.FundingProject.UserId);
+                        // 2. initiate new Notification object
+                        var notification = new Notification
+                        {
+                            Id = new Guid(),
+                            Date = DateTime.Now,
+                            Message = $"purchased game <b>{marketplaceProject.Name}</b>",
+                            NotificationType = NotificationType.MarketplacePurchase,
+                            Actor = new { user.Id, user.UserName, user.File.URL },
+                            ObjectId = marketplaceProject.Id,
+                        };
+                        // 3. send noti
+                        await _notificationService.SendNotification(notification, recipientsId);
+                    }
+                    
+                }
+
+
 
                 return ResultDTO<Guid>.Success(order.Id, "Order added successfully!");
             }

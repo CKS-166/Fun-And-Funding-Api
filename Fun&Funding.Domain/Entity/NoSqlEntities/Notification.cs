@@ -17,6 +17,7 @@ namespace Fun_Funding.Domain.Entity.NoSqlEntities
         public string Message { get; set; }
         public DateTime Date { get; set; }
         public Dictionary<string, bool> UserReadStatus { get; set; } = new Dictionary<string, bool>();
+        public Object Actor { get; set; }
         public Guid? ObjectId { get; set; }
         public NotificationType? NotificationType { get; set; }
     }

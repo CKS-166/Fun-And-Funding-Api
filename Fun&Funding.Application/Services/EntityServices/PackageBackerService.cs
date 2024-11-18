@@ -1,9 +1,12 @@
 ﻿using AutoMapper;
 using Fun_Funding.Application.ExceptionHandler;
+using Fun_Funding.Application.Interfaces.IEntityService;
 using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel;
+using Fun_Funding.Application.ViewModel.NotificationDTO;
 using Fun_Funding.Application.ViewModel.PackageBackerDTO;
 using Fun_Funding.Domain.Entity;
+using Fun_Funding.Domain.Entity.NoSqlEntities;
 using Fun_Funding.Domain.Enum;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -21,12 +24,15 @@ namespace Fun_Funding.Application.Services.EntityServices
         private readonly ITransactionService _transactionService;
         private IMapper _mapper;
         private readonly IUserService _userService;
-        public PackageBackerService(IUnitOfWork unitOfWork, ITransactionService transactionService, IUserService userService, IMapper mapper)
+        private readonly INotificationService _notificationService;
+        public PackageBackerService(IUnitOfWork unitOfWork, ITransactionService transactionService, IUserService userService, IMapper mapper,
+            INotificationService notificationService)
         {
             _unitOfWork = unitOfWork;
             _transactionService = transactionService;
             _userService = userService;
             _mapper = mapper;
+            _notificationService = notificationService;
         }
         public async Task<ResultDTO<PackageBackerResponse>> DonateFundingProject(PackageBackerRequest packageBackerRequest)
         {
@@ -115,6 +121,24 @@ namespace Fun_Funding.Application.Services.EntityServices
                 //{
 
                 //};
+
+                // NOTIFICATION
+                // 1. get recipientsIds
+                List<Guid> recipientsId = new List<Guid>();
+                recipientsId.Add(project.UserId);
+                // 2. initiate new Notification object
+                var notification = new Notification
+                {
+                    Id = new Guid(),
+                    Date = DateTime.Now,
+                    Message = $"donated to project <b>{project.Name}</b>",
+                    NotificationType = NotificationType.FundingProjectInteraction,
+                    Actor = new { user.Id, user.UserName, authorUser._data.Avatar},
+                    ObjectId = project.Id,
+                };
+
+                await _notificationService.SendNotification(notification, recipientsId);
+
 
                 return ResultDTO<PackageBackerResponse>.Success(null, "Donation successfully added!");
             }
