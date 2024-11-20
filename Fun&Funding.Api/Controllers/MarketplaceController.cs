@@ -2,6 +2,7 @@
 using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.MarketplaceProjectDTO;
 using Fun_Funding.Domain.Constrain;
+using Fun_Funding.Domain.Enum;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -60,12 +61,12 @@ namespace Fun_Funding.Api.Controllers
             var response = await _marketplace.UpdateMarketplaceProject(id, request);
             return Ok(response);
         }
-        [HttpPatch("{id}/approved")]
+        [HttpPatch("{id}/status")]
         [Authorize(Roles = Role.Admin)]
         public async Task<IActionResult> UpdateMarketplaceProjectStatus([FromRoute] Guid id,
-            [FromForm] MarketplaceProjectUpdateRequest request)
+            [FromQuery] ProjectStatus status)
         {
-            var response = await _marketplace.UpdateMarketplaceProjectStatus(id, Domain.Enum.ProjectStatus.Approved);
+            var response = await _marketplace.UpdateMarketplaceProjectStatus(id, status);
             return Ok(response);
         }
         [HttpGet("top3")]
