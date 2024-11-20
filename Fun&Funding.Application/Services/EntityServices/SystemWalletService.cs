@@ -1,6 +1,7 @@
 ﻿using Fun_Funding.Application.ExceptionHandler;
 using Fun_Funding.Application.Interfaces.IEntityService;
 using Fun_Funding.Application.ViewModel;
+using Fun_Funding.Domain.Entity;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,27 @@ namespace Fun_Funding.Application.Services.EntityServices
         {
             _unitOfWork = unitOfWork;
         }
+
+        public async Task<ResultDTO<SystemWallet>> CreateWallet()
+        {
+            try
+            {
+                var wallet = new SystemWallet
+                {
+                    Id = new Guid(),
+                    CommissionRate = (decimal)0.5,
+                    CreatedDate = DateTime.Now,
+                    TotalAmount = 0
+                };
+                _unitOfWork.SystemWalletRepository.Add(wallet);
+                _unitOfWork.CommitAsync();
+                return ResultDTO<SystemWallet>.Success(wallet);
+            }catch(Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
+
         public async Task<ResultDTO<decimal>> GetPlatformRevenue()
         {
             try
@@ -29,6 +51,23 @@ namespace Fun_Funding.Application.Services.EntityServices
                 }
                 var balance = (await _unitOfWork.SystemWalletRepository.GetQueryable().SingleOrDefaultAsync())?.TotalAmount ?? 0;
                 return ResultDTO<decimal>.Success(balance, "Platform balance");
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
+
+        public async Task<ResultDTO<SystemWallet>> GetSystemWallet()
+        {
+            try
+            {
+                var systemWallet = await _unitOfWork.SystemWalletRepository.GetQueryable().SingleOrDefaultAsync();
+                return ResultDTO<SystemWallet>.Success(systemWallet);
             }
             catch (Exception ex)
             {

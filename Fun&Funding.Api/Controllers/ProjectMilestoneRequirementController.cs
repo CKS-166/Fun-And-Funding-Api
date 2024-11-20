@@ -15,17 +15,17 @@ namespace Fun_Funding.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateMilestoneRequirements([FromForm] List<ProjectMilestoneRequirementRequest> request)
+        public async Task<IActionResult> CreateMilestoneRequirements([FromForm] List<ProjectMilestoneRequirementRequest> request, string? issueLog)
         {
-            var result = await _projectMilestoneRequirementService.CreateMilestoneRequirements(request);
+            var result = await _projectMilestoneRequirementService.CreateMilestoneRequirements(request, issueLog);
 
             return Ok(result);
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdateMilestoneRequirements([FromForm] List<ProjectMilestoneRequirementUpdateRequest> request)
+        public async Task<IActionResult> UpdateMilestoneRequirements([FromForm] List<ProjectMilestoneRequirementUpdateRequest> request, [FromForm] string? issueLog)
         {
-            var result = await _projectMilestoneRequirementService.UpdateMilestoneRequirements(request);
+            var result = await _projectMilestoneRequirementService.UpdateMilestoneRequirements(request,issueLog);
             return Ok(result);
         }
     }

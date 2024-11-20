@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Fun_Funding.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class AddWalletToMarketplaceProject : Migration
+    public partial class init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -459,6 +459,7 @@ namespace Fun_Funding.Infrastructure.Migrations
                     Status = table.Column<int>(type: "int", nullable: false),
                     MilestoneId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     FundingProjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IssueLog = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)

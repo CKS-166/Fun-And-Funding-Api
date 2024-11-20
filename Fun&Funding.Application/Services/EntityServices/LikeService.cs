@@ -1,10 +1,13 @@
 ﻿using AutoMapper;
+using Fun_Funding.Application.Interfaces.IEntityService;
 using Fun_Funding.Application.IRepository;
 using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.LikeDTO;
 using Fun_Funding.Domain.Entity;
 using Fun_Funding.Domain.Entity.NoSqlEntities;
+using Fun_Funding.Domain.Enum;
+using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -20,12 +23,14 @@ namespace Fun_Funding.Application.Services.EntityServices
         private readonly IUserService _userService;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly INotificationService _notificationService;
 
-        public LikeService(IUserService userService, IMapper mapper, IUnitOfWork unitOfWork)
+        public LikeService(IUserService userService, IMapper mapper, IUnitOfWork unitOfWork, INotificationService notificationService)
         {
             _userService = userService;
             _mapper = mapper;
             _unitOfWork = unitOfWork;
+            _notificationService = notificationService;
         }
 
         public async Task<ResultDTO<Like>> CheckUserLike(Guid projectId)
@@ -111,6 +116,24 @@ namespace Fun_Funding.Application.Services.EntityServices
                         IsDelete = false,
                     };
                     _unitOfWork.LikeRepository.Create(newLikeProject);
+
+                    // NOTIFICATION
+                    // 1. get recipientsIds
+                    List<Guid> recipientsId = new List<Guid>();
+                    recipientsId.Add(project.UserId); // project owner
+                                                      // 2. initiate new Notification object
+                    var notification = new Notification
+                    {
+                        Id = new Guid(),
+                        Date = DateTime.Now,
+                        Message = $"liked project <b>{project.Name}</b>",
+                        NotificationType = NotificationType.FundingProjectInteraction,
+                        Actor = new { user._data.Id, user._data.UserName, user._data.Avatar },
+                        ObjectId = project.Id,
+                    };
+                    // 3. send noti
+                    await _notificationService.SendNotification(notification, recipientsId);
+
                     return ResultDTO<LikeResponse>.Success(new LikeResponse { ProjectId = newLikeProject.ProjectId, UserID = newLikeProject.UserId }, "Succesfull like the project");
                 }
                 else
@@ -119,6 +142,23 @@ namespace Fun_Funding.Application.Services.EntityServices
                     {
                         var updateDefinition = Builders<Like>.Update.Set(x => x.IsLike, true).Set(x => x.IsDelete, false);
                         _unitOfWork.LikeRepository.Update(x => x.Id == getLikedProjects.Id, updateDefinition);
+
+                                // NOTIFICATION
+                                // 1. get recipientsIds
+                                List<Guid> recipientsId = new List<Guid>();
+                                recipientsId.Add(project.UserId); // project owner
+                                // 2. initiate new Notification object
+                                var notification = new Notification
+                                {
+                                    Id = new Guid(),
+                                    Date = DateTime.Now,
+                                    Message = $"liked project <b>{project.Name}</b>",
+                                    NotificationType = NotificationType.FundingProjectInteraction,
+                                    Actor = new { user._data.Id, user._data.UserName, user._data.Avatar },
+                                    ObjectId = project.Id,
+                                };
+                                // 3. send noti
+                                await _notificationService.SendNotification(notification, recipientsId);
 
                         return ResultDTO<LikeResponse>.Success(new LikeResponse { ProjectId = likeRequest.ProjectId, UserID = exitUser.Id }, "Succesfull like the project");
                     }
@@ -143,7 +183,11 @@ namespace Fun_Funding.Application.Services.EntityServices
             {
                 var user = await _userService.GetUserInfo();
                 User exitUser = _mapper.Map<User>(user._data);
-                var project = await _unitOfWork.MarketplaceRepository.GetAsync(x => x.Id.Equals(likeRequest.ProjectId));
+                var project = await _unitOfWork.MarketplaceRepository
+                    .GetQueryable()
+                    .Include(m => m.FundingProject)
+                        .ThenInclude(fp => fp.User)
+                    .FirstOrDefaultAsync(m => m.Id.Equals(likeRequest.ProjectId));
                 if (user is null)
                 {
                     return ResultDTO<Like>.Fail("User is null");
@@ -169,6 +213,24 @@ namespace Fun_Funding.Application.Services.EntityServices
                         IsDelete = false,
                     };
                     _unitOfWork.LikeRepository.Create(newLikeProject);
+
+                    // NOTIFICATION
+                    // 1. get recipientsIds
+                    List<Guid> recipientsId = new List<Guid>();
+                    recipientsId.Add(project.FundingProject.UserId); // project owner
+                                                                     // 2. initiate new Notification object
+                    var notification = new Notification
+                    {
+                        Id = new Guid(),
+                        Date = DateTime.Now,
+                        Message = $"liked project <b>{project.Name}</b>",
+                        NotificationType = NotificationType.FundingProjectInteraction,
+                        Actor = new { user._data.Id, user._data.UserName, user._data.Avatar },
+                        ObjectId = project.Id,
+                    };
+                    // 3. send noti
+                    await _notificationService.SendNotification(notification, recipientsId);
+
                     return ResultDTO<Like>.Success(newLikeProject, "Succesfull like the project");
                 }
                 else
@@ -177,6 +239,23 @@ namespace Fun_Funding.Application.Services.EntityServices
                     {
                         var updateDefinition = Builders<Like>.Update.Set(x => x.IsLike, true).Set(x => x.IsDelete, false);
                         _unitOfWork.LikeRepository.Update(x => x.Id == getLikedProjects.Id, updateDefinition);
+
+                                // NOTIFICATION
+                                // 1. get recipientsIds
+                                List<Guid> recipientsId = new List<Guid>();
+                                recipientsId.Add(project.FundingProject.UserId); // project owner
+                                // 2. initiate new Notification object
+                                var notification = new Notification
+                                {
+                                    Id = new Guid(),
+                                    Date = DateTime.Now,
+                                    Message = $"liked project <b>{project.Name}</b>",
+                                    NotificationType = NotificationType.FundingProjectInteraction,
+                                    Actor = new { user._data.Id, user._data.UserName, user._data.Avatar },
+                                    ObjectId = project.Id,
+                                };
+                                // 3. send noti
+                                await _notificationService.SendNotification(notification, recipientsId);
 
                         return ResultDTO<Like>.Success(getLikedProjects, "Succesfull like the project");
                     }
