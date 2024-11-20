@@ -1,4 +1,5 @@
 ﻿using Fun_Funding.Application.IRepository;
+using Fun_Funding.Domain.Entity;
 using Fun_Funding.Infrastructure.Persistence.Database;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Fun_Funding.Domain.Enum;
 
 namespace Fun_Funding.Domain.Entity.NoSqlEntities
 {
@@ -18,8 +19,11 @@ namespace Fun_Funding.Domain.Entity.NoSqlEntities
         [BsonElement("ReporterId")]
         public Guid ReporterId { get; set; }
 
-        [BsonElement("ProjectId")]
-        public Guid ProjectId { get; set; }
+        [BsonElement("ViolatorId")]
+        public Guid ViolatorId { get; set; }
+        [BsonElement("Type")]
+        public ReportType Type { get; set; }
+
         [BsonElement("Content")]
         public string Content { get; set; }
         [BsonElement("IsHandle")]

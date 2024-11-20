@@ -5,11 +5,14 @@ using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.ReportDTO;
 using Fun_Funding.Domain.Entity;
 using Fun_Funding.Domain.Entity.NoSqlEntities;
+using Fun_Funding.Domain.Enum;
 using Microsoft.AspNetCore.Http;
 using MongoDB.Driver;
+using NPOI.XWPF.UserModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -45,10 +48,31 @@ namespace Fun_Funding.Application.Services.EntityServices
             {
                 return ResultDTO<ViolentReport>.Fail("field can not be null");
             }
-            var exitedProject = await _unitOfWork.FundingProjectRepository.GetByIdAsync(request.ProjectId);
-            if (exitedProject is null)
+            switch (request.Type)
             {
-                return ResultDTO<ViolentReport>.Fail("can not found project");
+                case ReportType.User:
+                    var exitedUser = await _unitOfWork.UserRepository.GetByIdAsync(request.ViolatorId);
+                    if (exitedUser is null)
+                    {
+                        return ResultDTO<ViolentReport>.Fail("user can not found");
+                    }
+                    break;
+                case ReportType.MarketplaceProject:
+                    var marketplaceProject = await _unitOfWork.MarketplaceRepository.GetByIdAsync(request.ViolatorId);
+                    if (marketplaceProject is null)
+                    {
+                        return ResultDTO<ViolentReport>.Fail("can not found project");
+                    }
+                    break;
+                case ReportType.FundingProject:
+                    var exitedProject = await _unitOfWork.FundingProjectRepository.GetByIdAsync(request.ViolatorId);
+                    if (exitedProject is null)
+                    {
+                        return ResultDTO<ViolentReport>.Fail("can not found project");
+                    }
+                    break;
+                default:
+                    return ResultDTO<ViolentReport>.Fail("Invalid report type.");
             }
             try
             {
@@ -64,7 +88,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 {
                     Id = Guid.NewGuid(),
                     FileUrls = fileUrls,
-                    ProjectId = request.ProjectId,
+                    ViolatorId = request.ViolatorId,
                     ReporterId = exitUser.Id,
                     Content = request.Content,
                     IsHandle = false,
@@ -85,12 +109,74 @@ namespace Fun_Funding.Application.Services.EntityServices
         {
             try
             {
-                var list = _unitOfWork.ReportRepository.GetAllPaged(request);
+                Expression<Func<ViolentReport, bool>> filter = null;
+                if (!string.IsNullOrEmpty(request.SearchValue))
+                {
+                    filter = c => c.Type.Equals(request.SearchValue);
+                }
+                var list = _unitOfWork.ReportRepository.GetAllPaged(request,filter);
                 return ResultDTO<PaginatedResponse<ViolentReport>>.Success(list, "Successfull querry");
             }
             catch (Exception ex)
             {
                 return ResultDTO<PaginatedResponse<ViolentReport>>.Fail("something wrong!");
+            }
+        }
+
+        public async Task<ResultDTO<string>> SendReportedEmail(EmailReportRequest request)
+        {
+            var exitedReport = _unitOfWork.ReportRepository.Get(x => x.Id == request.ReportId);
+            if (exitedReport is null)
+            {
+                return ResultDTO<string>.Fail("can not find any reports");
+            }
+            try
+            {
+                if (exitedReport.Type == ReportType.User)
+                {
+                    var user = await _unitOfWork.UserRepository.GetByIdAsync(exitedReport.ViolatorId);
+                    await _emailService.SendUserReportAsync(
+                        toEmail: user.Email, 
+                        userName: user.FullName, 
+                        reportedDate: exitedReport.Date,
+                        reason:exitedReport.FaultCauses,
+                        content: request.Content);
+                    return ResultDTO<string>.Success("Successfull send email");
+                }
+                else
+                {
+                    if (exitedReport.Type == ReportType.FundingProject)
+                    {
+                        var fundingProject = await _unitOfWork.FundingProjectRepository.GetByIdAsync(exitedReport.ViolatorId);
+                        var owner = await _unitOfWork.UserRepository.GetByIdAsync(fundingProject.UserId);
+                        await _emailService.SendReportAsync(toEmail: owner.Email,
+                            userName: owner.FullName,
+                            reportedDate: exitedReport.Date,
+                            reason: exitedReport.FaultCauses,
+                            projectName: fundingProject.Name,
+                            content: request.Content);
+                        return ResultDTO<string>.Success("Successfull send email");
+
+                    }
+                    else
+                    {
+                        var marketplaceProject = await _unitOfWork.MarketplaceRepository.GetByIdAsync(exitedReport.ViolatorId);
+                        var fundingProject = await _unitOfWork.FundingProjectRepository.GetByIdAsync(marketplaceProject.FundingProjectId);
+                        var owner = await _unitOfWork.UserRepository.GetByIdAsync(fundingProject.UserId);
+                        await _emailService.SendReportAsync(toEmail: owner.Email,
+                            userName: owner.FullName,
+                            reportedDate: exitedReport.Date,
+                            reason: exitedReport.FaultCauses,
+                            projectName: fundingProject.Name,
+                            content: request.Content);
+                        return ResultDTO<string>.Success("Successfull send email");
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return ResultDTO<string>.Fail(ex.Message);
             }
         }
 
@@ -103,21 +189,43 @@ namespace Fun_Funding.Application.Services.EntityServices
             var exitedReport = _unitOfWork.ReportRepository.Get(x => x.Id == id);
             if (exitedReport == null)
                 return ResultDTO<ViolentReport>.Fail("reportId null");
-            var project = await _unitOfWork.FundingProjectRepository.GetByIdAsync(exitedReport.ProjectId);
-            if (project == null)
-                return ResultDTO<ViolentReport>.Fail("project null");
-            var owner = await _unitOfWork.UserRepository.GetByIdAsync(project.UserId);
-            if (owner == null)
-                return ResultDTO<ViolentReport>.Fail("owner null");
+
+            
+            switch (exitedReport.Type)
+            {
+                case ReportType.User:
+                    var exitedUser = await _unitOfWork.UserRepository.GetByIdAsync(exitedReport.ViolatorId);
+                    if (exitedUser is null)
+                    {
+                        return ResultDTO<ViolentReport>.Fail("user can not found");
+                    }
+                   
+                    break;
+                case ReportType.MarketplaceProject:
+                    var marketplaceProject = await _unitOfWork.MarketplaceRepository.GetByIdAsync(exitedReport.ViolatorId);
+                    if (marketplaceProject is null)
+                    {
+                        return ResultDTO<ViolentReport>.Fail("can not found project");
+                    }
+                    
+                    break;
+                case ReportType.FundingProject:
+                    var exitedProject = await _unitOfWork.FundingProjectRepository.GetByIdAsync(exitedReport.ViolatorId);
+                    if (exitedProject is null)
+                    {
+                        return ResultDTO<ViolentReport>.Fail("can not found project");
+                    }
+                 
+                    break;
+                default:
+                    return ResultDTO<ViolentReport>.Fail("Invalid report type.");
+            }          
             try
             {
                 var reporter = await _unitOfWork.UserRepository.GetByIdAsync(exitedReport.ReporterId);
                 var update = Builders<ViolentReport>.Update.Set(x => x.IsHandle, true);
                 _unitOfWork.ReportRepository.Update(x => x.Id == id, update);
                 var response = _unitOfWork.ReportRepository.Get(x => x.Id == id);
-
-                //email
-                await _emailService.SendReportAsync(owner.Email, project.Name, owner.FullName, exitedReport.Date, reporter.FullName, exitedReport.Content);
                 return ResultDTO<ViolentReport>.Success(response, "Successfull updated");
             }
             catch (Exception ex)
