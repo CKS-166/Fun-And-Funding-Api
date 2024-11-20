@@ -1,4 +1,5 @@
 ﻿using Fun_Funding.Application.Interfaces.IEntityService;
+using Fun_Funding.Application.ViewModel.BankAccountDTO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,6 +20,13 @@ namespace Fun_Funding.Api.Controllers
         {
             var result = await _bankAccountService.GetBankAccountByWalletId(id);
             if (result == null) return NotFound();
+            return Ok(result);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> LinkBankAccount([FromBody] BankAccountUpdateRequest request)
+        {
+            var result = await _bankAccountService.LinkUserBankAccount(request);
             return Ok(result);
         }
     }

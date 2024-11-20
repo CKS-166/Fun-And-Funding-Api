@@ -24,10 +24,12 @@ namespace Fun_Funding.Application.Services.EntityServices
         private IMapper _mapper;
         private int maxExpireDay = 30;
         private int maxMilestoneExtend = 10;
-        public ProjectMilestoneService(IUnitOfWork unitOfWork, IMapper mapper)
+        private ITransactionService _transactionService;
+        public ProjectMilestoneService(IUnitOfWork unitOfWork, IMapper mapper, ITransactionService transactionService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _transactionService = transactionService;
         }
 
         public async Task<ResultDTO<ProjectMilestoneResponse>> CreateProjectMilestoneRequest(ProjectMilestoneRequest request)
@@ -236,6 +238,17 @@ namespace Fun_Funding.Application.Services.EntityServices
                 {
                     projectMilestone.Status = request.Status;
                     statusChanged = true;
+                    if (request.Status.Equals(ProjectMilestoneStatus.Warning))
+                    {
+                        if (request.NewEndDate == null)
+                        {
+                            return ResultDTO<string>.Fail("New end date is required for warning a project milestone!");
+                        }
+                        else
+                        {
+                            projectMilestone.EndDate = request.NewEndDate.Value;
+                        }
+                    }
                 }
                 else if (projectMilestone.Status == ProjectMilestoneStatus.Submitted && approvedStatusList.Contains(request.Status))
                 {
@@ -257,7 +270,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                        (int)HttpStatusCode.BadRequest,
                        $"Milestone with status {projectMilestone.Status} cannot be changed to {request.Status}.");
 
-                return ResultDTO<string>.Success("Update successfully!");
+                return ResultDTO<string>.Success($"Update successfully to {request.Status}!");
             }
             catch (Exception ex)
             {

@@ -11,5 +11,6 @@ namespace Fun_Funding.Application.ViewModel.ProjectMilestoneDTO
     {
         public Guid ProjectMilestoneId { get; set; }
         public ProjectMilestoneStatus Status { get; set; }
+        public DateTime? NewEndDate { get; set; }
     }
 }
