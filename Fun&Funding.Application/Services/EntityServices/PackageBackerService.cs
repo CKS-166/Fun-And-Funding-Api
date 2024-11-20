@@ -126,6 +126,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 // 1. get recipientsIds
                 List<Guid> recipientsId = new List<Guid>();
                 recipientsId.Add(project.UserId);
+                recipientsId.Add(Guid.Parse("f766c910-4f6a-421e-a1a3-61534e6005c3"));
                 // 2. initiate new Notification object
                 var notification = new Notification
                 {

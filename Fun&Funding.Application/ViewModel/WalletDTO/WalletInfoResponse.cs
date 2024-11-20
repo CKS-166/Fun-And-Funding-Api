@@ -16,5 +16,6 @@ namespace Fun_Funding.Application.ViewModel.WalletDTO
         public decimal Balance { get; set; }
         public ICollection<TransactionInfoResponse>? Transactions { get; set; }
         public ICollection<WithdrawResponse>? WithdrawRequests { get; set; }
+
     }
 }
