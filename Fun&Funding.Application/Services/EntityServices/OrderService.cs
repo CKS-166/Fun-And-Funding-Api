@@ -387,7 +387,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                        isAscending: request.IsAscending.Value,
                        pageIndex: request.PageIndex,
                        pageSize: request.PageSize,
-                       includeProperties: "OrderDetails,OrderDetails.DigitalKey,OrderDetails.DigitalKey.MarketplaceProject,OrderDetails.ProjectCoupon,DigitalKey.MarketplaceProject.MarketplaceFiles");
+                       includeProperties: "OrderDetails,OrderDetails.DigitalKey,OrderDetails.DigitalKey.MarketplaceProject,OrderDetails.ProjectCoupon,OrderDetails.DigitalKey.MarketplaceProject.MarketplaceFiles");
 
                 if (list != null && list.Count() > 0)
                 {
@@ -522,7 +522,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                        isAscending: request.IsAscending.Value,
                        pageIndex: request.PageIndex,
                        pageSize: request.PageSize,
-                       includeProperties: "OrderDetails,OrderDetails.DigitalKey,OrderDetails.DigitalKey.MarketplaceProject,OrderDetails.ProjectCoupon");
+                       includeProperties: "OrderDetails,OrderDetails.DigitalKey,OrderDetails.DigitalKey.MarketplaceProject,OrderDetails.ProjectCoupon,OrderDetails.DigitalKey.MarketplaceProject.MarketplaceFiles");
 
                 if (list != null && list.Count() > 0)
                 {
