@@ -93,6 +93,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                     Content = request.Content,
                     IsHandle = false,
                     Date = DateTime.Now,
+                    Type = request.Type,
                     FaultCauses = request.FaultCauses,
                 };
                 _unitOfWork.ReportRepository.Create(report);

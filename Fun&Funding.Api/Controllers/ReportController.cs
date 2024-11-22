@@ -37,7 +37,7 @@ namespace Fun_Funding.Api.Controllers
         }
         [HttpPost("send-email")]
         [Authorize(Roles = Role.Admin)]
-        public async Task<IActionResult> SendEmail([FromForm] EmailReportRequest request)
+        public async Task<IActionResult> SendEmail([FromBody] EmailReportRequest request)
         {
             var result = await _reportService.SendReportedEmail(request);
             if (!result._isSuccess)
