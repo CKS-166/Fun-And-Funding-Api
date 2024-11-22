@@ -8,7 +8,7 @@ namespace Fun_Funding.Application.Interfaces.IEntityService
         Task<ResultDTO<MarketplaceFileInfoResponse>> UploadGameUpdateFile
             (Guid marketplaceProjectId, MarketplaceGameFileRequest request);
 
-        Task<ResultDTO<PaginatedResponse<MarketplaceFileInfoResponse>>> GetGameFiles
+        Task<ResultDTO<PaginatedResponse<object>>> GetGameFiles
             (Guid marketplaceProjectId, ListRequest request);
     }
 }
