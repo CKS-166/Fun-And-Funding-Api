@@ -409,6 +409,7 @@ namespace Fun_Funding.Application.Services.ExternalServices
         }
         private string GenerateUserReportedEmailBody(string userName, DateTime reportedDate, string content, List<string> reason)
         {
+            string reasonHtml = string.Join("", reason.Select(r => $"<li>{r}</li>"));
             return $@"
                 <!DOCTYPE html>
 <html lang=""en"">
@@ -502,7 +503,7 @@ namespace Fun_Funding.Application.Services.ExternalServices
                     <img src=""https://i.ibb.co/SxKvYLH/Frame-155.png"" alt=""Fun&Funding Logo"" width=""150px"" style=""margin-bottom: 20px;"" />
                     
                     <!-- Heading Section -->
-                    <h1>Important: Your Project Has Been Reported</h1>
+                    <h1>Important: You Has Been Reported</h1>
                     
                     <!-- Message Section -->
                     <p>Dear <strong>{userName}</strong>,</p>
@@ -552,7 +553,7 @@ namespace Fun_Funding.Application.Services.ExternalServices
                         </tr>
                          <tr>
                             <th>Reason:</th>
-                            <td>{reason}</td>
+                            <td>{reasonHtml}</td>
                         </tr>
                         <tr>
                             <th>Report Date:</th>

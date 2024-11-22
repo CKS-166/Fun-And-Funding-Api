@@ -35,6 +35,15 @@ namespace Fun_Funding.Api.Controllers
                 return BadRequest(result);
             return Ok(result);
         }
+        [HttpPost("send-email")]
+        [Authorize(Roles = Role.Admin)]
+        public async Task<IActionResult> SendEmail([FromForm] EmailReportRequest request)
+        {
+            var result = await _reportService.SendReportedEmail(request);
+            if (!result._isSuccess)
+                return BadRequest(result);
+            return Ok(result);
+        }
         [HttpPatch]
         [Authorize(Roles =Role.Admin)]
         public async Task<IActionResult> UpdateReport(Guid id)
