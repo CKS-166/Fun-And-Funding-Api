@@ -7,6 +7,7 @@ using Fun_Funding.Application.ViewModel.ProjectMilestoneDTO;
 using Fun_Funding.Domain.Entity;
 using Fun_Funding.Domain.Enum;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Asn1.X509;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -259,6 +260,10 @@ namespace Fun_Funding.Application.Services.EntityServices
                 {
                     projectMilestone.Status = request.Status;
                     statusChanged = true;
+                    if (projectMilestone.Status == ProjectMilestoneStatus.Failed)
+                    {
+                        await RefundBackersAsync(projectMilestone.Id);
+                    }
                 }
                 if (statusChanged)
                 {
@@ -281,7 +286,105 @@ namespace Fun_Funding.Application.Services.EntityServices
                 throw new Exception(ex.Message);
             }
         }
+        public async Task RefundBackersAsync(Guid projectMilestoneId)
+        {
+            try
+            {
+                // Get the project milestone
+                var projectMilestone = await _unitOfWork.ProjectMilestoneRepository.GetQueryable()
+                    .Include(pm => pm.FundingProject.Wallet)
+                    .Include(pm => pm.Milestone)
+                    .FirstOrDefaultAsync(pm => pm.Id == projectMilestoneId);
 
+                if (projectMilestone == null)
+                    throw new Exception("Project milestone not found.");
+
+                // Check if the milestone status is "Failed"
+                if (projectMilestone.Status != ProjectMilestoneStatus.Failed)
+                    throw new Exception("Milestone is not in a failed state.");
+
+                // Get all milestones for the funding project in order
+                var milestones = await _unitOfWork.MilestoneRepository.GetQueryable()
+                    .Where(m => m.ProjectMilestones.Any(pm => pm.FundingProjectId == projectMilestone.FundingProjectId))
+                    .OrderBy(m => m.MilestoneOrder)
+                    .ToListAsync();
+
+                decimal totalAvailableFunds = projectMilestone.FundingProject.Wallet.Balance * 0.95m;
+                // Calculate the disbursement percentage for completed milestones
+                decimal completedDisbursementPercentage = (projectMilestone.Milestone.DisbursementPercentage * 0.5m);
+                foreach (var milestone in milestones)
+                {
+                    var relatedProjectMilestone = _unitOfWork.ProjectMilestoneRepository.GetQueryable()
+                        .Include(pm => pm.Milestone)
+                        .FirstOrDefault(pm => pm.MilestoneId == milestone.Id && pm.FundingProjectId == projectMilestone.FundingProjectId);
+
+                    if (relatedProjectMilestone != null && relatedProjectMilestone.Status == ProjectMilestoneStatus.Completed &&
+                        relatedProjectMilestone.Milestone.MilestoneOrder < projectMilestone.Milestone.MilestoneOrder)
+                    {
+                        completedDisbursementPercentage += milestone.DisbursementPercentage;
+                    }
+                }
+
+                // Add the commission fee (5%)
+                decimal commissionFeePercentage = 5m;
+                decimal refundablePercentage = 1m - completedDisbursementPercentage ;
+
+                // Calculate the refundable amount
+                decimal totalFunds = projectMilestone.FundingProject.Wallet.Balance;
+                decimal refundableAmount = refundablePercentage  * totalAvailableFunds;
+
+                // Get all backers for the funding project
+                var packageBackers = await _unitOfWork.PackageBackerRepository.GetQueryable()
+                    .Include(pb => pb.User)
+                    .Where(pb => pb.Package.ProjectId == projectMilestone.FundingProjectId)
+                    .ToListAsync();
+
+                // Calculate total contribution by all backers
+                decimal totalContribution = packageBackers.Sum(pb => pb.DonateAmount);
+
+                // Refund backers proportionally based on their contribution
+                foreach (var backer in packageBackers)
+                {
+                    decimal backerContributionPercentage = backer.DonateAmount / totalContribution;
+                    decimal backerRefundAmount = backerContributionPercentage * refundableAmount;
+
+                    // Add the refund amount to the backer's wallet
+                    var backerWallet = await _unitOfWork.WalletRepository.GetQueryable().FirstOrDefaultAsync(w => w.Backer.Id == backer.UserId);
+                    if (backerWallet == null)
+                    {
+                        backerWallet = new Wallet
+                        {
+                            Backer = backer.User,
+                            Balance = 0,
+                            BankAccountId = Guid.NewGuid() // Replace with actual logic for associating a bank account
+                        };
+                        await _unitOfWork.WalletRepository.AddAsync(backerWallet);
+                    }
+
+                    backerWallet.Balance += backerRefundAmount;
+
+                    // Log the transaction
+                    var transaction = new Transaction
+                    {
+                        WalletId = backerWallet.Id,
+                        TotalAmount = backerRefundAmount,
+                        TransactionType = TransactionTypes.FundingRefund,
+                        CreatedDate = DateTime.UtcNow,
+                        Description = "Refund to backers"
+                    };
+                    await _unitOfWork.TransactionRepository.AddAsync(transaction);
+                }
+                projectMilestone.FundingProject.Wallet.Balance -= refundableAmount;
+
+                // Save changes to the database
+                 _unitOfWork.Commit();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+           
+        }
         public async Task<ResultDTO<PaginatedResponse<ProjectMilestoneResponse>>> GetProjectMilestones(
             ListRequest request,
             ProjectMilestoneStatus? status,
@@ -373,7 +476,6 @@ namespace Fun_Funding.Application.Services.EntityServices
 
                     return ResultDTO<PaginatedResponse<ProjectMilestoneResponse>>.Success(response);
                 
-
             }
             catch (Exception ex)
             {

@@ -471,7 +471,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 }
                 if (!string.IsNullOrEmpty(categoryName))
                 {
-                    filter = c => c.Name.ToLower().Contains(categoryName);
+                    filter = c => c.Categories.Any(category => category.Name.ToLower().Contains(categoryName.ToLower()));
                 }
                 if (request.From != null)
                 {
@@ -484,10 +484,6 @@ namespace Fun_Funding.Application.Services.EntityServices
                 if (status != null)
                 {
                     filter = c => c.Status.Equals(status);
-                }
-                else
-                {
-                    filter = c => c.Status.Equals(ProjectStatus.Processing);
                 }
                 if (fromTarget != null)
                 {
@@ -503,7 +499,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                        isAscending: request.IsAscending.Value,
                        pageIndex: request.PageIndex,
                        pageSize: request.PageSize,
-                       includeProperties: "Categories,Packages,SourceFiles,Packages.RewardItems,Wallet");
+                       includeProperties: "Categories,Packages,SourceFiles,Packages.RewardItems,Wallet,User");
                 if (list != null && list.Count() >= 0)
                 {
                     var totalItems = _unitOfWork.FundingProjectRepository.GetAll(filter).Count();
