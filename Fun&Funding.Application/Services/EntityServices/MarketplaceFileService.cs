@@ -101,7 +101,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                     filter = f => f.Version.ToLower().Contains(request.SearchValue.ToLower());
                 }
 
-                var list = await _unitOfWork.MarketplaceFileRepository.GetAllAsync(
+                var list = await _unitOfWork.MarketplaceFileRepository.GetAllDeletedAsync(
                    filter: filter,
                    orderBy: orderBy,
                    isAscending: request.IsAscending.Value,
