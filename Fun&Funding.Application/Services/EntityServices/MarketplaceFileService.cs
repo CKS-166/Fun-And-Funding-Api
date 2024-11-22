@@ -75,7 +75,7 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
-        public async Task<ResultDTO<PaginatedResponse<MarketplaceFileInfoResponse>>> GetGameFiles
+        public async Task<ResultDTO<PaginatedResponse<object>>> GetGameFiles
             (Guid marketplaceProjectId, ListRequest request)
         {
             try
@@ -110,10 +110,10 @@ namespace Fun_Funding.Application.Services.EntityServices
 
                 var totalItems = _unitOfWork.MarketplaceFileRepository.GetAll(filter).Count();
                 var totalPages = (int)Math.Ceiling((double)totalItems / (int)request.PageSize);
-                IEnumerable<MarketplaceFileInfoResponse> marketplaceFiles =
-                    _mapper.Map<IEnumerable<MarketplaceFileInfoResponse>>(list);
+                var marketplaceFiles = list.Select(
+                    f => new { f.Id, f.Name, f.URL, f.Version, f.Description, f.FileType, f.IsDeleted, f.CreatedDate });
 
-                PaginatedResponse<MarketplaceFileInfoResponse> response = new PaginatedResponse<MarketplaceFileInfoResponse>
+                PaginatedResponse<object> response = new PaginatedResponse<object>
                 {
                     PageSize = request.PageSize.Value,
                     PageIndex = request.PageIndex.Value,
@@ -122,7 +122,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                     Items = marketplaceFiles
                 };
 
-                return ResultDTO<PaginatedResponse<MarketplaceFileInfoResponse>>.Success(response);
+                return ResultDTO<PaginatedResponse<object>>.Success(response);
 
             }
             catch (Exception ex)
