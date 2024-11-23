@@ -232,8 +232,14 @@ namespace Fun_Funding.Application.Services.EntityServices
                 bool statusChanged = false;
                 if (projectMilestone.Status == ProjectMilestoneStatus.Pending && pendingStatusList.Contains(request.Status))
                 {
+                    if (projectMilestone.Milestone.MilestoneOrder == 1)
+                    {
+                        await ChargeCommissionFee(projectMilestone.Id);
+
+                    }
                     projectMilestone.Status = request.Status;
                     statusChanged = true;
+                    
                 }
                 else if (projectMilestone.Status == ProjectMilestoneStatus.Processing && processingStatusList.Contains(request.Status))
                 {
@@ -286,6 +292,26 @@ namespace Fun_Funding.Application.Services.EntityServices
                 throw new Exception(ex.Message);
             }
         }
+        public async Task ChargeCommissionFee(Guid projectMilestoneId)
+        {
+            try
+            {
+                var projectMilestone = await _unitOfWork.ProjectMilestoneRepository.GetQueryable()
+                   .Include(pm => pm.FundingProject.Wallet)
+                   .Include(pm => pm.Milestone)
+                   .FirstOrDefaultAsync(pm => pm.Id == projectMilestoneId);
+                var commissionFee = _unitOfWork.CommissionFeeRepository.GetQueryable()
+                                .Where(c => c.CommissionType == CommissionType.FundingCommission)
+                                .OrderByDescending(c => c.UpdateDate)
+                                .FirstOrDefault();
+                projectMilestone.FundingProject.Wallet.Balance *= (1 - commissionFee.Rate);
+                _unitOfWork.Commit();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message, ex);
+            }
+        }
         public async Task RefundBackersAsync(Guid projectMilestoneId)
         {
             try
@@ -309,7 +335,6 @@ namespace Fun_Funding.Application.Services.EntityServices
                     .OrderBy(m => m.MilestoneOrder)
                     .ToListAsync();
 
-                decimal totalAvailableFunds = projectMilestone.FundingProject.Wallet.Balance * 0.95m;
                 // Calculate the disbursement percentage for completed milestones
                 decimal completedDisbursementPercentage = (projectMilestone.Milestone.DisbursementPercentage * 0.5m);
                 foreach (var milestone in milestones)
@@ -331,7 +356,7 @@ namespace Fun_Funding.Application.Services.EntityServices
 
                 // Calculate the refundable amount
                 decimal totalFunds = projectMilestone.FundingProject.Wallet.Balance;
-                decimal refundableAmount = refundablePercentage  * totalAvailableFunds;
+                decimal refundableAmount = refundablePercentage  * totalFunds;
 
                 // Get all backers for the funding project
                 var packageBackers = await _unitOfWork.PackageBackerRepository.GetQueryable()
