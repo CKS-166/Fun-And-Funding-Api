@@ -26,8 +26,7 @@ namespace Fun_Funding.Api.Controllers
                 return BadRequest(result);
             return Ok(result);
         }
-        [HttpPost]
-        [Authorize(Roles = Role.Backer)]
+        [HttpPost]       
         public async Task<IActionResult> CreateReport([FromForm]ReportRequest request)
         {
             var result = await _reportService.CreateReportRequest(request);
