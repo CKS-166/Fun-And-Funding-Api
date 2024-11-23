@@ -621,6 +621,8 @@ namespace Fun_Funding.Application.Services.EntityServices
                     {
                         Name = file.Name,
                         URL = result.Result,
+                        Version = file.Version,
+                        Description = file.Description,
                         FileType = file.FileType,
                         CreatedDate = DateTime.Now,
                         MarketplaceProjectId = id
