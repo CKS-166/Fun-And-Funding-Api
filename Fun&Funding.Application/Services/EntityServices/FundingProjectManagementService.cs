@@ -504,7 +504,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 {
                     var totalItems = _unitOfWork.FundingProjectRepository.GetAll(filter).Count();
                     var totalPages = (int)Math.Ceiling((double)totalItems / (int)request.PageSize);
-                    IEnumerable<FundingProjectResponse> categories = _mapper.Map<IEnumerable<FundingProjectResponse>>(list);
+                    IEnumerable<FundingProjectResponse> projects = _mapper.Map<IEnumerable<FundingProjectResponse>>(list);
 
                     PaginatedResponse<FundingProjectResponse> response = new PaginatedResponse<FundingProjectResponse>
                     {
@@ -512,7 +512,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                         PageIndex = request.PageIndex.Value,
                         TotalItems = totalItems,
                         TotalPages = totalPages,
-                        Items = categories
+                        Items = projects
                     };
 
                     return ResultDTO<PaginatedResponse<FundingProjectResponse>>.Success(response);

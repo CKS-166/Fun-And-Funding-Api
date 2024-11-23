@@ -56,25 +56,42 @@ namespace Fun_Funding.Application.Services.EntityServices
                 Expression<Func<User, object>> orderBy = u => u.CreatedDate;
                 const string excludeRoleName = "Administrator";
 
-                IQueryable<User> usersQuery = _unitOfWork.UserRepository.GetQueryable()
-                    .AsNoTracking()
-                    .Include(u => u.Wallet);
+                // Get users with Administrator role
+                var excludeRole = await _roleManager.FindByNameAsync(excludeRoleName);
+                var userIdsToExclude = new List<string>();
 
+                if (excludeRole != null)
+                {
+                    var usersInExcludeRole = await _userManager.GetUsersInRoleAsync(excludeRoleName);
+                    userIdsToExclude = usersInExcludeRole.Select(u => u.Id.ToString()).ToList();
+                }
+
+                // Combine search filter with role exclusion
                 if (!string.IsNullOrEmpty(request.SearchValue))
                 {
                     string searchLower = request.SearchValue.ToLower();
-                    filter = u =>
-                        u.FullName != null && u.FullName.ToLower().Contains(searchLower) ||
-                        u.Email != null && u.Email.ToLower().Contains(searchLower) ||
-                        u.UserName != null && u.UserName.ToLower().Contains(searchLower);
+                    if (userIdsToExclude.Any())
+                    {
+                        filter = u =>
+                            !userIdsToExclude.Contains(u.Id.ToString()) &&
+                            ((u.FullName != null && u.FullName.ToLower().Contains(searchLower)) ||
+                             (u.Email != null && u.Email.ToLower().Contains(searchLower)) ||
+                             (u.UserName != null && u.UserName.ToLower().Contains(searchLower)));
+                    }
+                    else
+                    {
+                        filter = u =>
+                            (u.FullName != null && u.FullName.ToLower().Contains(searchLower)) ||
+                            (u.Email != null && u.Email.ToLower().Contains(searchLower)) ||
+                            (u.UserName != null && u.UserName.ToLower().Contains(searchLower));
+                    }
                 }
-
-                var excludeRole = await _roleManager.FindByNameAsync(excludeRoleName);
-                if (excludeRole != null)
+                else
                 {
-                    var userIdsInExcludeRole = await _userManager.GetUsersInRoleAsync(excludeRoleName);
-                    var excludeUserIds = userIdsInExcludeRole.Select(u => u.Id).ToList();
-                    usersQuery = usersQuery.Where(u => !excludeUserIds.Contains(u.Id));
+                    if (userIdsToExclude.Any())
+                    {
+                        filter = u => !userIdsToExclude.Contains(u.Id.ToString());
+                    }
                 }
 
                 if (!string.IsNullOrEmpty(request.OrderBy))
@@ -92,30 +109,35 @@ namespace Fun_Funding.Application.Services.EntityServices
                     }
                 }
 
-                var totalItems = await usersQuery.CountAsync();
-                int pageIndex = request.PageIndex ?? 1;
-                int pageSize = request.PageSize ?? 10;
+                var list = await _unitOfWork.UserRepository.GetAllDeletedAsync(
+                       filter: filter,
+                       orderBy: orderBy,
+                       isAscending: request.IsAscending.Value,
+                       pageIndex: request.PageIndex,
+                       pageSize: request.PageSize,
+                       includeProperties: "Wallet");
 
-                var paginatedUsers = await usersQuery
-                    .OrderBy(orderBy)
-                    .Skip((pageIndex - 1) * pageSize)
-                    .Take(request.PageSize ?? 10)
-                    .ToListAsync();
-
-                var usersList = _mapper.Map<IEnumerable<UserInfoResponse>>(paginatedUsers);
-
-                var totalPages = (int)Math.Ceiling((double)totalItems / (request.PageSize ?? 10));
-
-                var paginatedResponse = new PaginatedResponse<UserInfoResponse>
+                if (list != null && list.Count() >= 0)
                 {
-                    PageSize = request.PageSize ?? 10,
-                    PageIndex = request.PageIndex ?? 1,
-                    TotalItems = totalItems,
-                    TotalPages = totalPages,
-                    Items = usersList
-                };
+                    var totalItems = _unitOfWork.UserRepository.GetAllDeletedNoPagination(filter).Count();
+                    var totalPages = (int)Math.Ceiling((double)totalItems / (int)request.PageSize);
+                    IEnumerable<UserInfoResponse> users = _mapper.Map<IEnumerable<UserInfoResponse>>(list);
 
-                return ResultDTO<PaginatedResponse<UserInfoResponse>>.Success(paginatedResponse, "User found!");
+                    PaginatedResponse<UserInfoResponse> response = new PaginatedResponse<UserInfoResponse>
+                    {
+                        PageSize = request.PageSize.Value,
+                        PageIndex = request.PageIndex.Value,
+                        TotalItems = totalItems,
+                        TotalPages = totalPages,
+                        Items = users
+                    };
+
+                    return ResultDTO<PaginatedResponse<UserInfoResponse>>.Success(response, "User found!");
+                }
+                else
+                {
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "User Not Found.");
+                }
             }
             catch (Exception ex)
             {
