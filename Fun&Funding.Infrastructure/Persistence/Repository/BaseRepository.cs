@@ -131,6 +131,15 @@ namespace Fun_Funding.Infrastructure.Persistence.Repository
                 .ToListAsync();
         }
 
+        public IEnumerable<T> GetAllDeletedNoPagination(Expression<Func<T, bool>>? predicate = null)
+        {
+            if (predicate == null) return _entitySet.AsNoTracking().ToList();
+            return _entitySet
+                .Where(predicate)
+                .AsNoTracking()
+                .ToList();
+        }
+
         // Asynchronously retrieve deleted entities
         public async Task<IEnumerable<T>> GetAllDeletedAsync(
             Expression<Func<T, bool>> filter = null,

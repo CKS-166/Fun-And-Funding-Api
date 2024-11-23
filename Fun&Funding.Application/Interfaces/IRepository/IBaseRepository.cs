@@ -11,6 +11,7 @@ namespace Fun_Funding.Application.IRepository
         IEnumerable<T> GetAll(Expression<Func<T, bool>> predicate = null);
         // Soft delete-related methods
         Task<IEnumerable<T>> GetAllDeletedNoPaginationAsync(Expression<Func<T, bool>>? predicate = null); // Retrieve deleted entities no pagination
+        IEnumerable<T> GetAllDeletedNoPagination(Expression<Func<T, bool>>? predicate = null);
         Task<IEnumerable<T>> GetAllDeletedAsync(
             Expression<Func<T, bool>> filter = null,
             Expression<Func<T, object>> orderBy = null,
