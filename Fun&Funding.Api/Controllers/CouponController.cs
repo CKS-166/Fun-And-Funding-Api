@@ -14,6 +14,13 @@ namespace Fun_Funding.Api.Controllers
         {
             _couponService = couponService;
         }
+        [HttpGet("all/{id}")]
+        public async Task<IActionResult> GetCouponsByProjectId(Guid id)
+        {
+            var result = await _couponService.GetListCouponByProjectId(id);
+            if (!result._isSuccess) return BadRequest(result);
+            return Ok(result);
+        }
         [HttpGet("get-by-code")]
         public async Task<IActionResult> GetCouponsByCode(string couponCode, Guid marketplaceProjectId)
         {
@@ -35,6 +42,13 @@ namespace Fun_Funding.Api.Controllers
             if(!result._isSuccess) return BadRequest(result);
             return Ok(result);
         }
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> ChangeStatusCoupons(Guid id)
+        {
+            var result = await _couponService.ChangeStatusCoupons(id);
+            if(!result._isSuccess) return BadRequest(result);
+            return Ok(result);
+        } 
         [HttpPatch]
         public async Task<IActionResult> ChangeStatus(Guid couponId)
         {
