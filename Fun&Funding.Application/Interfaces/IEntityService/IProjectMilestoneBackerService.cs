@@ -13,5 +13,6 @@ namespace Fun_Funding.Application.IService
     {
         Task<ResultDTO<ProjectMilestoneBackerResponse>> CreateNewProjectMilestoneBackerReview(ProjectMilestoneBackerRequest request);
         Task<ResultDTO<List<ProjectMilestoneBackerResponse>>> GetAllMilestoneReview(Guid projectMilestoneId);
+        Task<ResultDTO<bool>> CheckIfQualifiedForReview(Guid projectMilestoneId, Guid userId);
     }
 }

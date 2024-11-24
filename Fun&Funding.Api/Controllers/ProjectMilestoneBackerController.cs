@@ -29,5 +29,15 @@ namespace Fun_Funding.Api.Controllers
             var result = await _projectMilestoneBackerService.GetAllMilestoneReview(projectMilestoneId);
             return Ok(result);
         }
+
+        [HttpGet("CheckIfQualifiedForReview")]
+        public async Task<IActionResult> CheckIfQualifiedForReview(Guid projectMilestoneId, Guid userId)
+        {
+
+            var result = await _projectMilestoneBackerService.CheckIfQualifiedForReview(projectMilestoneId, userId);
+
+            return Ok(result);
+
+        }
     }
 }

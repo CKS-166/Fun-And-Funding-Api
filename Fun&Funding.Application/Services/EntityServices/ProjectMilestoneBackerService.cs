@@ -28,6 +28,42 @@ namespace Fun_Funding.Application.Services.EntityServices
             _unitOfWork = unitOfWork;
             _notificationService = notificationService;
         }
+
+        public async Task<ResultDTO<bool>> CheckIfQualifiedForReview(Guid projectMilestoneId, Guid userId)
+        {
+            try
+            {
+                var fundingProject = await _unitOfWork.FundingProjectRepository
+                    .GetAsync(p => p.ProjectMilestones.Any(pm => pm.Id == projectMilestoneId));
+                if (fundingProject == null)
+                    return ResultDTO<bool>.Fail("Funding project not found!");
+
+                var isBacker = await _unitOfWork.PackageBackerRepository.GetQueryable()
+                    .AnyAsync(pb => pb.Package.ProjectId == fundingProject.Id && pb.UserId == userId);
+                if (!isBacker)
+                    return ResultDTO<bool>.Success(false, "You must be a backer to review this milestone!");
+
+                var projectMilestone = await _unitOfWork.ProjectMilestoneRepository
+                    .GetAsync(pm => pm.Id == projectMilestoneId);
+                if (projectMilestone == null)
+                    return ResultDTO<bool>.Fail("Project milestone not found!");
+                if (projectMilestone.Status != ProjectMilestoneStatus.Processing &&
+                    projectMilestone.Status != ProjectMilestoneStatus.Warning)
+                    return ResultDTO<bool>.Success(false, "This project milestone is currently not accepting reviews!");
+
+                var alreadyReviewed = await _unitOfWork.ProjectMilestoneBackerRepository.GetQueryable()
+                    .AnyAsync(pmb => pmb.ProjectMilestoneId == projectMilestoneId && pmb.BackerId == userId);
+                if (alreadyReviewed)
+                    return ResultDTO<bool>.Success(false, "You have already reviewed this milestone!");
+
+                return ResultDTO<bool>.Success(true, "You are qualified to review this milestone.");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Error while checking review qualifications: {ex.Message}");
+            }
+        }
+
         public async Task<ResultDTO<ProjectMilestoneBackerResponse>> CreateNewProjectMilestoneBackerReview(ProjectMilestoneBackerRequest request)
         {
             try

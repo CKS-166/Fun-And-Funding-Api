@@ -580,6 +580,9 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Property<Guid>("FundingProjectId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Introduction")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -591,6 +594,12 @@ namespace Fun_Funding.Infrastructure.Migrations
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal?>("TotalAmount")
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 

@@ -15,6 +15,9 @@ namespace Fun_Funding.Application.ViewModel.ProjectMilestoneDTO
         public ProjectMilestoneStatus Status { get; set; }
         public Guid MilestoneId { get; set; }
         public Guid FundingProjectId { get; set; }
+        public string? Title { get; set; }
+        public string? Introduction { get; set; }
+        public decimal? TotalAmount { get; set; }
 
         //public List<ProjectMilestoneRequirementRequest> ProjectMilestoneRequirements { get; set; }
     }

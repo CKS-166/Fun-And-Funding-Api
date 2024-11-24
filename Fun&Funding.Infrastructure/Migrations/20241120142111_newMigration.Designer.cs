@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fun_Funding.Infrastructure.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20241118084750_init")]
-    partial class init
+    [Migration("20241120142111_newMigration")]
+    partial class newMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -583,6 +583,9 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Property<Guid>("FundingProjectId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Introduction")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
@@ -594,6 +597,9 @@ namespace Fun_Funding.Infrastructure.Migrations
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
