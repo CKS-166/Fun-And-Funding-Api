@@ -16,5 +16,7 @@ namespace Fun_Funding.Application.IService
             UpdateMarketplaceProjectStatus(Guid id, ProjectStatus status);
         Task<ResultDTO<List<MarketplaceProjectInfoResponse>>> GetTop3MostFundedOngoingMarketplaceProject();
         Task<ResultDTO<decimal>> CountPlatformProjects();
+        Task<ResultDTO<PaginatedResponse<MarketplaceProjectInfoResponse>>> GetBackerPurchasedMarketplaceProject(ListRequest request);
+        Task<ResultDTO<PaginatedResponse<MarketplaceProjectInfoResponse>>> GetGameOwnerMarketplaceProject(ListRequest request);
     }
 }

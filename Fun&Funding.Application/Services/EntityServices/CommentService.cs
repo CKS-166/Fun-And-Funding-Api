@@ -76,24 +76,27 @@ namespace Fun_Funding.Application.Services.EntityServices
             {
                 var list = _unitOfWork.CommentRepository.GetAll().Where(c => c.FundingProjectId == id);
                 List<CommentViewResponse> comments = new List<CommentViewResponse>();
-                foreach (var comment in list)
+                if (comments != null && comments.Count > 0)
                 {
-                    // Fetch the user including the file (avatar)
-                    var user = _unitOfWork.UserRepository.GetQueryable()
-                        .Include(x => x.File) // Include the UserFile
-                        .FirstOrDefault(x => x.Id == comment.UserID);
-
-                    // Extract the avatar URL
-                    var avatarUrl = user?.File?.URL;
-
-                    comments.Add(new CommentViewResponse
+                    foreach (var comment in list)
                     {
-                        Content = comment.Content,
-                        CreateDate = comment.CreateDate,
-                        UserName = user?.UserName,  // Ensure safe navigation
-                        AvatarUrl = avatarUrl,
-                        UserId = user.Id
-                    });
+                        // Fetch the user including the file (avatar)
+                        var user = _unitOfWork.UserRepository.GetQueryable()
+                            .Include(x => x.File) // Include the UserFile
+                            .FirstOrDefault(x => x.Id == comment.UserID);
+
+                        // Extract the avatar URL
+                        var avatarUrl = user?.File?.URL ?? null;
+
+                        comments.Add(new CommentViewResponse
+                        {
+                            Content = comment.Content,
+                            CreateDate = comment.CreateDate,
+                            UserName = user != null ? user?.UserName : "Anonymous",
+                            AvatarUrl = avatarUrl,
+                            UserId = user != null ? user.Id : null
+                        });
+                    }
                 }
 
                 return comments;
@@ -112,24 +115,27 @@ namespace Fun_Funding.Application.Services.EntityServices
             {
                 var list = _unitOfWork.CommentRepository.GetAll().Where(c => c.MarketplaceProjectId == id);
                 List<CommentViewResponse> comments = new List<CommentViewResponse>();
-                foreach (var comment in list)
+                if(comments != null && comments.Count > 0)
                 {
-                    // Fetch the user including the file (avatar)
-                    var user = _unitOfWork.UserRepository.GetQueryable()
-                        .Include(x => x.File) // Include the UserFile
-                        .FirstOrDefault(x => x.Id == comment.UserID);
-
-                    // Extract the avatar URL
-                    var avatarUrl = user?.File?.URL;
-
-                    comments.Add(new CommentViewResponse
+                    foreach (var comment in list)
                     {
-                        Content = comment.Content,
-                        CreateDate = comment.CreateDate,
-                        UserName = user?.UserName,
-                        AvatarUrl = avatarUrl,
-                        UserId = user.Id
-                    });
+                        // Fetch the user including the file (avatar)
+                        var user = _unitOfWork.UserRepository.GetQueryable()
+                            .Include(x => x.File) // Include the UserFile
+                            .FirstOrDefault(x => x.Id == comment.UserID);
+
+                        // Extract the avatar URL
+                        var avatarUrl = user?.File?.URL ?? null;
+
+                        comments.Add(new CommentViewResponse
+                        {
+                            Content = comment.Content,
+                            CreateDate = comment.CreateDate,
+                            UserName = user != null ? user?.UserName : "Anonymous",
+                            AvatarUrl = avatarUrl,
+                            UserId = user != null ? user.Id : null
+                        });
+                    }
                 }
 
                 return comments;

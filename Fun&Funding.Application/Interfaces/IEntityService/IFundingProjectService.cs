@@ -19,5 +19,7 @@ namespace Fun_Funding.Application.IService
         Task<ResultDTO<FundingProjectResponse>> UpdateFundingProjectStatus(Guid id, ProjectStatus status);
         Task<ResultDTO<bool>> CheckProjectOwner(Guid projectId);
         Task<ResultDTO<List<FundingProjectResponse>>> GetTop3MostFundedOngoingFundingProject();
+        Task<ResultDTO<PaginatedResponse<FundingProjectResponse>>> GetGameOwnerFundingProjects(ListRequest request, string? categoryName, ProjectStatus? status, decimal? fromTarget, decimal? toTarget);
+        Task<ResultDTO<PaginatedResponse<FundingProjectResponse>>> GetBackerDonatedProjects(ListRequest request, string? categoryName, ProjectStatus? status, decimal? fromTarget, decimal? toTarget);
     }
 }
