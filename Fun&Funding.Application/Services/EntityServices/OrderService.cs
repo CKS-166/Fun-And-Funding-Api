@@ -321,7 +321,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                             Date = DateTime.Now,
                             Message = $"purchased game <b>{marketplaceProject.Name}</b>",
                             NotificationType = NotificationType.MarketplacePurchase,
-                            Actor = new { user.Id, user.UserName, user.File.URL },
+                            Actor = new { user.Id, user.UserName, user.File?.URL },
                             ObjectId = marketplaceProject.Id,
                         };
                         // 3. send noti

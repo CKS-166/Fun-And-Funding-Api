@@ -75,7 +75,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 if (projectMilestone == null) return ResultDTO<ProjectMilestoneBackerResponse>.Fail("Project milestone not found!");
 
                 // check project milestone status
-                if (projectMilestone.Status != Domain.Enum.ProjectMilestoneStatus.Processing || projectMilestone.Status != Domain.Enum.ProjectMilestoneStatus.Warning)
+                if (projectMilestone.Status != Domain.Enum.ProjectMilestoneStatus.Processing && projectMilestone.Status != Domain.Enum.ProjectMilestoneStatus.Warning)
                     return ResultDTO<ProjectMilestoneBackerResponse>.Fail("This project milestone is currently not accepting reviews!");
 
                 // check if backer donate
