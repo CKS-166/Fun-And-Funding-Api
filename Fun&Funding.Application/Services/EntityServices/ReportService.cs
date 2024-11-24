@@ -196,6 +196,8 @@ namespace Fun_Funding.Application.Services.EntityServices
             {
                 case ReportType.User:
                     var exitedUser = await _unitOfWork.UserRepository.GetByIdAsync(exitedReport.ViolatorId);
+                    exitedUser.UserStatus = UserStatus.Inactive; 
+                    await _unitOfWork.CommitAsync();
                     if (exitedUser is null)
                     {
                         return ResultDTO<ViolentReport>.Fail("user can not found");
@@ -204,6 +206,8 @@ namespace Fun_Funding.Application.Services.EntityServices
                     break;
                 case ReportType.MarketplaceProject:
                     var marketplaceProject = await _unitOfWork.MarketplaceRepository.GetByIdAsync(exitedReport.ViolatorId);
+                    marketplaceProject.Status = ProjectStatus.Reported;
+                    await _unitOfWork.CommitAsync();
                     if (marketplaceProject is null)
                     {
                         return ResultDTO<ViolentReport>.Fail("can not found project");
@@ -212,6 +216,8 @@ namespace Fun_Funding.Application.Services.EntityServices
                     break;
                 case ReportType.FundingProject:
                     var exitedProject = await _unitOfWork.FundingProjectRepository.GetByIdAsync(exitedReport.ViolatorId);
+                    exitedProject.Status = ProjectStatus.Reported;
+                    await _unitOfWork.CommitAsync();
                     if (exitedProject is null)
                     {
                         return ResultDTO<ViolentReport>.Fail("can not found project");
