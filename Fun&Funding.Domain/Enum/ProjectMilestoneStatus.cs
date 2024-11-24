@@ -13,6 +13,7 @@ namespace Fun_Funding.Domain.Enum
         Completed,
         Warning,
         Failed,
-        Submitted
+        Submitted,
+        Resubmitted
     }
 }

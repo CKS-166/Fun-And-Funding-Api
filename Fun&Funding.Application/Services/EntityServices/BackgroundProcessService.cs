@@ -38,10 +38,17 @@ namespace Fun_Funding.Application.Services.EntityServices
                 {
                     bool statusChanged = false;
                     // If project stil present and end date has already pass
-                    if (project.Status == ProjectStatus.Processing && project.EndDate <= present && project.Balance < project.Target)
+                    if (project.Status == ProjectStatus.Processing && project.EndDate <= present)
                     {
-                        project.Status = ProjectStatus.Failed;
-                        statusChanged = true;
+                        if (project.Balance < project.Target)
+                        {
+                            project.Status = ProjectStatus.Failed;
+                            statusChanged = true;
+                        }else if (project.Balance >= project.Target)
+                        {
+                            project.Status = ProjectStatus.FundedSuccessful;
+                        }
+                       
                     }
                     // If admin has already approved project and start date reach today's date
                     else if (project.Status == ProjectStatus.Approved)
@@ -52,12 +59,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                             statusChanged = true;
                         }
                     }
-                    // If the project has reached its funding goal
-                    else if (project.Balance >= project.Target && project.Status == ProjectStatus.Processing)
-                    {
-                        project.Status = ProjectStatus.FundedSuccessful;
-                        statusChanged = true;
-                    }
+                    
                     else if (project.Status == ProjectStatus.Pending && project.StartDate <= present)
                     {
                         project.Status = ProjectStatus.Rejected;
