@@ -142,7 +142,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                     {
                         throw new ExceptionError((int)HttpStatusCode.BadRequest, checkValidateMilstone);
                     }
-                    if (projectMilestone.Status != ProjectMilestoneStatus.Processing)
+                    if (projectMilestone.Status != ProjectMilestoneStatus.Processing && projectMilestone.Status != ProjectMilestoneStatus.Warning)
                     {
                         throw new ExceptionError((int)HttpStatusCode.BadRequest, "Milestone for this project is not approved yet");
                     }

@@ -248,6 +248,10 @@ namespace Fun_Funding.Application.Services.EntityServices
                 };
                 var warnStatusList = new List<ProjectMilestoneStatus>()
                 {
+                    ProjectMilestoneStatus.Resubmitted,
+                };
+                var reSubmittedStatusList = new List<ProjectMilestoneStatus>()
+                {
                     ProjectMilestoneStatus.Completed,
                     ProjectMilestoneStatus.Failed
                 };
@@ -303,6 +307,11 @@ namespace Fun_Funding.Application.Services.EntityServices
                     statusChanged = true;
                 }
                 else if (projectMilestone.Status == ProjectMilestoneStatus.Warning && warnStatusList.Contains(request.Status))
+                {
+                    projectMilestone.Status = request.Status;
+                    statusChanged = true;
+                }
+                else if (projectMilestone.Status == ProjectMilestoneStatus.Resubmitted && reSubmittedStatusList.Contains(request.Status))
                 {
                     projectMilestone.Status = request.Status;
                     statusChanged = true;
