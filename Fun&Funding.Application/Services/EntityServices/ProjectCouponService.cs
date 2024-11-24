@@ -127,6 +127,57 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
+        public async Task<ResultDTO<List<ProjectCoupon>>> ChangeStatusCoupons(Guid projectId)
+        {
+            try
+            {
+                // Retrieve the list of coupons associated with the provided projectId
+                var coupons = await _unitOfWork.ProjectCouponRepository.GetAllAsync(x => x.MarketplaceProjectId == projectId);
+
+                if (coupons == null || !coupons.Any())
+                {
+                    return ResultDTO<List<ProjectCoupon>>.Fail("No coupons found for the given project.");
+                }
+
+                // Iterate through the list and toggle the status of each coupon
+                foreach (var coupon in coupons)
+                {
+                    if (!coupon.IsDeleted) // Ensure the coupon is not marked as deleted
+                    {
+                        coupon.Status = coupon.Status == ProjectCouponStatus.Enable
+                            ? ProjectCouponStatus.Disable
+                            : ProjectCouponStatus.Enable;
+
+                        _unitOfWork.ProjectCouponRepository.Update(coupon);
+                    }
+                }
+
+                // Commit the changes to the database
+                await _unitOfWork.CommitAsync();
+
+                return ResultDTO<List<ProjectCoupon>>.Success(coupons.ToList(), "Coupons status updated successfully.");
+            }
+            catch (Exception ex)
+            {
+                return ResultDTO<List<ProjectCoupon>>.Fail($"An error occurred while updating coupons: {ex.Message}");
+            }
+        }
+
+
+        public async Task<ResultDTO<List<CouponResponse>>> GetListCouponByProjectId(Guid projectId)
+        {
+            try
+            {
+                var list = await _unitOfWork.ProjectCouponRepository.GetAllAsync(x=>x.MarketplaceProjectId == projectId);
+                var result  = _mapper.Map<List<CouponResponse>>(list);
+                return ResultDTO<List<CouponResponse>>.Success(result, "successull recieve list coupons");
+                
+            }
+            catch (Exception ex) {
+                return ResultDTO<List<CouponResponse>>.Fail($"something went wrongs? error: {ex.Message}");
+            }
+        }
+
         public async Task<ResultDTO<ListCouponResponse>> ImportFile(IFormFile formFile, Guid projectId)
         {
             try
@@ -154,13 +205,14 @@ namespace Fun_Funding.Application.Services.EntityServices
                                 var coupon = new ProjectCoupon
                                 {
                                     Id = Guid.NewGuid(),
-                                    CouponKey = row.GetCell(0)?.ToString() ?? string.Empty, // Check for null and provide a default value
-                                    CouponName = row.GetCell(1)?.ToString() ?? string.Empty, // Check for null and provide a default value
-                                    DiscountRate = decimal.TryParse(row.GetCell(2)?.ToString(), out var commissionRate) ? commissionRate : 0, // Try parsing safely
+                                    CouponKey = row.GetCell(0)?.ToString() ?? string.Empty,
+                                    CouponName = row.GetCell(1)?.ToString() ?? string.Empty, 
+                                    DiscountRate = decimal.TryParse(row.GetCell(2)?.ToString(), out var commissionRate) ? commissionRate : 0, 
                                     CreatedDate = DateTime.Now,
-                                    Status = ProjectCouponStatus.Enable,
+                                    Status = ProjectCouponStatus.Disable,
                                     IsDeleted = false,
                                     MarketplaceProjectId = projectId,
+                                    
                                     MarketplaceProject = await _unitOfWork.MarketplaceRepository.GetByIdAsync(projectId),
                                 };
                                 couponList.Add(coupon);

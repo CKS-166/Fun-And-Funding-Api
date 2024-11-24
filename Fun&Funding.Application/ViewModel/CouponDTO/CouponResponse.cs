@@ -15,7 +15,6 @@ namespace Fun_Funding.Application.ViewModel.CouponDTO
         public string CouponName { get; set; }
         public decimal DiscountRate { get; set; }
         public ProjectCouponStatus Status { get; set; }
-        public DateTime ExpiredDate { get; set; }
         public Guid? MarketplaceProjectId { get; set; }
     }
 }
