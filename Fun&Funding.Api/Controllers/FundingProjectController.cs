@@ -38,6 +38,14 @@ namespace Fun_Funding.Api.Controllers
             return Ok(response);
         }
 
+        [HttpGet("owner/{id}")]
+        [Authorize(Roles = Role.GameOwner)]
+        public async Task<IActionResult> GetProjectAndOwner(Guid id)
+        {
+            var response = await _fundingProjectService.GetProjectByIdAndOwner(id);
+            return Ok(response);
+        }
+
         [HttpPut]
         [Authorize (Roles = Role.GameOwner)]
         public async Task<IActionResult> UpdateProject([FromForm] FundingProjectUpdateRequest req)
