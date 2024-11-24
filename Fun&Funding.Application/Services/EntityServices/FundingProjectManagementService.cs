@@ -479,7 +479,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 }
                 if (request.To != null)
                 {
-                    filter = c => c.EndDate >= (DateTime)request.To;
+                    filter = c => c.EndDate <= (DateTime)request.To;
                 }
                 if (status != null)
                 {
@@ -725,6 +725,194 @@ namespace Fun_Funding.Application.Services.EntityServices
                 {
                     throw exceptionError;
                 }
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
+        public async Task<ResultDTO<PaginatedResponse<FundingProjectResponse>>> GetGameOwnerFundingProjects(ListRequest request, string? categoryName, ProjectStatus? status, decimal? fromTarget, decimal? toTarget)
+        {
+            try
+            {
+                var authorUser = _userService.GetUserInfo().Result;
+                if (authorUser is null) {
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "Game Owner Not Found.");
+                }
+                User user = _mapper.Map<User>(authorUser._data);
+
+                Expression<Func<FundingProject, bool>> filter = u => u.UserId == user.Id;
+                Expression<Func<FundingProject, object>> orderBy = u => u.CreatedDate;
+
+                if (!string.IsNullOrEmpty(request.SearchValue))
+                {
+                    string searchLower = request.SearchValue.ToLower();
+                    filter = u =>
+                        (u.Name != null && u.Name.ToLower().Contains(searchLower));
+                }
+                if (!string.IsNullOrEmpty(request.OrderBy))
+                {
+                    switch (request.OrderBy.ToLower())
+                    {
+                        case "balance":
+                            orderBy = u => u.Balance;
+                            break;
+                        case "target":
+                            orderBy = u => u.Target;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                if (!string.IsNullOrEmpty(categoryName))
+                {
+                    filter = c => c.Categories.Any(category => category.Name.ToLower().Contains(categoryName.ToLower()));
+                }
+                if (request.From != null)
+                {
+                    filter = c => c.StartDate >= (DateTime)request.From;
+                }
+                if (request.To != null)
+                {
+                    filter = c => c.EndDate <= (DateTime)request.To;
+                }
+                if (status != null)
+                {
+                    filter = c => c.Status.Equals(status);
+                }
+                if (fromTarget != null)
+                {
+                    filter = c => c.Target >= fromTarget;
+                }
+                if (toTarget != null)
+                {
+                    filter = c => c.Target <= toTarget;
+                }
+                var list = await _unitOfWork.FundingProjectRepository.GetAllAsync(
+                       filter: filter,
+                       orderBy: orderBy,
+                       isAscending: request.IsAscending.Value,
+                       pageIndex: request.PageIndex,
+                       pageSize: request.PageSize,
+                       includeProperties: "Categories,Packages,SourceFiles,Packages.RewardItems,Wallet,User");
+                if (list != null && list.Count() >= 0)
+                {
+                    var totalItems = _unitOfWork.FundingProjectRepository.GetAll(filter).Count();
+                    var totalPages = (int)Math.Ceiling((double)totalItems / (int)request.PageSize);
+                    IEnumerable<FundingProjectResponse> projects = _mapper.Map<IEnumerable<FundingProjectResponse>>(list);
+
+                    PaginatedResponse<FundingProjectResponse> response = new PaginatedResponse<FundingProjectResponse>
+                    {
+                        PageSize = request.PageSize.Value,
+                        PageIndex = request.PageIndex.Value,
+                        TotalItems = totalItems,
+                        TotalPages = totalPages,
+                        Items = projects
+                    };
+
+                    return ResultDTO<PaginatedResponse<FundingProjectResponse>>.Success(response);
+                }
+                else
+                {
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "Project Not Found.");
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
+        public async Task<ResultDTO<PaginatedResponse<FundingProjectResponse>>> GetBackerDonatedProjects(ListRequest request, string? categoryName, ProjectStatus? status, decimal? fromTarget, decimal? toTarget)
+        {
+            try
+            {
+                var authorUser = _userService.GetUserInfo().Result;
+                if (authorUser is null)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "Backer Not Found.");
+                }
+                User user = _mapper.Map<User>(authorUser._data);
+
+                List<PackageBacker> pbList = _unitOfWork.PackageBackerRepository.GetQueryable().Where(pb => pb.UserId.Equals(user.Id)).ToList();
+
+                // Extract Package IDs
+                var packageIds = pbList.Select(pb => pb.PackageId).ToList();
+                //Add filter to FundingProject via Package IDs
+                Expression<Func<FundingProject, bool>> filter = u => u.Packages.Any(p => packageIds.Contains(p.Id));
+                Expression<Func<FundingProject, object>> orderBy = u => u.CreatedDate;
+
+                if (!string.IsNullOrEmpty(request.SearchValue))
+                {
+                    string searchLower = request.SearchValue.ToLower();
+                    filter = u =>
+                        (u.Name != null && u.Name.ToLower().Contains(searchLower));
+                }
+                if (!string.IsNullOrEmpty(request.OrderBy))
+                {
+                    switch (request.OrderBy.ToLower())
+                    {
+                        case "balance":
+                            orderBy = u => u.Balance;
+                            break;
+                        case "target":
+                            orderBy = u => u.Target;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                if (!string.IsNullOrEmpty(categoryName))
+                {
+                    filter = c => c.Categories.Any(category => category.Name.ToLower().Contains(categoryName.ToLower()));
+                }
+                if (request.From != null)
+                {
+                    filter = c => c.StartDate >= (DateTime)request.From;
+                }
+                if (request.To != null)
+                {
+                    filter = c => c.EndDate <= (DateTime)request.To;
+                }
+                if (status != null)
+                {
+                    filter = c => c.Status.Equals(status);
+                }
+                if (fromTarget != null)
+                {
+                    filter = c => c.Target >= fromTarget;
+                }
+                if (toTarget != null)
+                {
+                    filter = c => c.Target <= toTarget;
+                }
+                var list = await _unitOfWork.FundingProjectRepository.GetAllAsync(
+                       filter: filter,
+                       orderBy: orderBy,
+                       isAscending: request.IsAscending.Value,
+                       pageIndex: request.PageIndex,
+                       pageSize: request.PageSize,
+                       includeProperties: "Categories,Packages,SourceFiles,Packages.RewardItems,Wallet,User");
+                if (list != null && list.Count() >= 0)
+                {
+                    var totalItems = _unitOfWork.FundingProjectRepository.GetAll(filter).Count();
+                    var totalPages = (int)Math.Ceiling((double)totalItems / (int)request.PageSize);
+                    IEnumerable<FundingProjectResponse> projects = _mapper.Map<IEnumerable<FundingProjectResponse>>(list);
+
+                    PaginatedResponse<FundingProjectResponse> response = new PaginatedResponse<FundingProjectResponse>
+                    {
+                        PageSize = request.PageSize.Value,
+                        PageIndex = request.PageIndex.Value,
+                        TotalItems = totalItems,
+                        TotalPages = totalPages,
+                        Items = projects
+                    };
+
+                    return ResultDTO<PaginatedResponse<FundingProjectResponse>>.Success(response);
+                }
+                else
+                {
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "Project Not Found.");
+                }
+            }
+            catch (Exception ex)
+            {
                 throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
             }
         }

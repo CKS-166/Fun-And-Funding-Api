@@ -81,5 +81,17 @@ namespace Fun_Funding.Api.Controllers
             var response = await _marketplace.CountPlatformProjects();
             return Ok(response);
         }
+        [HttpGet("backer-donations-project")]
+        public async Task<IActionResult> GetBackerPurchasedMarketplaceProject([FromQuery] ListRequest request)
+        {
+            var response = await _marketplace.GetBackerPurchasedMarketplaceProject(request);
+            return Ok(response);
+        }
+        [HttpGet("game-owner-projects")]
+        public async Task<IActionResult> GetGameOwnerMarketplaceProject([FromQuery] ListRequest request)
+        {
+            var response = await _marketplace.GetGameOwnerMarketplaceProject(request);
+            return Ok(response);
+        }
     }
 }

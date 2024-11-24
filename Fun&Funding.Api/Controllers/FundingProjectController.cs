@@ -74,5 +74,19 @@ namespace Fun_Funding.Api.Controllers
             var response = await _fundingProjectService.GetTop3MostFundedOngoingFundingProject();
             return Ok(response);
         }
+
+        [HttpGet("game-owner-projects")]
+        public async Task<IActionResult> GetGameOwnerFundingProjects([FromQuery] ListRequest request, string? categoryName, ProjectStatus? status, decimal? fromTarget, decimal? toTarget)
+        {
+            var response = await _fundingProjectService.GetGameOwnerFundingProjects(request, categoryName, status, fromTarget, toTarget);
+            return Ok(response);
+        }
+
+        [HttpGet("backer-donations-project")]
+        public async Task<IActionResult> GetBackerDonatedProjects([FromQuery] ListRequest request, string? categoryName, ProjectStatus? status, decimal? fromTarget, decimal? toTarget)
+        {
+            var response = await _fundingProjectService.GetBackerDonatedProjects(request, categoryName, status, fromTarget, toTarget);
+            return Ok(response);
+        }
     }
 }

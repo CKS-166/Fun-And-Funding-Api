@@ -723,5 +723,152 @@ namespace Fun_Funding.Application.Services.EntityServices
                 throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
             }
         }
+
+        public async Task<ResultDTO<PaginatedResponse<MarketplaceProjectInfoResponse>>> GetGameOwnerMarketplaceProject(ListRequest request)
+        {
+
+            try
+            {
+                var authorUser = _userService.GetUserInfo().Result;
+                if (authorUser is null)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "Game Owner Not Found.");
+                }
+                User user = _mapper.Map<User>(authorUser._data);
+
+                Expression<Func<MarketplaceProject, bool>> filter = u => u.FundingProject.UserId == user.Id;
+                Expression<Func<MarketplaceProject, object>> orderBy = c => c.CreatedDate;
+
+                if (!string.IsNullOrEmpty(request.OrderBy))
+                {
+                    switch (request.OrderBy.ToLower())
+                    {
+                        case "name":
+                            orderBy = c => c.Name;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(request.SearchValue))
+                {
+                    filter = c => c.Name.ToLower().Contains(request.SearchValue.ToLower());
+                }
+
+                var list = await _unitOfWork.MarketplaceRepository.GetAllAsync(
+                   filter: filter,
+                   orderBy: orderBy,
+                   isAscending: request.IsAscending.Value,
+                   includeProperties: "MarketplaceFiles,FundingProject.User,FundingProject.Categories,Wallet",
+                   pageIndex: request.PageIndex,
+                   pageSize: request.PageSize);
+
+                var totalItems = _unitOfWork.MarketplaceRepository.GetAll(filter).Count();
+                var totalPages = (int)Math.Ceiling((double)totalItems / (int)request.PageSize);
+                IEnumerable<MarketplaceProjectInfoResponse> marketplaceProjects =
+                    _mapper.Map<IEnumerable<MarketplaceProjectInfoResponse>>(list);
+
+                PaginatedResponse<MarketplaceProjectInfoResponse> response = new PaginatedResponse<MarketplaceProjectInfoResponse>
+                {
+                    PageSize = request.PageSize.Value,
+                    PageIndex = request.PageIndex.Value,
+                    TotalItems = totalItems,
+                    TotalPages = totalPages,
+                    Items = marketplaceProjects
+                };
+
+                return ResultDTO<PaginatedResponse<MarketplaceProjectInfoResponse>>.Success(response);
+
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
+
+        public async Task<ResultDTO<PaginatedResponse<MarketplaceProjectInfoResponse>>> GetBackerPurchasedMarketplaceProject(ListRequest request)
+        {
+
+            try
+            {
+                var authorUser = _userService.GetUserInfo().Result;
+                if (authorUser is null)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "Game Owner Not Found.");
+                }
+                User user = _mapper.Map<User>(authorUser._data);
+
+                List<Order> orderList = _unitOfWork.OrderRepository.GetQueryable().Where(pb => pb.UserId.Equals(user.Id)).ToList();
+
+                // Extract Marketplace IDs
+                var marketplaceProjectIds = orderList
+                .SelectMany(o => o.OrderDetails)
+                .Select(od => od.DigitalKey)
+                .Where(dk => dk != null)
+                .Select(dk => dk.MarketplaceProject.Id)
+                .Distinct()
+                .ToList();
+
+                Expression<Func<MarketplaceProject, bool>> filter = u => marketplaceProjectIds.Contains(u.Id);
+                Expression<Func<MarketplaceProject, object>> orderBy = c => c.CreatedDate;
+
+                if (!string.IsNullOrEmpty(request.OrderBy))
+                {
+                    switch (request.OrderBy.ToLower())
+                    {
+                        case "name":
+                            orderBy = c => c.Name;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(request.SearchValue))
+                {
+                    filter = c => c.Name.ToLower().Contains(request.SearchValue.ToLower());
+                }
+
+                var list = await _unitOfWork.MarketplaceRepository.GetAllAsync(
+                   filter: filter,
+                   orderBy: orderBy,
+                   isAscending: request.IsAscending.Value,
+                   includeProperties: "MarketplaceFiles,FundingProject.User,FundingProject.Categories,Wallet",
+                   pageIndex: request.PageIndex,
+                   pageSize: request.PageSize);
+
+                var totalItems = _unitOfWork.MarketplaceRepository.GetAll(filter).Count();
+                var totalPages = (int)Math.Ceiling((double)totalItems / (int)request.PageSize);
+                IEnumerable<MarketplaceProjectInfoResponse> marketplaceProjects =
+                    _mapper.Map<IEnumerable<MarketplaceProjectInfoResponse>>(list);
+
+                PaginatedResponse<MarketplaceProjectInfoResponse> response = new PaginatedResponse<MarketplaceProjectInfoResponse>
+                {
+                    PageSize = request.PageSize.Value,
+                    PageIndex = request.PageIndex.Value,
+                    TotalItems = totalItems,
+                    TotalPages = totalPages,
+                    Items = marketplaceProjects
+                };
+
+                return ResultDTO<PaginatedResponse<MarketplaceProjectInfoResponse>>.Success(response);
+
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
     }
 }
