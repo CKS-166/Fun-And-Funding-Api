@@ -208,7 +208,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                    filter: filter,
                    orderBy: orderBy,
                    isAscending: request.IsAscending.Value,
-                   includeProperties: "MarketplaceFiles,FundingProject.User,FundingProject.Categories,Wallet",
+                   includeProperties: "MarketplaceFiles,FundingProject.User,FundingProject.Categories,Wallet,Wallet.BankAccount",
                    pageIndex: request.PageIndex,
                    pageSize: request.PageSize);
 
@@ -804,13 +804,21 @@ namespace Fun_Funding.Application.Services.EntityServices
                 }
                 User user = _mapper.Map<User>(authorUser._data);
 
-                List<Order> orderList = _unitOfWork.OrderRepository.GetQueryable().Where(pb => pb.UserId.Equals(user.Id)).ToList();
+                List<Order> orderList = _unitOfWork.OrderRepository
+                .GetQueryable()
+                .Where(pb => pb.UserId.Equals(user.Id))
+                .Include(o => o.OrderDetails)
+                .ThenInclude(od => od.DigitalKey)
+                .ThenInclude(dk => dk.MarketplaceProject)
+                .ToList();
 
                 // Extract Marketplace IDs
                 var marketplaceProjectIds = orderList
+                .Where(o => o.OrderDetails != null)
                 .SelectMany(o => o.OrderDetails)
+                .Where(od => od.DigitalKey != null)
                 .Select(od => od.DigitalKey)
-                .Where(dk => dk != null)
+                .Where(dk => dk.MarketplaceProject != null)
                 .Select(dk => dk.MarketplaceProject.Id)
                 .Distinct()
                 .ToList();

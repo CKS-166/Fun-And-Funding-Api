@@ -22,5 +22,6 @@ namespace Fun_Funding.Application.ViewModel.MarketplaceProjectDTO
         public required virtual ICollection<CategoryResponse> Categories { get; set; }
         public ProjectStatus Status { get; set; }
         public required WalletFundingResponse Wallet { get; set; }
+        public DateTime CreatedDate { get; set; }
     }
 }
