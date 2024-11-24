@@ -916,5 +916,44 @@ namespace Fun_Funding.Application.Services.EntityServices
                 throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
             }
         }
+
+        public async Task<ResultDTO<FundingProjectResponse>> GetProjectByIdAndOwner(Guid id)
+        {
+            try
+            {
+                var authorUser = _userService.GetUserInfo().Result;
+                if (authorUser is null)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "Backer Not Found.");
+                }
+                User user = _mapper.Map<User>(authorUser._data);
+                var project = _unitOfWork.FundingProjectRepository.GetQueryable()
+                    .Include(p => p.Packages).ThenInclude(pack => pack.RewardItems)
+                    .Include(p => p.SourceFiles.Where(sf => sf.IsDeleted == false))
+                    .Include(p => p.Wallet).ThenInclude(w => w.BankAccount)
+                    .Include(p => p.User)
+                    .Include(p => p.Categories)
+                    .AsSplitQuery()
+                    .FirstOrDefault(p => p.Id == id);
+                if (project is null)
+                {
+                    return ResultDTO<FundingProjectResponse>.Fail("Project not found", 404);
+                }
+                if (user.Id != project.UserId)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "User is not the owner of the project");
+                }
+                FundingProjectResponse result = _mapper.Map<FundingProjectResponse>(project);
+                return ResultDTO<FundingProjectResponse>.Success(result);
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+                throw ex;
+            }
+        }
     }
 }

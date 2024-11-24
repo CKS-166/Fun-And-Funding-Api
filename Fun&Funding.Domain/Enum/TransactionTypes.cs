@@ -16,6 +16,8 @@ namespace Fun_Funding.Domain.Enum
         FundingRefund, // case funding project fails
         FundingPurchase,
         OrderPurchase,
-        MarketplaceWithdraw
+        MarketplaceWithdraw,
+        MilestoneFirstHalf,
+        MilestoneSecondHalf
     }
 }
