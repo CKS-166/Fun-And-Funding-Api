@@ -40,9 +40,9 @@ namespace Fun_Funding.Api.Controllers
             return Ok(result);
         }
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetMilestoneById(Guid id)
+        public async Task<IActionResult> GetMilestoneById(Guid id, [FromQuery] int? filter = 0)
         {
-            var result = _milestoneService.GetMilestoneById(id);
+            var result = _milestoneService.GetMilestoneById(id, filter);
             return Ok(result);
         }
     }
