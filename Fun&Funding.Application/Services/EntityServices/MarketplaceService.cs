@@ -208,7 +208,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                    filter: filter,
                    orderBy: orderBy,
                    isAscending: request.IsAscending.Value,
-                   includeProperties: "MarketplaceFiles,FundingProject.User,FundingProject.Categories,Wallet",
+                   includeProperties: "MarketplaceFiles,FundingProject.User,FundingProject.Categories,Wallet,Wallet.BankAccount",
                    pageIndex: request.PageIndex,
                    pageSize: request.PageSize);
 
