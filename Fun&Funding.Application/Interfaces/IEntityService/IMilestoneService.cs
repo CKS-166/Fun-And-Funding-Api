@@ -14,6 +14,6 @@ namespace Fun_Funding.Application.IService
         Task<ResultDTO<List<MilestoneResponse>>> GetListLastestMilestone(bool? status);
         Task<ResultDTO<List<MilestoneResponse>>> GetMilestoneByVersionAndOrder(int? Order, int? Version);
 
-        Task<ResultDTO<MilestoneResponse>> GetMilestoneById(Guid milestoneId);
+        Task<ResultDTO<MilestoneResponse>> GetMilestoneById(Guid milestoneId, int? filter);
     }
 }

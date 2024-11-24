@@ -148,17 +148,34 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
-        public async Task<ResultDTO<MilestoneResponse>> GetMilestoneById(Guid milestoneId)
+        public async Task<ResultDTO<MilestoneResponse>> GetMilestoneById(Guid milestoneId, int? filter)
         {
             try
             {
-                var milestone = _unitOfWork.MilestoneRepository.GetQueryable()
-                    .Include(m => m.Requirements).FirstOrDefault(m => m.Id == milestoneId && m.IsDeleted == false);
+                // Base milestone query
+                var milestoneQuery = _unitOfWork.MilestoneRepository.GetQueryable()
+                    .Where(m => m.Id == milestoneId && m.IsDeleted == false);
+
+                // Apply filter to include requirements conditionally
+                if (filter == 1)
+                {
+                    milestoneQuery = milestoneQuery.Include(m => m.Requirements.Where(r => r.IsDeleted == false));
+                }
+                else
+                {
+                    milestoneQuery = milestoneQuery.Include(m => m.Requirements);
+                }
+
+                // Execute the query
+                var milestone = milestoneQuery.FirstOrDefault();
                 if (milestone == null)
                 {
                     throw new ExceptionError((int)HttpStatusCode.NotFound, "Milestone not found");
                 }
+
+                // Map the milestone to the response object
                 var response = _mapper.Map<MilestoneResponse>(milestone);
+
                 return ResultDTO<MilestoneResponse>.Success(response);
             }
             catch (Exception ex)

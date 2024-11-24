@@ -7,6 +7,7 @@ using Fun_Funding.Application.ViewModel.ProjectMilestoneDTO;
 using Fun_Funding.Domain.Entity;
 using Fun_Funding.Domain.Enum;
 using Microsoft.EntityFrameworkCore;
+using NPOI.SS.Formula.Functions;
 using Org.BouncyCastle.Asn1.X509;
 using System;
 using System.Collections.Generic;
@@ -245,6 +246,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 {
                     projectMilestone.Status = request.Status;
                     statusChanged = true;
+                    //warning
                     if (request.Status.Equals(ProjectMilestoneStatus.Warning))
                     {
                         if (request.NewEndDate == null)
@@ -256,6 +258,16 @@ namespace Fun_Funding.Application.Services.EntityServices
                             projectMilestone.EndDate = request.NewEndDate.Value;
                         }
                     }
+                    //submitted
+                    if ((request.Status.Equals(ProjectMilestoneStatus.Submitted)))
+                    {
+                        var check = CheckMandatoryRequirement(projectMilestone.Id);
+                        if (check)
+                        {
+                            throw new ExceptionError((int)HttpStatusCode.BadRequest, "Mandatory requirements must be completed before submitting");
+                        }
+                    }
+
                 }
                 else if (projectMilestone.Status == ProjectMilestoneStatus.Submitted && approvedStatusList.Contains(request.Status))
                 {
@@ -269,6 +281,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                     if (projectMilestone.Status == ProjectMilestoneStatus.Failed)
                     {
                         await RefundBackersAsync(projectMilestone.Id);
+                        await FailedProjectWhenMilestoneFailed(projectMilestone.FundingProjectId);
                     }
                 }
                 if (statusChanged)
@@ -409,6 +422,63 @@ namespace Fun_Funding.Application.Services.EntityServices
                 throw new Exception(ex.Message, ex);
             }
            
+        }
+
+        public async Task FailedProjectWhenMilestoneFailed(Guid projectId)
+        {
+            try
+            {
+                var project = _unitOfWork.FundingProjectRepository.GetQueryable()
+                    .Include(p => p.ProjectMilestones)
+                    .FirstOrDefault(p => p.Id == projectId);
+
+                if (project == null)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.BadRequest,"Project not found");
+                }
+                project.Status = ProjectStatus.Failed;
+                foreach(ProjectMilestone pm in project.ProjectMilestones)
+                {
+                    pm.Status = ProjectMilestoneStatus.Failed;
+                }
+                _unitOfWork.Commit();
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public bool CheckMandatoryRequirement(Guid projectMilestoneId)
+        {
+            try
+            {
+                var projectMilestone =  _unitOfWork.ProjectMilestoneRepository.GetQueryable()
+                    .Include(pm => pm.ProjectMilestoneRequirements)
+                    .ThenInclude(pmr => pmr.Requirement)
+                    .FirstOrDefault(pm => pm.Id == projectMilestoneId);
+                var quillEmptyPlaceholders = new HashSet<string> { "<p><br></p>", "<p></p>" };
+                foreach (ProjectMilestoneRequirement req in projectMilestone.ProjectMilestoneRequirements)
+                {
+                    if ((string.IsNullOrWhiteSpace(req.Content) || quillEmptyPlaceholders.Contains(req.Content.Trim())) && req.Requirement.Status == FixedRequirementStatus.Mandatory)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+                throw new Exception(ex.Message);
+            }
         }
         public async Task<ResultDTO<PaginatedResponse<ProjectMilestoneResponse>>> GetProjectMilestones(
             ListRequest request,
