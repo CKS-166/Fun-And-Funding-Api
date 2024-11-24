@@ -2,6 +2,8 @@
 using Fun_Funding.Application.ExceptionHandler;
 using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel;
+using Fun_Funding.Application.ViewModel.FundingProjectDTO;
+using Fun_Funding.Application.ViewModel.PackageBackerDTO;
 using Fun_Funding.Application.ViewModel.ProjectMilestoneBackerDTO;
 using Fun_Funding.Application.ViewModel.ProjectMilestoneDTO;
 using Fun_Funding.Domain.Entity;
@@ -93,10 +95,15 @@ namespace Fun_Funding.Application.Services.EntityServices
                     Status = ProjectMilestoneStatus.Pending,
                     MilestoneId = request.MilestoneId,
                     FundingProjectId = project.Id,
-                    CreatedDate = request.CreatedDate,
+                    Title = request.Title,
                     IsDeleted = false,
-
                 };
+
+                if (!String.IsNullOrEmpty(request.Title) && !String.IsNullOrEmpty(request.Introduction))
+                {
+                    projectMilestone.Introduction = request.Introduction;
+                    projectMilestone.CreatedDate = request.CreatedDate;
+                }
 
                 await _unitOfWork.ProjectMilestoneRepository.AddAsync(projectMilestone);
                 _unitOfWork.Commit();
@@ -211,8 +218,24 @@ namespace Fun_Funding.Application.Services.EntityServices
         {
             try
             {
-                var projectMilestone = await _unitOfWork.ProjectMilestoneRepository.GetAsync(pm => pm.Id == request.ProjectMilestoneId);
+                var projectMilestone = await _unitOfWork.ProjectMilestoneRepository
+                    .GetQueryable()
+                    .Include(pm => pm.Milestone)
+                    .FirstOrDefaultAsync(pm => pm.Id == request.ProjectMilestoneId);
                 if (projectMilestone == null) return ResultDTO<string>.Fail("The requested project milestone is not found!");
+
+                var fundingProject = await _unitOfWork.FundingProjectRepository
+                    .GetQueryable()
+                    .Include(p => p.Wallet)
+                    .Include(p => p.ProjectMilestones)
+                    .FirstOrDefaultAsync(p => p.ProjectMilestones.Any(m => m.Id == request.ProjectMilestoneId));
+
+                if (fundingProject == null)
+                {
+                    throw new Exception("Corresponding funding project not found!");
+                }
+
+
 
                 // check project milestone current status
                 // ...
@@ -236,11 +259,16 @@ namespace Fun_Funding.Application.Services.EntityServices
                     if (projectMilestone.Milestone.MilestoneOrder == 1)
                     {
                         await ChargeCommissionFee(projectMilestone.Id);
-
                     }
+                    await _transactionService.CreateTransactionAsync(
+                       totalAmount: (decimal) projectMilestone.TotalAmount,
+                       description: "Funding withdrawn",
+                       transactionType: TransactionTypes.FundingWithdraw,
+                       walletId: fundingProject.Wallet.Id
+               );
                     projectMilestone.Status = request.Status;
                     statusChanged = true;
-                    
+
                 }
                 else if (projectMilestone.Status == ProjectMilestoneStatus.Processing && processingStatusList.Contains(request.Status))
                 {
@@ -365,11 +393,11 @@ namespace Fun_Funding.Application.Services.EntityServices
 
                 // Add the commission fee (5%)
                 decimal commissionFeePercentage = 5m;
-                decimal refundablePercentage = 1m - completedDisbursementPercentage ;
+                decimal refundablePercentage = 1m - completedDisbursementPercentage;
 
                 // Calculate the refundable amount
                 decimal totalFunds = projectMilestone.FundingProject.Wallet.Balance;
-                decimal refundableAmount = refundablePercentage  * totalFunds;
+                decimal refundableAmount = refundablePercentage * totalFunds;
 
                 // Get all backers for the funding project
                 var packageBackers = await _unitOfWork.PackageBackerRepository.GetQueryable()
@@ -415,13 +443,13 @@ namespace Fun_Funding.Application.Services.EntityServices
                 projectMilestone.FundingProject.Wallet.Balance -= refundableAmount;
 
                 // Save changes to the database
-                 _unitOfWork.Commit();
+                _unitOfWork.Commit();
             }
             catch (Exception ex)
             {
                 throw new Exception(ex.Message, ex);
             }
-           
+
         }
 
         public async Task FailedProjectWhenMilestoneFailed(Guid projectId)
@@ -554,23 +582,23 @@ namespace Fun_Funding.Application.Services.EntityServices
                     ",ProjectMilestoneRequirements.RequirementFiles,ProjectMilestoneRequirements.Requirement"
                 );
 
-                    var totalItems = _unitOfWork.ProjectMilestoneRepository.GetAll(filter).Count();
-                    var totalPages = (int)Math.Ceiling((double)totalItems / (request.PageSize ?? 10));
+                var totalItems = _unitOfWork.ProjectMilestoneRepository.GetAll(filter).Count();
+                var totalPages = (int)Math.Ceiling((double)totalItems / (request.PageSize ?? 10));
 
-                    // Map to the response DTO.
-                    var responseItems = _mapper.Map<IEnumerable<ProjectMilestoneResponse>>(list);
+                // Map to the response DTO.
+                var responseItems = _mapper.Map<IEnumerable<ProjectMilestoneResponse>>(list);
 
-                    var response = new PaginatedResponse<ProjectMilestoneResponse>
-                    {
-                        PageSize = request.PageSize ?? 10,
-                        PageIndex = request.PageIndex ?? 1,
-                        TotalItems = totalItems,
-                        TotalPages = totalPages,
-                        Items = responseItems
-                    };
+                var response = new PaginatedResponse<ProjectMilestoneResponse>
+                {
+                    PageSize = request.PageSize ?? 10,
+                    PageIndex = request.PageIndex ?? 1,
+                    TotalItems = totalItems,
+                    TotalPages = totalPages,
+                    Items = responseItems
+                };
 
-                    return ResultDTO<PaginatedResponse<ProjectMilestoneResponse>>.Success(response);
-                
+                return ResultDTO<PaginatedResponse<ProjectMilestoneResponse>>.Success(response);
+
             }
             catch (Exception ex)
             {
