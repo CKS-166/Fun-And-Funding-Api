@@ -81,7 +81,7 @@ namespace Fun_Funding.Api.Controllers
             var response = await _marketplace.CountPlatformProjects();
             return Ok(response);
         }
-        [HttpGet("backer-donations-project")]
+        [HttpGet("backer-purchase-projects")]
         public async Task<IActionResult> GetBackerPurchasedMarketplaceProject([FromQuery] ListRequest request)
         {
             var response = await _marketplace.GetBackerPurchasedMarketplaceProject(request);

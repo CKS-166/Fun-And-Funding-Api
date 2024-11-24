@@ -8,6 +8,7 @@ using Fun_Funding.Domain.Entity;
 using Fun_Funding.Domain.Entity.NoSqlEntities;
 using Fun_Funding.Domain.Enum;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
@@ -76,7 +77,7 @@ namespace Fun_Funding.Application.Services.EntityServices
             {
                 var list = _unitOfWork.CommentRepository.GetAll().Where(c => c.FundingProjectId == id);
                 List<CommentViewResponse> comments = new List<CommentViewResponse>();
-                if (comments != null && comments.Count > 0)
+                if (list != null)
                 {
                     foreach (var comment in list)
                     {
@@ -115,7 +116,7 @@ namespace Fun_Funding.Application.Services.EntityServices
             {
                 var list = _unitOfWork.CommentRepository.GetAll().Where(c => c.MarketplaceProjectId == id);
                 List<CommentViewResponse> comments = new List<CommentViewResponse>();
-                if(comments != null && comments.Count > 0)
+                if(list != null)
                 {
                     foreach (var comment in list)
                     {
