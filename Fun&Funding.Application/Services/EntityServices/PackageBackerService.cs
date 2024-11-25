@@ -89,8 +89,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                     .Include(w => w.FundingProject)
                     .FirstOrDefault(w => w.FundingProject.Id == package.ProjectId);
 
-                projectWallet.Balance += packageBackerRequest.DonateAmount;
-                if (wallet.Balance > 0)
+                if (wallet.Balance > 0 && wallet.Balance >= packageBackerRequest.DonateAmount)
                 {
                     wallet.Balance -= packageBackerRequest.DonateAmount;
                 }
@@ -98,7 +97,9 @@ namespace Fun_Funding.Application.Services.EntityServices
                 {
                     throw new ExceptionError((int)HttpStatusCode.BadRequest, "Backer wallet is not enough money for donation! Please charge more");
                 }
-               
+                projectWallet.Balance += packageBackerRequest.DonateAmount;
+
+
                 Package donatedPack = _unitOfWork.PackageRepository.GetById(packageBackerRequest.PackageId);
                 donatedPack.LimitQuantity -= 1;
                 await _unitOfWork.PackageBackerRepository.AddAsync(packageBacker);
@@ -126,7 +127,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 // 1. get recipientsIds
                 List<Guid> recipientsId = new List<Guid>();
                 recipientsId.Add(project.UserId);
-                recipientsId.Add(Guid.Parse("f766c910-4f6a-421e-a1a3-61534e6005c3"));
+                //recipientsId.Add(Guid.Parse("f766c910-4f6a-421e-a1a3-61534e6005c3"));
                 // 2. initiate new Notification object
                 var notification = new Notification
                 {
