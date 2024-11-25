@@ -564,6 +564,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                     ProjectMilestoneId = projectMilestone.Id
                 };
                 projectMilestone.FundingProject.Wallet.Balance -= transferMoney;
+                _unitOfWork.TransactionRepository.Add(transaction);
                 _unitOfWork.Commit();
             }
             catch (Exception ex)
