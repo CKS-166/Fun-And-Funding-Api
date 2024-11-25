@@ -27,7 +27,6 @@ namespace Fun_Funding.Api.Controllers
             return Ok(response);
         }
         [HttpPost("{marketplaceProjectId}")]
-        [Authorize(Roles = Role.Backer)]
         public async Task<IActionResult> AddGameToUserCart([FromRoute]Guid marketplaceProjectId)
         {
             var response = await _cartService.AddGameToUserCart(marketplaceProjectId);

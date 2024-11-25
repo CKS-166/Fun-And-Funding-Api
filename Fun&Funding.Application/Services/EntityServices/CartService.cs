@@ -17,6 +17,8 @@ using Fun_Funding.Domain.Entity.NoSqlEntities;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using Microsoft.EntityFrameworkCore;
+using Fun_Funding.Domain.Constrain;
+using Microsoft.AspNetCore.Identity;
 
 namespace Fun_Funding.Application.Services.EntityServices
 {
@@ -24,13 +26,17 @@ namespace Fun_Funding.Application.Services.EntityServices
     {
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly UserManager<User> _userManager;
         private readonly IUserService _userService;
+        private readonly RoleManager<IdentityRole<Guid>> _roleManager;
 
-        public CartService(IMapper mapper, IUnitOfWork unitOfWork, IUserService userService)
+        public CartService(IMapper mapper, IUnitOfWork unitOfWork, IUserService userService, UserManager<User> userManager, RoleManager<IdentityRole<Guid>> roleManager)
         {
             _mapper = mapper;
             _unitOfWork = unitOfWork;
             _userService = userService;
+            _userManager = userManager;
+            _roleManager = roleManager;
         }
 
         public async Task<ResultDTO<CartInfoResponse>> GetUserCartInfo()
@@ -68,6 +74,16 @@ namespace Fun_Funding.Application.Services.EntityServices
             {
                 var user = await _userService.GetUserInfo();
                 var existUser = _mapper.Map<User>(user._data);
+
+                var roles = await _userManager.GetRolesAsync(existUser);
+                if (roles.Contains(Role.GameOwner))
+                {
+                    throw new ExceptionError((int)HttpStatusCode.Unauthorized, "Game Owner cannot purchase games.");
+                }
+                else if (roles.Contains(Role.Admin))
+                {
+                    throw new ExceptionError((int)HttpStatusCode.Unauthorized, "Admin cannot purchase games.");
+                }
 
                 var cart = _unitOfWork.CartRepository
                     .GetQueryable()
