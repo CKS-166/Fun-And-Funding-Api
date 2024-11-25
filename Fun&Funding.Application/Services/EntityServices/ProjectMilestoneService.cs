@@ -322,7 +322,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                     }
                     if (projectMilestone.Status == ProjectMilestoneStatus.Completed)
                     {
-                        TransferHalfMilestone(projectMilestone.Id, 2);
+                        await TransferHalfMilestone(projectMilestone.Id, 2);
                     }
                 }
                 if (statusChanged)
