@@ -81,7 +81,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                         (t.WalletId != null &&
                          _unitOfWork.WalletRepository.GetQueryable()
                              .Any(w => w.Id == t.WalletId && w.FundingProject.Id == projectId)) // Check Wallet related to the project
-                    ).OrderBy(t => t.CreatedDate)
+                    ).OrderByDescending(t => t.CreatedDate)
                     .ToListAsync();
 
                 if (transactions == null || transactions.Count == 0)
