@@ -6,6 +6,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Fun_Funding.Domain.Entity;
+using Fun_Funding.Application.ViewModel;
+using Fun_Funding.Application.ViewModel.TransactionDTO;
+using Fun_Funding.Application.ExceptionHandler;
+using Microsoft.EntityFrameworkCore;
+using System.Net;
 
 namespace Fun_Funding.Application.Services.EntityServices
 {
@@ -49,6 +54,65 @@ namespace Fun_Funding.Application.Services.EntityServices
             await _unitOfWork.TransactionRepository.AddAsync(transaction);
             await _unitOfWork.CommitAsync();
 
+        }
+
+        public async Task<ResultDTO<List<TransactionInfoResponse>>> GetAllTransactionsByProjectId(Guid? projectId)
+        {
+            try
+            {
+                if (projectId == null || projectId == Guid.Empty)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "Project ID cannot be null or empty.");
+                }
+
+                // Get all transactions related to the specific project ID
+                var transactions = await _unitOfWork.TransactionRepository.GetQueryable()
+                    .Include(t => t.Wallet)
+                    .Include(t => t.CommissionFee)
+                    .Where(t =>
+                        (t.PackageId != null &&
+                         _unitOfWork.PackageRepository.GetQueryable()
+                             .Any(p => p.Id == t.PackageId && p.ProjectId == projectId)) // Check Package related to the project
+                        ||
+                        (t.ProjectMilestoneId != null &&
+                         _unitOfWork.ProjectMilestoneRepository.GetQueryable()
+                             .Any(pm => pm.Id == t.ProjectMilestoneId && pm.FundingProjectId == projectId)) // Check Milestone related to the project
+                        ||
+                        (t.WalletId != null &&
+                         _unitOfWork.WalletRepository.GetQueryable()
+                             .Any(w => w.Id == t.WalletId && w.FundingProject.Id == projectId)) // Check Wallet related to the project
+                    ).OrderBy(t => t.CreatedDate)
+                    .ToListAsync();
+
+                if (transactions == null || transactions.Count == 0)
+                {
+                    return ResultDTO<List<TransactionInfoResponse>>.Fail("No transactions found for the specified project.");
+                }
+
+                // Map the transactions to TransactionInfoResponse
+                var response = transactions.Select(transaction => new TransactionInfoResponse
+                {
+                    Id = transaction.Id,
+                    CreatedDate = transaction.CreatedDate,
+                    Description = transaction.Description,
+                    TotalAmount = transaction.TotalAmount,
+                    TransactionType = transaction.TransactionType,
+                    PackageId = transaction.PackageId,
+                    OrderId = transaction.OrderId,
+                    CommissionFeeId = transaction.CommissionFeeId,
+                    ProjectMilestoneId = transaction.ProjectMilestoneId
+                }).ToList();
+
+                return ResultDTO<List<TransactionInfoResponse>>.Success(response);
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
         }
     }
 }

@@ -128,9 +128,9 @@ namespace Fun_Funding.Application.Services.EntityServices
                     .GetQueryable()
                     .Include(pm => pm.Milestone)
                     .ThenInclude(pmr => pmr.Requirements)
-                    .Include(pm => pm.ProjectMilestoneRequirements) // Include ProjectMilestoneRequirements collection
-                    .ThenInclude(pmr => pmr.Requirement) // Include Requirement within ProjectMilestoneRequirements
-                    .Include(pm => pm.ProjectMilestoneRequirements) // Include ProjectMilestoneRequirements collection again
+                    .Include(pm => pm.ProjectMilestoneRequirements) 
+                    .ThenInclude(pmr => pmr.Requirement) 
+                    .Include(pm => pm.ProjectMilestoneRequirements) 
                     .ThenInclude(pmr => pmr.RequirementFiles)
                     .FirstOrDefault(pm => pm.Id == id);
                 if (projectMilestone == null)
@@ -360,15 +360,18 @@ namespace Fun_Funding.Application.Services.EntityServices
                                 .FirstOrDefault();
                 var balance = projectMilestone.FundingProject.Wallet.Balance;
                 projectMilestone.FundingProject.Wallet.Balance *= (1 - commissionFee.Rate);
+                var systemWallet = await _unitOfWork.SystemWalletRepository.GetAsync(s => true);
                 var transaction = new Transaction
                 {
                     WalletId = projectMilestone.FundingProject.Wallet.Id,
                     TotalAmount = commissionFee.Rate * balance,
                     TransactionType = TransactionTypes.CommissionFee,
                     CreatedDate = DateTime.UtcNow,
-                    Description = "Charge Commission Fee"
+                    Description = "Charge Commission Fee",
+                    ProjectMilestoneId = projectMilestone.Id,
+                    CommissionFeeId = commissionFee.Id,
                 };
-                var systemWallet = await _unitOfWork.SystemWalletRepository.GetAsync(s => true);
+                
                 systemWallet.TotalAmount += commissionFee.Rate * balance;
                 _unitOfWork.TransactionRepository.Add(transaction);
                 _unitOfWork.Commit();
@@ -462,7 +465,8 @@ namespace Fun_Funding.Application.Services.EntityServices
                         TotalAmount = backerRefundAmount,
                         TransactionType = TransactionTypes.FundingRefund,
                         CreatedDate = DateTime.UtcNow,
-                        Description = "Refund to backers"
+                        Description = "Refund to backers",
+                        ProjectMilestoneId = projectMilestone.Id
                     };
                     await _unitOfWork.TransactionRepository.AddAsync(transaction);
                 }
@@ -556,7 +560,8 @@ namespace Fun_Funding.Application.Services.EntityServices
                     TotalAmount = transferMoney,
                     TransactionType = status == 1 ? TransactionTypes.MilestoneFirstHalf : TransactionTypes.MilestoneSecondHalf,
                     CreatedDate = DateTime.UtcNow,
-                    Description = "Transfer money to milestone disbursement"
+                    Description = "Transfer money to milestone disbursement",
+                    ProjectMilestoneId = projectMilestone.Id
                 };
                 projectMilestone.FundingProject.Wallet.Balance -= transferMoney;
                 _unitOfWork.Commit();
