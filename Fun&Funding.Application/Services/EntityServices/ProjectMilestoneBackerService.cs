@@ -47,8 +47,8 @@ namespace Fun_Funding.Application.Services.EntityServices
                     .GetAsync(pm => pm.Id == projectMilestoneId);
                 if (projectMilestone == null)
                     return ResultDTO<bool>.Fail("Project milestone not found!");
-                if (projectMilestone.Status != ProjectMilestoneStatus.Processing &&
-                    projectMilestone.Status != ProjectMilestoneStatus.Warning)
+                if (projectMilestone.Status != ProjectMilestoneStatus.Submitted &&
+                    projectMilestone.Status != ProjectMilestoneStatus.Resubmitted)
                     return ResultDTO<bool>.Success(false, "This project milestone is currently not accepting reviews!");
 
                 var alreadyReviewed = await _unitOfWork.ProjectMilestoneBackerRepository.GetQueryable()
@@ -75,7 +75,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 if (projectMilestone == null) return ResultDTO<ProjectMilestoneBackerResponse>.Fail("Project milestone not found!");
 
                 // check project milestone status
-                if (projectMilestone.Status != Domain.Enum.ProjectMilestoneStatus.Processing && projectMilestone.Status != Domain.Enum.ProjectMilestoneStatus.Warning)
+                if (projectMilestone.Status != Domain.Enum.ProjectMilestoneStatus.Submitted && projectMilestone.Status != Domain.Enum.ProjectMilestoneStatus.Resubmitted)
                     return ResultDTO<ProjectMilestoneBackerResponse>.Fail("This project milestone is currently not accepting reviews!");
 
                 // check if backer donate
@@ -88,7 +88,7 @@ namespace Fun_Funding.Application.Services.EntityServices
 
                 // check if backer already review this projectmilestone
                 var alreadyReview = await _unitOfWork.ProjectMilestoneBackerRepository.GetQueryable()
-                    .AnyAsync(pmb => pmb.BackerId == request.BackerId);
+                    .AnyAsync(pmb => pmb.BackerId == request.BackerId && pmb.ProjectMilestoneId == request.ProjectMilestoneId);
                 if (alreadyReview) return ResultDTO<ProjectMilestoneBackerResponse>.Fail("Backer already review this project milestone!");
 
                 if (isBacker)
