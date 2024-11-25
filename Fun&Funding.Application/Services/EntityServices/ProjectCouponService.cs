@@ -209,7 +209,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                                     CouponName = row.GetCell(1)?.ToString() ?? string.Empty, 
                                     DiscountRate = decimal.TryParse(row.GetCell(2)?.ToString(), out var commissionRate) ? commissionRate : 0, 
                                     CreatedDate = DateTime.Now,
-                                    Status = ProjectCouponStatus.Disable,
+                                    Status = ProjectCouponStatus.Enable,
                                     IsDeleted = false,
                                     MarketplaceProjectId = projectId,
                                     
