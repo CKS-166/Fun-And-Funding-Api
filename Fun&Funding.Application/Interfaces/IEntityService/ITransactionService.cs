@@ -1,4 +1,6 @@
-﻿using Fun_Funding.Domain.Enum;
+﻿using Fun_Funding.Application.ViewModel;
+using Fun_Funding.Application.ViewModel.TransactionDTO;
+using Fun_Funding.Domain.Enum;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,5 +22,7 @@ namespace Fun_Funding.Application.IService
             Guid? orderId = null,
             Guid? orderDetailId = null
         );
+
+        Task<ResultDTO<List<TransactionInfoResponse>>> GetAllTransactionsByProjectId(Guid? projectId );
     }
 }

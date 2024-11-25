@@ -17,5 +17,7 @@ namespace Fun_Funding.Application.ViewModel.TransactionDTO
         public Guid? PackageId { get; set; }
         public Guid? OrderId { get; set; }
         public Guid? CommissionFeeId { get; set; }
+
+        public Guid? ProjectMilestoneId { get; set; }
     }
 }
