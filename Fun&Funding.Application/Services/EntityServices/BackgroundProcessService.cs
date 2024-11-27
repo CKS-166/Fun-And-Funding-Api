@@ -116,9 +116,8 @@ namespace Fun_Funding.Application.Services.EntityServices
                             await _emailService.SendMilestoneAsync(owner.Email, project.Name, projectMilestone.Milestone.MilestoneName, owner.FullName, null, 7, present, EmailType.MilestoneReminder);
                         }else if ((projectMilestone.EndDate.Date - present).TotalDays == 0)
                         {
-                            projectMilestone.Status = ProjectMilestoneStatus.Failed;
+                            projectMilestone.Status = ProjectMilestoneStatus.Resubmitted;
                             await _emailService.SendMilestoneAsync(owner.Email, project.Name, projectMilestone.Milestone.MilestoneName, owner.FullName, "Failed", null, present, EmailType.MilestoneExpired);
-                            project.Status = ProjectStatus.Failed;
                             statusChanged = true;
                         }
                       
