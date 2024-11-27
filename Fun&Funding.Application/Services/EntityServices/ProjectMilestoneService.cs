@@ -29,6 +29,7 @@ namespace Fun_Funding.Application.Services.EntityServices
         private int maxExpireDay = 30;
         private int maxMilestoneExtend = 10;
         private ITransactionService _transactionService;
+        private int lastMilestoneOrder = 4;
         public ProjectMilestoneService(IUnitOfWork unitOfWork, IMapper mapper, ITransactionService transactionService)
         {
             _unitOfWork = unitOfWork;
@@ -322,7 +323,12 @@ namespace Fun_Funding.Application.Services.EntityServices
                     }
                     if (projectMilestone.Status == ProjectMilestoneStatus.Completed)
                     {
+                        if (projectMilestone.Milestone.MilestoneOrder == 4)
+                        {
+
+                        }
                         await TransferHalfMilestone(projectMilestone.Id, 2);
+
                     }
                 }
                 if (statusChanged)
@@ -577,7 +583,32 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
-    
+        public async Task ChangeProjectSuccessful(Guid projectId)
+        {
+            try
+            {
+                var project = _unitOfWork.FundingProjectRepository.GetQueryable()
+                   .Include(p => p.ProjectMilestones)
+                   .FirstOrDefault(p => p.Id == projectId);
+
+                if (project == null)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "Project not found");
+                }
+                project.Status = ProjectStatus.Successful;
+                _unitOfWork.Commit();
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+                throw new Exception(ex.Message);
+            }
+        }
+
+
 
         public async Task<ResultDTO<PaginatedResponse<ProjectMilestoneResponse>>> GetProjectMilestones(
             ListRequest request,
