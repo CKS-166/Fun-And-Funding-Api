@@ -62,6 +62,10 @@ namespace Fun_Funding.Application.Services.EntityServices
                 DigitalKey digitalKey = _unitOfWork.DigitalKeyRepository.GetQueryable().Where(k => k.KeyString == key).SingleOrDefault();
                 if (digitalKey != null)
                 {
+                    if(digitalKey.Status != KeyStatus.ACTIVE)
+                    {
+                        throw new ExceptionError((int)HttpStatusCode.NotFound, "Game Key Has Been Used.");
+                    }
                     digitalKey.Status = KeyStatus.EXPIRED;
                     digitalKey.ExpiredDate = DateTime.Now;
                     _unitOfWork.DigitalKeyRepository.Update(digitalKey);
