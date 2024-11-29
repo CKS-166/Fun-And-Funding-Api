@@ -31,17 +31,28 @@ namespace Fun_Funding.Application.Services.EntityServices
         public string GenerateGameKey()
         {
             StringBuilder keyBuilder = new StringBuilder();
+            string key;
+            bool isDuplicate;
 
-            for (int i = 0; i < 4; i++)
+            do
             {
-                if (i > 0) keyBuilder.Append('-');
-                for (int j = 0; j < 5; j++)
+                keyBuilder.Clear();
+                for (int i = 0; i < 4; i++)
                 {
-                    keyBuilder.Append(chars[random.Next(chars.Length)]);
+                    if (i > 0) keyBuilder.Append('-');
+                    for (int j = 0; j < 5; j++)
+                    {
+                        keyBuilder.Append(chars[random.Next(chars.Length)]);
+                    }
                 }
-            }
+                key = keyBuilder.ToString();
+                isDuplicate = _unitOfWork.DigitalKeyRepository
+                             .GetQueryable()
+                             .Any(k => k.KeyString == key);
 
-            return keyBuilder.ToString();
+            } while (isDuplicate);
+
+            return key;
         }
 
         public async Task<ResultDTO<string>> VerifyDigitalKey(string key)
@@ -51,6 +62,10 @@ namespace Fun_Funding.Application.Services.EntityServices
                 DigitalKey digitalKey = _unitOfWork.DigitalKeyRepository.GetQueryable().Where(k => k.KeyString == key).SingleOrDefault();
                 if (digitalKey != null)
                 {
+                    if(digitalKey.Status != KeyStatus.ACTIVE)
+                    {
+                        throw new ExceptionError((int)HttpStatusCode.NotFound, "Game Key Has Been Used.");
+                    }
                     digitalKey.Status = KeyStatus.EXPIRED;
                     digitalKey.ExpiredDate = DateTime.Now;
                     _unitOfWork.DigitalKeyRepository.Update(digitalKey);
