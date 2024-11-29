@@ -25,6 +25,7 @@ namespace Fun_Funding.Application.Services.EntityServices
         private IAzureService _azureService;
         private IProjectMilestoneService _projectMilestoneService;
         private readonly IMilestoneService _milestoneService;
+        private DateTime present = DateTime.Now;
         public ProjectMilestoneRequirementService(IUnitOfWork unitOfWork, IMapper mapper, IAzureService azureService, IProjectMilestoneService projectMilestoneService, IMilestoneService milestoneService, ISystemWalletService systemWalletService)
         {
             _unitOfWork = unitOfWork;
@@ -124,16 +125,13 @@ namespace Fun_Funding.Application.Services.EntityServices
                     .Include(x => x.Milestone)
                     .Include(x => x.FundingProject)
                     .FirstOrDefault(pm => pm.Id == sampleReq.ProjectMilestoneId);
-                if (issueLog != null)
-                {
-                    projectMilestone.IssueLog = issueLog;
-                }
                 if (projectMilestone == null)
                 {
                     throw new ExceptionError((int)HttpStatusCode.NotFound, "Milestone for this project not found");
                 }
                 else
                 {
+                    
                     FundingProject project = _unitOfWork.FundingProjectRepository
                     .GetQueryable().Include(p => p.ProjectMilestones)
                     .ThenInclude(pm => pm.Milestone).FirstOrDefault(p => p.Id == projectMilestone.FundingProjectId);
@@ -147,6 +145,11 @@ namespace Fun_Funding.Application.Services.EntityServices
                         throw new ExceptionError((int)HttpStatusCode.BadRequest, "Milestone for this project is not approved yet");
                     }
                 }
+                if (issueLog != null)
+                {
+                    projectMilestone.IssueLog = issueLog;
+                }
+               
                 //Projec
                 foreach (var requestItem in request)
                 {
@@ -185,7 +188,21 @@ namespace Fun_Funding.Application.Services.EntityServices
                         }
                     }
                     _unitOfWork.ProjectMilestoneRequirementRepository.Update(req);
+                }
+                if ((projectMilestone.EndDate.Date - present.Date).TotalDays <= 0)
+                {
+                    if (projectMilestone.Status == ProjectMilestoneStatus.Processing)
+                    {
+                        projectMilestone.Status = ProjectMilestoneStatus.Submitted;
 
+                    }
+                    else if (projectMilestone.Status == ProjectMilestoneStatus.Warning)
+                    {
+                        projectMilestone.Status = ProjectMilestoneStatus.Resubmitted;
+                    }
+                    _unitOfWork.Commit();
+
+                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "This milestone has already been expired");
                 }
                 _unitOfWork.Commit();
                 return ResultDTO<string>.Success("Ok");
