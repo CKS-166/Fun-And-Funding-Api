@@ -43,6 +43,10 @@ namespace Fun_Funding.Application.Services.EntityServices
         public async Task<ResultDTO<WithdrawRequest>> AdminApproveRequest(Guid id)
         {
             var admin = await _userService.GetUserInfo();
+            if (admin is null)
+            {
+                return ResultDTO<WithdrawRequest>.Fail("admin is not found");
+            }
             var request = await _unitOfWork.WithdrawRequestRepository.GetByIdAsync(id);
             if (request is null)
             {
