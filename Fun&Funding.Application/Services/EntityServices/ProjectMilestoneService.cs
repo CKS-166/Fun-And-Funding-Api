@@ -9,6 +9,7 @@ using Fun_Funding.Application.ViewModel.ProjectMilestoneDTO;
 using Fun_Funding.Domain.Entity;
 using Fun_Funding.Domain.Enum;
 using Microsoft.EntityFrameworkCore;
+using NPOI.OpenXmlFormats.Dml.Diagram;
 using NPOI.SS.Formula.Functions;
 using Org.BouncyCastle.Asn1.X509;
 using System;
@@ -30,6 +31,7 @@ namespace Fun_Funding.Application.Services.EntityServices
         private int maxMilestoneExtend = 10;
         private ITransactionService _transactionService;
         private int lastMilestoneOrder = 4;
+        private DateTime present = DateTime.Now;
         public ProjectMilestoneService(IUnitOfWork unitOfWork, IMapper mapper, ITransactionService transactionService)
         {
             _unitOfWork = unitOfWork;
@@ -70,9 +72,9 @@ namespace Fun_Funding.Application.Services.EntityServices
                 //case request first
                 if (requestMilestone.MilestoneOrder == 1)
                 {
-                    if (request.CreatedDate >= project.EndDate)
+                    if (present >= project.EndDate)
                     {
-                        if ((request.CreatedDate - project.EndDate).TotalDays > maxExpireDay)
+                        if ((present.Date - project.EndDate.Date).TotalDays > maxExpireDay)
                         {
                             return ResultDTO<ProjectMilestoneResponse>.Fail("The milestone must begin within 30 days after the project's funding period ends.", 500);
                         }
@@ -92,18 +94,19 @@ namespace Fun_Funding.Application.Services.EntityServices
                 }
                 ProjectMilestone projectMilestone = new ProjectMilestone
                 {
-                    EndDate = request.CreatedDate.AddDays(requestMilestone.Duration),
+                    EndDate = DateTime.UtcNow.AddDays(requestMilestone.Duration),
                     Status = ProjectMilestoneStatus.Pending,
                     MilestoneId = request.MilestoneId,
                     FundingProjectId = project.Id,
                     Title = request.Title,
                     IsDeleted = false,
+                    CreatedDate = present
                 };
 
                 if (!String.IsNullOrEmpty(request.Title) && !String.IsNullOrEmpty(request.Introduction))
                 {
                     projectMilestone.Introduction = request.Introduction;
-                    projectMilestone.CreatedDate = request.CreatedDate;
+                    projectMilestone.CreatedDate = present;
                 }
 
                 await _unitOfWork.ProjectMilestoneRepository.AddAsync(projectMilestone);
@@ -607,8 +610,6 @@ namespace Fun_Funding.Application.Services.EntityServices
                 throw new Exception(ex.Message);
             }
         }
-
-
 
         public async Task<ResultDTO<PaginatedResponse<ProjectMilestoneResponse>>> GetProjectMilestones(
             ListRequest request,
