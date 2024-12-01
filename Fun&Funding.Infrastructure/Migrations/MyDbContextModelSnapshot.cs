@@ -546,9 +546,6 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Property<Guid?>("MarketplaceProjectId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<decimal?>("Quantity")
-                        .HasColumnType("decimal(18, 2)");
-
                     b.Property<int>("Status")
                         .HasColumnType("int");
 

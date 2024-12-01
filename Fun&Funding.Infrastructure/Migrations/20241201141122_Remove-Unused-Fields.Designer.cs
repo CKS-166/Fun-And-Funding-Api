@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fun_Funding.Infrastructure.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20241201093017_Remove-Unusable-Fields")]
-    partial class RemoveUnusableFields
+    [Migration("20241201141122_Remove-Unused-Fields")]
+    partial class RemoveUnusedFields
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -548,9 +548,6 @@ namespace Fun_Funding.Infrastructure.Migrations
 
                     b.Property<Guid?>("MarketplaceProjectId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal?>("Quantity")
-                        .HasColumnType("decimal(18, 2)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
