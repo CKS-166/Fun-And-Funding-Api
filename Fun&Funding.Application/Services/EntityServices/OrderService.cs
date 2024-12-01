@@ -176,16 +176,11 @@ namespace Fun_Funding.Application.Services.EntityServices
                             {
                                 throw new ExceptionError((int)HttpStatusCode.NotFound, "Project Coupon Not Found.");
                             }
-                            else if (projectCoupon.Status == ProjectCouponStatus.Disable || projectCoupon.Quantity <= 0)
+                            else if (projectCoupon.Status == ProjectCouponStatus.Disable)
                             {
                                 throw new ExceptionError((int)HttpStatusCode.BadRequest, "Coupon Already Used Up.");
                             }
-                            // Remove 1 quantity from coupon
-                            projectCoupon.Quantity -= 1;
-                            if (projectCoupon.Quantity <= 0 || projectCoupon.Quantity == null)
-                            {
-                                projectCoupon.Status = ProjectCouponStatus.Disable;
-                            }
+                            projectCoupon.Status = ProjectCouponStatus.Disable;
                             // Money left when applying coupon
                             receivedMoney = receivedMoney * (1 - cartItem.AppliedCoupon.DiscountRate);
 
