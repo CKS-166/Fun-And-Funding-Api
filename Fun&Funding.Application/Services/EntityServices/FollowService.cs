@@ -26,6 +26,43 @@ namespace Fun_Funding.Application.Services.EntityServices
             _unitOfWork = unitOfWork;
         }
 
+        public async Task<ResultDTO<Follow>> CheckUserFollow(Guid projectId)
+        {
+            try
+            {
+                // Get current user
+                var user = await _userService.GetUserInfo();
+                User exitUser = _mapper.Map<User>(user._data);
+                if (exitUser == null)
+                {
+                    return ResultDTO<Follow>.Fail("Cannot find user");
+                }
+
+
+                // Check for like in funding project
+                var fundingLike = await _unitOfWork.FundingProjectRepository.GetByIdAsync(projectId);
+                if (fundingLike != null)
+                {
+                    var isLike = _unitOfWork.FollowRepository.Get(x => x.FundingProjectId == fundingLike.Id && x.UserID == exitUser.Id);
+                    if (isLike != null) return ResultDTO<Follow>.Success(isLike, "user has like this funding project");
+                }
+
+                // Check for like in marketplace project
+                //var marketplaceProject = await _unitOfWork.MarketplaceRepository.GetByIdAsync(projectId);
+                //if (marketplaceProject != null)
+                //{
+                //    var isLike = _unitOfWork.LikeRepository.Get(x => x.ProjectId == marketplaceProject.Id && x.UserId == exitUser.Id);
+                //    if (isLike != null) return ResultDTO<Like>.Success(isLike, "user has like this marketplace project");
+                //}
+
+                return ResultDTO<Follow>.Fail("User has not liked any project", 404);
+            }
+            catch (Exception ex)
+            {
+                return ResultDTO<Follow>.Fail($"Error: {ex.Message}");
+            }
+        }
+
         public async Task<ResultDTO<Follow>> FollowProject(Guid projectId)
         {
             var user = await _userService.GetUserInfo();
