@@ -1,6 +1,8 @@
 ﻿using Fun_Funding.Domain.Enum;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,6 +19,8 @@ namespace Fun_Funding.Domain.Entity
         public string? IssueLog { get; set; }
         public string? Title { get; set; }
         public string? Introduction { get; set; }
+        [Range(0, (double)decimal.MaxValue)]
+        [Column(TypeName = "decimal(18, 2)")]
         public decimal? TotalAmount { get; set; }
         public FundingProject FundingProject { get; set; }
         public virtual ICollection<Transaction> Transactions { get; set; }

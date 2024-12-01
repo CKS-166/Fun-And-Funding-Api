@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fun_Funding.Infrastructure.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20241201090745_init")]
-    partial class init
+    [Migration("20241201093017_Remove-Unusable-Fields")]
+    partial class RemoveUnusableFields
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -599,7 +599,7 @@ namespace Fun_Funding.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal?>("TotalAmount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18, 2)");
 
                     b.HasKey("Id");
 

@@ -596,7 +596,7 @@ namespace Fun_Funding.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal?>("TotalAmount")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(18, 2)");
 
                     b.HasKey("Id");
 
