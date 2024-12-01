@@ -10,15 +10,12 @@ namespace Fun_Funding.Domain.Entity
 {
     public class PackageBacker : BaseEntity
     {
-        public Boolean IsHidden { get; set; }
         [Range(0, (double)decimal.MaxValue)]
         [Column(TypeName = "decimal(18, 2)")]
         public decimal DonateAmount { get; set; }
-
         [Required]
         public Guid PackageId { get; set; }
         public Package Package { get; set; }
-
         [Required]
         public Guid UserId { get; set; }
         public User User { get; set; }

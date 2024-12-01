@@ -124,7 +124,6 @@ namespace Fun_Funding.Application.Services.EntityServices
                     Description = $"Admin id: {admin._data.Id} just CANCEL withdraw id: {request.Id}",
                     CreatedDate = DateTime.UtcNow,
                     TransactionType = TransactionTypes.FundingWithdraw,
-
                 };
                 await _unitOfWork.TransactionRepository.AddAsync(transaction);
 

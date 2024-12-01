@@ -13,10 +13,6 @@ namespace Fun_Funding.Domain.Entity
         [Range(0, (double)decimal.MaxValue)]
         [Column(TypeName = "decimal(18, 2)")]
         public decimal TotalAmount { get; set; }
-        [Range(0, (double)decimal.MaxValue)]
-        [Column(TypeName = "decimal(18, 2)")]
-        public decimal CommissionRate { get; set; } 
-
         public ICollection<Transaction> Transactions { get; set; }
     }
 }
