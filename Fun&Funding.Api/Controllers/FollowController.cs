@@ -44,6 +44,16 @@ namespace Fun_Funding.Api.Controllers
                 return BadRequest();
             }
             return Ok(result);
+        } 
+        [HttpPost("check-follow-project/{id}")]
+        public async Task<IActionResult> CheckIsFollow(Guid id)
+        {
+            var result = await _followService.CheckUserFollow(id);
+            if (!result._isSuccess)
+            {
+                return BadRequest();
+            }
+            return Ok(result);
         }
     }
 }
