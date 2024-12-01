@@ -26,13 +26,12 @@ namespace Fun_Funding.Application.Services.EntityServices
             {
                 var wallet = new SystemWallet
                 {
-                    Id = new Guid(),
-                    CommissionRate = (decimal)0.5,
+                    Id = new Guid(),        
                     CreatedDate = DateTime.Now,
                     TotalAmount = 0
                 };
                 _unitOfWork.SystemWalletRepository.Add(wallet);
-                _unitOfWork.CommitAsync();
+                await _unitOfWork.CommitAsync();
                 return ResultDTO<SystemWallet>.Success(wallet);
             }catch(Exception ex)
             {

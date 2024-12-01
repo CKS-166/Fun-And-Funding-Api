@@ -81,7 +81,6 @@ namespace Fun_Funding.Application.Services.EntityServices
                     User = user,
                     Package = package,
                     DonateAmount = packageBackerRequest.DonateAmount,
-                    IsHidden = false,
                     CreatedDate = DateTime.Now
                 };
                 // add donation amount to project wallet

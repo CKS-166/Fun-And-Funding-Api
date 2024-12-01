@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fun_Funding.Infrastructure.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20241124073001_init")]
+    [Migration("20241201090745_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -505,9 +505,6 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsHidden")
-                        .HasColumnType("bit");
-
                     b.Property<Guid>("PackageId")
                         .HasColumnType("uniqueidentifier");
 
@@ -812,9 +809,6 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<decimal>("CommissionRate")
-                        .HasColumnType("decimal(18, 2)");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
