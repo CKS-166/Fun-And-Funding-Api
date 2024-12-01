@@ -19,8 +19,6 @@ namespace Fun_Funding.Domain.Entity
         public decimal DiscountRate { get; set; }
         public ProjectCouponStatus Status { get; set; }
         [Range(0, (double)decimal.MaxValue)]
-        [Column(TypeName = "decimal(18, 2)")]
-        public decimal? Quantity { get; set; }
         public OrderDetail? OrderDetail { get; set; }
 
         public Guid? MarketplaceProjectId { get; set; }
