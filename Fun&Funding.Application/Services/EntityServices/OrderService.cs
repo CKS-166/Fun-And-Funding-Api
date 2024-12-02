@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Azure;
 using Azure.Core;
 using Fun_Funding.Application.ExceptionHandler;
 using Fun_Funding.Application.Interfaces.IEntityService;
@@ -403,7 +404,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 }
                 else
                 {
-                    throw new ExceptionError((int)HttpStatusCode.NotFound, "Order Not Found.");
+                    return ResultDTO<PaginatedResponse<OrderInfoResponse>>.Fail( "Orders not found!",404);
                 }
             }
             catch (Exception ex)
