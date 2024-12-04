@@ -187,6 +187,30 @@ namespace Fun_Funding.Application.Services.EntityServices
             return null;
         }
 
+        public string CanUpdateProjectMilestone(FundingProject project, int requestedMilestoneOrder)
+        {
+            // Get all the project milestones ordered by MilestoneOrder
+            var projectMilestones = project.ProjectMilestones
+                .OrderBy(pm => pm.Milestone.MilestoneOrder)
+                .ToList();
+            if (projectMilestones != null || projectMilestones.Count != 0)
+            {
+                // Check if the requested milestone order is valid
+                if (requestedMilestoneOrder > projectMilestones.Count + 1)
+                    return "Requested milestone order is greater than the next available milestone"; // Requested milestone order is greater than the next available milestone
+
+                // Check the status of the previous milestones
+                for (int i = 0; i < requestedMilestoneOrder - 1; i++)
+                {
+                    var previousMilestone = projectMilestones[i];
+                    if (previousMilestone.Status != ProjectMilestoneStatus.Completed)
+                        return "The previous milestones are not completed";
+                }
+
+            }
+            return null;
+        }
+
         public async Task<ResultDTO<List<ProjectMilestoneResponse>>> GetAllProjectMilestone()
         {
             try
@@ -228,11 +252,12 @@ namespace Fun_Funding.Application.Services.EntityServices
                     .FirstOrDefaultAsync(pm => pm.Id == request.ProjectMilestoneId);
                 if (projectMilestone == null) return ResultDTO<string>.Fail("The requested project milestone is not found!");
 
-                var fundingProject = await _unitOfWork.FundingProjectRepository
+                var fundingProject =  _unitOfWork.FundingProjectRepository
                     .GetQueryable()
                     .Include(p => p.Wallet)
                     .Include(p => p.ProjectMilestones)
-                    .FirstOrDefaultAsync(p => p.ProjectMilestones.Any(m => m.Id == request.ProjectMilestoneId));
+                    .ThenInclude(pm => pm.Milestone)
+                    .FirstOrDefault(p => p.Id == projectMilestone.FundingProjectId);
 
                 if (fundingProject == null)
                 {
@@ -262,6 +287,15 @@ namespace Fun_Funding.Application.Services.EntityServices
                 // check project milestone incoming status
                 // ...
                 bool statusChanged = false;
+                if (projectMilestone.Milestone.MilestoneOrder != 1)
+                {
+                    var checkValidateMilstone = CanUpdateProjectMilestone(fundingProject, projectMilestone.Milestone.MilestoneOrder);
+                    if (checkValidateMilstone != null)
+                    {
+                        throw new ExceptionError((int)HttpStatusCode.BadRequest, checkValidateMilstone);
+                    }
+                }
+                
                 if (projectMilestone.Status == ProjectMilestoneStatus.Pending && pendingStatusList.Contains(request.Status))
                 {
                     if (projectMilestone.Milestone.MilestoneOrder == 1)
