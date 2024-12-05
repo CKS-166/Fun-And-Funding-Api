@@ -567,7 +567,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                     errorMessages.Add("Introduction is required.");
                 }
 
-                if (request.Price <= 0)
+                if (request.Price < 1000)
                 {
                     errorMessages.Add("Invalid price.");
                 }
