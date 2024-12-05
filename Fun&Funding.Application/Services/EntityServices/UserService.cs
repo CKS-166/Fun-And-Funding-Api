@@ -568,11 +568,6 @@ namespace Fun_Funding.Application.Services.EntityServices
                     TotalDonation = tb.TotalDonation
                 }).ToList();
 
-                if (!result.Any())
-                {
-                    throw new ExceptionError((int)HttpStatusCode.NotFound, "No backer found.");
-                }
-
                 return ResultDTO<List<TopBackerResponse>>.Success(result, "Backer Found!");
             }
             catch (Exception ex)

@@ -704,11 +704,6 @@ namespace Fun_Funding.Application.Services.EntityServices
                     .Where(p => p.Status == ProjectStatus.Processing || p.Status == ProjectStatus.FundedSuccessful)
                     .ToListAsync();
 
-                if (!projects.Any())
-                {
-                    throw new ExceptionError((int)HttpStatusCode.NotFound, "No Funding Project Founded");
-                }
-
                 var topProjects = projects
                     .OrderByDescending(p => p.Status == ProjectStatus.Processing)
                     .ThenByDescending(p => p.Balance)

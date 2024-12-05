@@ -46,7 +46,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 var systemWallet = await _unitOfWork.SystemWalletRepository.GetQueryable().SingleOrDefaultAsync();
                 if(systemWallet == null)
                 {
-                    throw new ExceptionError((int)HttpStatusCode.NotFound, "No system wallet found.");
+                    ResultDTO<decimal>.Success(0, "Platform balance");
                 }
                 var balance = (await _unitOfWork.SystemWalletRepository.GetQueryable().SingleOrDefaultAsync())?.TotalAmount ?? 0;
                 return ResultDTO<decimal>.Success(balance, "Platform balance");
