@@ -686,11 +686,6 @@ namespace Fun_Funding.Application.Services.EntityServices
                     .Take(3)
                     .ToListAsync();
 
-                if (!projects.Any())
-                {
-                    throw new ExceptionError((int)HttpStatusCode.NotFound, "No Marketplace Project Found");
-                }
-
                 List<MarketplaceProjectInfoResponse> result = _mapper.Map<List<MarketplaceProjectInfoResponse>>(projects);
 
                 return ResultDTO<List<MarketplaceProjectInfoResponse>>.Success(result, "Marketplace Project Found!");

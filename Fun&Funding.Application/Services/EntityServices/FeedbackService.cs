@@ -127,7 +127,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                     var user = await _unitOfWork.UserRepository.GetByIdAsync(feedback.UserID);
                     responseList.Add(new FeedbackResponse
                     {
-                        Name = user?.FullName ?? null,
+                        Name = user?.FullName ?? "Anonymous",
                         Avatar = user?.File?.URL ?? null,
                         Content = feedback.Content ?? null
                     });
