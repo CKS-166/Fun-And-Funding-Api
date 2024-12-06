@@ -453,7 +453,8 @@ namespace Fun_Funding.Application.Services.EntityServices
                 throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
             }
         }
-        public async Task<ResultDTO<PaginatedResponse<FundingProjectResponse>>> GetFundingProjects(ListRequest request, string? categoryName, ProjectStatus? status, decimal? fromTarget, decimal? toTarget)
+        public async Task<ResultDTO<PaginatedResponse<FundingProjectResponse>>> GetFundingProjects
+            (ListRequest request, string? categoryName, ProjectStatus? status, decimal? fromTarget, decimal? toTarget)
         {
             try
             {
