@@ -362,7 +362,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                     {
                         if (projectMilestone.Milestone.MilestoneOrder == 4)
                         {
-
+                            await ChangeProjectSuccessful(projectMilestone.FundingProjectId);
                         }
                         await TransferHalfMilestone(projectMilestone.Id, 2);
 
@@ -400,10 +400,18 @@ namespace Fun_Funding.Application.Services.EntityServices
                 var commissionFee = _unitOfWork.CommissionFeeRepository.GetQueryable()
                                 .Where(c => c.CommissionType == CommissionType.FundingCommission)
                                 .OrderByDescending(c => c.UpdateDate)
-                                .FirstOrDefault();
+                                .FirstOrDefault() ?? throw new ExceptionError((int)HttpStatusCode.NotFound, "Commission fee not found");
                 var balance = projectMilestone.FundingProject.Wallet.Balance;
+                if (balance <= 0 )
+                {
+                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "Project balance cannot be 0 or negative");
+                }else if (balance < balance* (1 - commissionFee.Rate))
+                {
+                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "Project balance is not available for charging");
+                }
                 projectMilestone.FundingProject.Wallet.Balance *= (1 - commissionFee.Rate);
-                var systemWallet = await _unitOfWork.SystemWalletRepository.GetAsync(s => true);
+                var systemWallet = await _unitOfWork.SystemWalletRepository.GetAsync(s => true) 
+                    ?? throw new ExceptionError((int)HttpStatusCode.NotFound, "System wallet not found");
                 var transaction = new Transaction
                 {
                     WalletId = projectMilestone.FundingProject.Wallet.Id,
@@ -421,7 +429,12 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
             catch (Exception ex)
             {
-                throw new Exception(ex.Message, ex);
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+
+                throw new Exception(ex.Message);
             }
         }
         public async Task RefundBackersAsync(Guid projectMilestoneId)
@@ -447,7 +460,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                     .OrderBy(m => m.MilestoneOrder)
                     .ToListAsync();
 
-                // Calculate the disbursement percentage for completed milestones
+                // Calculate the disbursement percentage for completed milestones 
                 decimal completedDisbursementPercentage = (projectMilestone.Milestone.DisbursementPercentage * 0.5m);
                 foreach (var milestone in milestones)
                 {
@@ -468,8 +481,8 @@ namespace Fun_Funding.Application.Services.EntityServices
                                 .Where(c => c.CommissionType == CommissionType.FundingCommission)
                                 .OrderByDescending(c => c.UpdateDate)
                                 .FirstOrDefault();
-                decimal totalFunds = projectMilestone.FundingProject.Balance * (1-commissionFee.Rate);
-                decimal refundableAmount = refundablePercentage * totalFunds;
+                decimal totalFunds = projectMilestone.FundingProject.Balance;
+                decimal refundableAmount = projectMilestone.FundingProject.Wallet.Balance;
 
                 // Get all backers for the funding project
                 var packageBackers = await _unitOfWork.PackageBackerRepository.GetQueryable()
