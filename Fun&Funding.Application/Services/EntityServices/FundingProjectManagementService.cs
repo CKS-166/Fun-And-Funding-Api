@@ -13,6 +13,7 @@ using Fun_Funding.Domain.Entity;
 using Fun_Funding.Domain.Enum;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using Org.BouncyCastle.Ocsp;
 using System.Linq.Expressions;
 using System.Net;
 using System.Security.Claims;
@@ -28,6 +29,7 @@ namespace Fun_Funding.Application.Services.EntityServices
         private int maxDays = 60;
         private int minDays = 1;
         public IUserService _userService;
+        public string defaultImage = "https://funfundingmediafiles.blob.core.windows.net/fundingprojectfiles/sampleThumb_a1abaa10-9b59-465b-a31b-218031942496.jfif";
         public FundingProjectManagementService(IUnitOfWork unitOfWork, IMapper mapper, IAzureService azureService, IHttpContextAccessor httpContextAccessor, IUserService userService)
         {
             _unitOfWork = unitOfWork;
@@ -142,7 +144,16 @@ namespace Fun_Funding.Application.Services.EntityServices
 
                 //add files 
                 List<FundingFile> files = new List<FundingFile>();
-
+                if (projectRequest.FundingFiles.Count == 0 || projectRequest.FundingFiles == null)
+                {
+                    FundingFile media = new FundingFile
+                    {
+                        Name = "Default Image",
+                        URL = defaultImage,
+                        Filetype = 0
+                    };
+                    files.Add(media);
+                }
                 foreach (FundingFileRequest req in projectRequest.FundingFiles)
                 {
                     if (req.URL.Length > 0)
