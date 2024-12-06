@@ -20,9 +20,9 @@ namespace Fun_Funding.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllProject([FromQuery] ListRequest request)
+        public async Task<IActionResult> GetAllProject([FromQuery] ListRequest request, Guid? categoryId, decimal? FromPrice, decimal? ToPrice)
         {
-            var result = await _marketplace.GetAllMarketplaceProject(request);
+            var result = await _marketplace.GetAllMarketplaceProject(request, categoryId, FromPrice, ToPrice);
             if (result == null) return NotFound();
             return Ok(result);
         }

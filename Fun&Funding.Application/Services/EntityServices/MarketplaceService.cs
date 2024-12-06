@@ -179,7 +179,7 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
-        public async Task<ResultDTO<PaginatedResponse<MarketplaceProjectInfoResponse>>> GetAllMarketplaceProject(ListRequest request)
+        public async Task<ResultDTO<PaginatedResponse<MarketplaceProjectInfoResponse>>> GetAllMarketplaceProject(ListRequest request, Guid? categoryId,decimal? FromPrice, decimal? ToPrice)
         {
 
             try
@@ -194,15 +194,30 @@ namespace Fun_Funding.Application.Services.EntityServices
                         case "name":
                             orderBy = c => c.Name;
                             break;
+                        case "category":
+                            orderBy = c => c.FundingProject.Categories
+                                .OrderBy(category => category.Name) 
+                                .FirstOrDefault().Name; 
+                            break;
                         default:
                             break;
                     }
                 }
-
+                if (categoryId is not null)
+                {                  
+                    filter = c => c.FundingProject.Categories.Any(category => category.Id == categoryId);
+                }
                 if (!string.IsNullOrEmpty(request.SearchValue))
                 {
                     filter = c => c.Name.ToLower().Contains(request.SearchValue.ToLower());
                 }
+                if (FromPrice != null || ToPrice != null)
+                {
+                    filter = c =>
+                        (FromPrice == null || c.Price >= FromPrice) &&
+                        (ToPrice == null || c.Price <= ToPrice);
+                }
+
 
                 var list = await _unitOfWork.MarketplaceRepository.GetAllAsync(
                    filter: filter,

@@ -6,7 +6,7 @@ namespace Fun_Funding.Application.IService
 {
     public interface IMarketplaceService
     {
-        Task<ResultDTO<PaginatedResponse<MarketplaceProjectInfoResponse>>> GetAllMarketplaceProject(ListRequest request);
+        Task<ResultDTO<PaginatedResponse<MarketplaceProjectInfoResponse>>> GetAllMarketplaceProject(ListRequest request, Guid? categoryId, decimal? FromPrice, decimal? ToPrice);
         Task<ResultDTO<MarketplaceProjectInfoResponse>> CreateMarketplaceProject(MarketplaceProjectAddRequest request);
         Task<ResultDTO<MarketplaceProjectInfoResponse>> GetMarketplaceProjectById(Guid id);
         Task DeleteMarketplaceProject(Guid id);
