@@ -77,13 +77,18 @@ namespace Fun_Funding.Application.Services.EntityServices
             try
             {
                 // Upload files and get their URLs
+                
                 List<string> fileUrls = new List<string>();
-                foreach (var file in request.FileUrls) // `Files` would be of type `IFormFile[]`
+                if (request.FileUrls is not null)
                 {
-                    // Upload each file and get its URL (pseudo-code)
-                    string fileUrl = await _azureService.UploadUrlSingleFiles(file);
-                    fileUrls.Add(fileUrl);
+                    foreach (var file in request.FileUrls) // `Files` would be of type `IFormFile[]`
+                    {
+                        // Upload each file and get its URL (pseudo-code)
+                        string fileUrl = await _azureService.UploadUrlSingleFiles(file);
+                        fileUrls.Add(fileUrl);
+                    }
                 }
+                
                 ViolentReport report = new ViolentReport
                 {
                     Id = Guid.NewGuid(),
