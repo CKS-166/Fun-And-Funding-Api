@@ -610,18 +610,31 @@ namespace Fun_Funding.Application.Services.EntityServices
                                .FirstOrDefault();
                 var refundableAmount = (1- commissionFee.Rate) * projectMilestone.FundingProject.Balance;
                 var transferMoney = (rate * 0.5m) * refundableAmount;
-                var transaction = new Transaction
+                if (status == 1 || status == 2)
                 {
-                    WalletId = projectMilestone.FundingProject.Wallet.Id,
-                    TotalAmount = transferMoney,
-                    TransactionType = status == 1 ? TransactionTypes.MilestoneFirstHalf : TransactionTypes.MilestoneSecondHalf,
-                    CreatedDate = DateTime.UtcNow,
-                    Description = "Transfer money to milestone disbursement",
-                    ProjectMilestoneId = projectMilestone.Id
-                };
-                projectMilestone.FundingProject.Wallet.Balance -= transferMoney;
-                _unitOfWork.TransactionRepository.Add(transaction);
-                _unitOfWork.Commit();
+                    if (projectMilestone.FundingProject.Wallet.Balance < transferMoney)
+                    {
+                        throw new ExceptionError((int)HttpStatusCode.BadRequest, "Wallet is not enough for transferring money");
+                    }
+                    var transaction = new Transaction
+                    {
+                        WalletId = projectMilestone.FundingProject.Wallet.Id,
+                        TotalAmount = transferMoney,
+                        TransactionType = status == 1 ? TransactionTypes.MilestoneFirstHalf : TransactionTypes.MilestoneSecondHalf,
+                        CreatedDate = DateTime.UtcNow,
+                        Description = "Transfer money to milestone disbursement",
+                        ProjectMilestoneId = projectMilestone.Id
+                    };
+                    projectMilestone.FundingProject.Wallet.Balance -= transferMoney;
+                    _unitOfWork.TransactionRepository.Add(transaction);
+                    _unitOfWork.Commit();
+                }
+                else
+                {
+                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "Not support this mode");
+                }
+                
+                
             }
             catch (Exception ex)
             {

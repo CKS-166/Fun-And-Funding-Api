@@ -15,6 +15,7 @@ using Fun_Funding.Domain.Enum;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using NPOI.XWPF.UserModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -385,8 +386,6 @@ namespace Fun_Funding.Application.Services.EntityServices
                        pageSize: request.PageSize,
                        includeProperties: "OrderDetails,OrderDetails.DigitalKey,OrderDetails.DigitalKey.MarketplaceProject,OrderDetails.ProjectCoupon,OrderDetails.DigitalKey.MarketplaceProject.MarketplaceFiles");
 
-                if (list != null && list.Count() > 0)
-                {
                     var totalItems = _unitOfWork.OrderRepository.GetAll(filter).Count();
                     var totalPages = (int)Math.Ceiling((double)totalItems / (int)request.PageSize);
                     IEnumerable<OrderInfoResponse> orders = _mapper.Map<IEnumerable<OrderInfoResponse>>(list);
@@ -401,11 +400,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                     };
 
                     return ResultDTO<PaginatedResponse<OrderInfoResponse>>.Success(response, "Orders found!");
-                }
-                else
-                {
-                    return ResultDTO<PaginatedResponse<OrderInfoResponse>>.Fail("Orders not found!",404);
-                }
+                
             }
             catch (Exception ex)
             {
