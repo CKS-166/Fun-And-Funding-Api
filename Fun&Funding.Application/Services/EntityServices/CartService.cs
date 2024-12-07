@@ -94,6 +94,10 @@ namespace Fun_Funding.Application.Services.EntityServices
                 {
                     throw new ExceptionError((int)HttpStatusCode.NotFound, "Marketplace project not found.");
                 }
+                if (marketplaceProject.Status != Domain.Enum.ProjectStatus.Processing)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "Marketplace project is not viable for purchase!");
+                }
 
                 bool itemExists = cart != null && cart.Items.Any(item =>
                     item.Contains("marketplaceProjectId") &&

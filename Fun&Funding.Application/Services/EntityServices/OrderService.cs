@@ -85,8 +85,24 @@ namespace Fun_Funding.Application.Services.EntityServices
                     throw new ExceptionError((int)HttpStatusCode.NotFound, "Wallet Not Found.");
 
                 decimal totalCost = 0;
+                if (createOrderRequest.CartItems.Count <= 0) {
+                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "No Items in Cart");
+                }
                 foreach (var cartItem in createOrderRequest.CartItems)
                 {
+                    var marketplaceProject = _unitOfWork.MarketplaceRepository.GetById(cartItem.MarketplaceProjectId);
+                    if(marketplaceProject == null)
+                    {
+                        throw new ExceptionError((int)HttpStatusCode.BadRequest, "Marketplace project not found.");
+                    }
+                    if (marketplaceProject.Status != ProjectStatus.Processing)
+                    {
+                        throw new ExceptionError((int)HttpStatusCode.BadRequest, "Game is not allowed to purchased");
+                    }
+                    if(cartItem.Price < 0)
+                    {
+                        throw new ExceptionError((int)HttpStatusCode.BadRequest, "Invalid game price");
+                    }
                     var gamePrice = cartItem.Price;
                     // Check if Marketplace game has a coupon
                     if (cartItem.AppliedCoupon != null)
