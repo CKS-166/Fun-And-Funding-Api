@@ -58,10 +58,10 @@ namespace Fun_Funding.Application.Services.EntityServices
             {
                 var getUser = await _unitOfWork.UserRepository.GetAsync(x => x.Email == loginDTO.Email);
 
-                if (getUser.UserStatus.Equals(UserStatus.Inactive))
-                    return ResultDTO<string>.Fail("You have been blocked");
                 if (getUser is null || !await _userManager.CheckPasswordAsync(getUser, loginDTO.Password))
                     return ResultDTO<string>.Fail("Email or Password failed");
+                if (getUser.UserStatus.Equals(UserStatus.Inactive))
+                    return ResultDTO<string>.Fail("You have been blocked");
                 if (!getUser.EmailConfirmed)
                 {
                     await _signInManager.SignOutAsync();
