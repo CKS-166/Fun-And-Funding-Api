@@ -90,7 +90,15 @@ namespace Fun_Funding.Application.Services.EntityServices
                 {
                     return ResultDTO<string>.Fail("Email and password are required.");
                 }
-
+                var properties = registerModel.GetType().GetProperties();
+                foreach (var property in properties)
+                {
+                    var value = property.GetValue(registerModel);
+                    if (value == null || (value is string str && string.IsNullOrWhiteSpace(str)))
+                    {
+                        return ResultDTO<string>.Fail($"{property.Name} cannot be null or whitespace");
+                    }
+                }
                 var existingUser = await _unitOfWork.UserRepository.GetAsync(x => x.Email == registerModel.Email);
                 if (existingUser != null)
                 {
