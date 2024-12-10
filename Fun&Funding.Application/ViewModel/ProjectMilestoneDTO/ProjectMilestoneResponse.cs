@@ -25,6 +25,8 @@ namespace Fun_Funding.Application.ViewModel.ProjectMilestoneDTO
         public string? Title { get; set; }
         public string? Introduction { get; set; }
         public decimal? TotalAmount { get; set; }
+        public int? BackerAmount { get; set; }
+        public MilestoneResponse? LatestMilestone { get; set; }
         public FundingProjectResponse FundingProject {get; set; }
         public MilestoneResponse Milestone { get; set; }
         public List<ProjectMilestoneRequirementResponse> ProjectMilestoneRequirements { get; set; }

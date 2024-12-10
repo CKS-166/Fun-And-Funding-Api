@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Fun_Funding.Application.ExceptionHandler;
+using Fun_Funding.Application.Interfaces.IEntityService;
 using Fun_Funding.Application.Interfaces.IExternalServices;
 using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel;
@@ -7,6 +8,7 @@ using Fun_Funding.Application.ViewModel.BankAccountDTO;
 using Fun_Funding.Application.ViewModel.MarketplaceFileDTO;
 using Fun_Funding.Application.ViewModel.MarketplaceProjectDTO;
 using Fun_Funding.Domain.Entity;
+using Fun_Funding.Domain.Entity.NoSqlEntities;
 using Fun_Funding.Domain.Enum;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -24,10 +26,11 @@ namespace Fun_Funding.Application.Services.EntityServices
         private readonly IFundingProjectService _fundingProjectService;
         private readonly ClaimsPrincipal _claimsPrincipal;
         private readonly IAzureService _azureService;
+        private readonly INotificationService _notificationService;
 
         public MarketplaceService(IUnitOfWork unitOfWork, IMapper mapper, IUserService userService,
             IHttpContextAccessor httpContextAccessor, IFundingProjectService fundingProjectService,
-            IAzureService azureService)
+            IAzureService azureService, INotificationService notificationService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
@@ -35,6 +38,7 @@ namespace Fun_Funding.Application.Services.EntityServices
             _claimsPrincipal = httpContextAccessor.HttpContext.User;
             _fundingProjectService = fundingProjectService;
             _azureService = azureService;
+            _notificationService = notificationService;
         }
 
         public async Task<ResultDTO<MarketplaceProjectInfoResponse>>
@@ -538,6 +542,24 @@ namespace Fun_Funding.Application.Services.EntityServices
                         await _unitOfWork.CommitAsync();
 
                         var response = _mapper.Map<MarketplaceProjectInfoResponse>(marketplaceProject);
+
+                        // NOTIFICATION
+                        // 1. get recipientsIds
+                        List<Guid> recipientsId = new List<Guid>();
+                        recipientsId.Add(marketplaceProject.FundingProject.User.Id);
+                        //recipientsId.Add(Guid.Parse("f766c910-4f6a-421e-a1a3-61534e6005c3"));
+                        // 2. initiate new Notification object
+                        var notification = new Notification
+                        {
+                            Id = new Guid(),
+                            Date = DateTime.Now,
+                            Message = $"has updated status project <b>{marketplaceProject.Name}</b>",
+                            NotificationType = NotificationType.MarketplaceProjectStatus,
+                            Actor = new { Id = new Guid(), UserName = "Admin", Avatar = ""},
+                            ObjectId = marketplaceProject.Id,
+                        };
+
+                        await _notificationService.SendNotification(notification, recipientsId);
 
                         return ResultDTO<MarketplaceProjectInfoResponse>.Success(response);
                     }
