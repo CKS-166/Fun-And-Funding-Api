@@ -15,5 +15,6 @@ namespace Fun_Funding.Application.IService
         Task<ResultDTO<Guid>> CreateOrder(CreateOrderRequest createOrderRequest);
         Task<ResultDTO<PaginatedResponse<OrderInfoResponse>>> GetAllOrders(ListRequest request);
         Task<ResultDTO<OrderInfoResponse>> GetOrderById(Guid orderId);
+        Task<ResultDTO<List<OrderSummary>>> GetOrdersGroupedByDate(Guid marketplaceProjectId);
     }
 }
