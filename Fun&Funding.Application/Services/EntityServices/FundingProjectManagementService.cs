@@ -1,5 +1,6 @@
 using AutoMapper;
 using Fun_Funding.Application.ExceptionHandler;
+using Fun_Funding.Application.Interfaces.IEntityService;
 using Fun_Funding.Application.Interfaces.IExternalServices;
 using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel;
@@ -10,6 +11,7 @@ using Fun_Funding.Application.ViewModel.PackageBackerDTO;
 using Fun_Funding.Application.ViewModel.PackageDTO;
 using Fun_Funding.Domain.Constrain;
 using Fun_Funding.Domain.Entity;
+using Fun_Funding.Domain.Entity.NoSqlEntities;
 using Fun_Funding.Domain.Enum;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -30,13 +32,16 @@ namespace Fun_Funding.Application.Services.EntityServices
         private int minDays = 1;
         public IUserService _userService;
         public string defaultImage = "https://funfundingmediafiles.blob.core.windows.net/fundingprojectfiles/sampleThumb_a1abaa10-9b59-465b-a31b-218031942496.jfif";
-        public FundingProjectManagementService(IUnitOfWork unitOfWork, IMapper mapper, IAzureService azureService, IHttpContextAccessor httpContextAccessor, IUserService userService)
+        private INotificationService _notificationService;
+        public FundingProjectManagementService(IUnitOfWork unitOfWork, IMapper mapper, IAzureService azureService, IHttpContextAccessor httpContextAccessor, IUserService userService,
+            INotificationService notificationService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _azureService = azureService;
             _claimsPrincipal = httpContextAccessor.HttpContext.User;
             _userService = userService;
+            _notificationService = notificationService;
         }
         public async Task<ResultDTO<FundingProjectResponse>> CreateFundingProject(FundingProjectAddRequest projectRequest)
         {
@@ -640,6 +645,24 @@ namespace Fun_Funding.Application.Services.EntityServices
                         await _unitOfWork.CommitAsync();
 
                         var response = _mapper.Map<FundingProject, FundingProjectResponse>(project);
+
+                        // NOTIFICATION
+                        // 1. get recipientsIds
+                        List<Guid> recipientsId = new List<Guid>();
+                        recipientsId.Add(project.UserId);
+                        //recipientsId.Add(Guid.Parse("f766c910-4f6a-421e-a1a3-61534e6005c3"));
+                        // 2. initiate new Notification object
+                        var notification = new Notification
+                        {
+                            Id = new Guid(),
+                            Date = DateTime.Now,
+                            Message = $"has updated status project <b>{project.Name}</b>",
+                            NotificationType = NotificationType.FundingProjectStatus,
+                            Actor = new { Id = new Guid(), UserName = "Admin", Avatar = "" },
+                            ObjectId = project.Id,
+                        };
+
+                        await _notificationService.SendNotification(notification, recipientsId);
 
                         return ResultDTO<FundingProjectResponse>.Success(response);
                     }

@@ -20,7 +20,7 @@ namespace Fun_Funding.Api.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = Role.Backer)]
+        //[Authorize(Roles = Role.Backer)]
         public async Task<IActionResult> GetUserCartInfo()
         {
             var response = await _cartService.GetUserCartInfo();
@@ -47,7 +47,7 @@ namespace Fun_Funding.Api.Controllers
             return Ok(response);
         }
         [HttpGet("quantity")]
-        [Authorize(Roles = Role.Backer)]
+        //[Authorize(Roles = Role.Backer)]
         public async Task<IActionResult> CountUserCartItem()
         {
             var response = await _cartService.CountUserCartItem();
