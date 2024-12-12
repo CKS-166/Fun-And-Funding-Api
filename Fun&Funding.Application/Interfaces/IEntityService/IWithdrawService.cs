@@ -18,6 +18,6 @@ namespace Fun_Funding.Application.IService
         public Task<ResultDTO<AdminResponse>> AdminProcessingRequest(Guid id);
         public Task<ResultDTO<WithdrawRequest>> AdminCancelRequest(Guid id);
         public Task<ResultDTO<WithdrawRequest>> AdminApproveRequest(Guid id);
-        Task<ResultDTO<string>> WalletWithdrawRequest();
+        Task<ResultDTO<string>> WalletWithdrawRequest(decimal amount);
     }
 }

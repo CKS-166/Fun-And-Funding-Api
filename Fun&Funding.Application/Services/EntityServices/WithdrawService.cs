@@ -302,7 +302,7 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
-        public async Task<ResultDTO<string>> WalletWithdrawRequest()
+        public async Task<ResultDTO<string>> WalletWithdrawRequest(decimal amount)
         {
             try
             {
@@ -329,10 +329,18 @@ namespace Fun_Funding.Application.Services.EntityServices
                 {
                     return ResultDTO<string>.Fail("Your account balance must be higher than 10.000 VND to withdraw balance.", (int)HttpStatusCode.Forbidden);
                 }
+                else if (amount <= 10000)
+                {
+                    return ResultDTO<string>.Fail("Must withdraw at least 10.000 VND to withdraw balance.", (int)HttpStatusCode.Forbidden);
+                }
+                else if (wallet.Balance < amount)
+                {
+                    return ResultDTO<string>.Fail("Not enough money to withdraw balance.", (int)HttpStatusCode.Forbidden);
+                }
                 WithdrawRequest withdrawRequest = new WithdrawRequest
                 {
                     Id = new Guid(),
-                    Amount = wallet.Balance,
+                    Amount = amount,
                     CreatedDate = DateTime.UtcNow,
                     ExpiredDate = DateTime.UtcNow.AddDays(7),
                     IsFinished = false,

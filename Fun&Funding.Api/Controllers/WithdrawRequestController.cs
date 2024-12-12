@@ -59,9 +59,9 @@ namespace Fun_Funding.Api.Controllers
             return Ok(result);
         }
         [HttpPost("wallet-request")]
-        public async Task<IActionResult> WalletWithdrawRequest()
+        public async Task<IActionResult> WalletWithdrawRequest(decimal amount)
         {
-            var result = await _withdrawService.WalletWithdrawRequest();
+            var result = await _withdrawService.WalletWithdrawRequest(amount);
             return Ok(result);
         }
     }
