@@ -45,5 +45,12 @@ namespace Fun_Funding.Api.Controllers
             var response = await _orderService.GetAllOrders(request);
             return Ok(response);
         }
+
+        [HttpGet("group-orders")]
+        public async Task<IActionResult> GroupOrders([FromQuery] Guid id)
+        {
+            var result = await _orderService.GetOrdersGroupedByDate(id);
+            return Ok(result);
+        }
     }
 }

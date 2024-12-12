@@ -463,6 +463,30 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
+        public async Task<ResultDTO<List<OrderSummary>>> GetOrdersGroupedByDate(Guid marketplaceProjectId)
+        {
+            try
+            {
+                var ordersGroupedByDate = await _unitOfWork.OrderRepository.GetQueryable()
+                    .Include(o => o.OrderDetails).ThenInclude(od =>od.DigitalKey)
+                .Where(o => o.OrderDetails.Any(od => od.DigitalKey.MarketplaceProject.Id == marketplaceProjectId))
+                .GroupBy(o => o.CreatedDate.Date)
+                .Select(g => new OrderSummary
+                {
+                    CreatedDate = g.Key,
+                    TotalAmount = g.Sum(o => o.TotalPrice)
+                })
+                .OrderBy(summary => summary.CreatedDate)
+                .ToListAsync();
+
+                return ResultDTO<List<OrderSummary>>.Success(ordersGroupedByDate);
+            }catch(Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+            
+        }
+
         public async Task<ResultDTO<PaginatedResponse<OrderInfoResponse>>> GetUserOrders(ListRequest request)
         {
             try

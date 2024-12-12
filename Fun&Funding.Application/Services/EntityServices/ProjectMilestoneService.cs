@@ -393,6 +393,7 @@ namespace Fun_Funding.Application.Services.EntityServices
         {
             try
             {
+
                 var projectMilestone = await _unitOfWork.ProjectMilestoneRepository.GetQueryable()
                    .Include(pm => pm.FundingProject.Wallet)
                    .Include(pm => pm.Milestone)
@@ -436,7 +437,7 @@ namespace Fun_Funding.Application.Services.EntityServices
 
                 throw new Exception(ex.Message);
             }
-        }
+        }  
         public async Task RefundBackersAsync(Guid projectMilestoneId)
         {
             try
@@ -741,7 +742,8 @@ namespace Fun_Funding.Application.Services.EntityServices
                     isAscending: request.IsAscending ?? true,
                     pageIndex: request.PageIndex ?? 1,
                     pageSize: request.PageSize ?? 10,
-                    includeProperties: "Milestone,FundingProject,FundingProject.SourceFiles,FundingProject.User,FundingProject.Wallet,FundingProject.Wallet.BankAccount" +
+                    includeProperties: "Milestone,FundingProject,FundingProject.SourceFiles,FundingProject.User," +
+                    "FundingProject.Packages,FundingProject.Packages.PackageUsers,FundingProject.Wallet,FundingProject.Wallet.BankAccount" +
                     ",ProjectMilestoneRequirements.RequirementFiles,ProjectMilestoneRequirements.Requirement"
                 );
 

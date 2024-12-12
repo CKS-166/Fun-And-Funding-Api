@@ -24,6 +24,13 @@ namespace Fun_Funding.Api.Controllers
             return Ok(response);
         }
 
+        [HttpGet("latest-commission-fee")]
+        public IActionResult GetLatestCommissionFee(CommissionType type)
+        {
+            var response = _commissionFeeService.GetAppliedCommissionFee(type);
+            return Ok(response);
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetCommissionFees([FromQuery] ListRequest request, [FromQuery] CommissionType? type)
         {
