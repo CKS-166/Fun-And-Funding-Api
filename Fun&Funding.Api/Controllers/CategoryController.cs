@@ -1,6 +1,8 @@
 ﻿using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.CategoryDTO;
+using Fun_Funding.Domain.Constrain;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Fun_Funding.Api.Controller
@@ -37,6 +39,7 @@ namespace Fun_Funding.Api.Controller
             return Ok(response);
         }
 
+        [Authorize(Roles = Role.Admin)]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCategory([FromRoute] Guid id)
         {
@@ -44,6 +47,7 @@ namespace Fun_Funding.Api.Controller
             return NoContent();
         }
 
+        [Authorize(Roles = Role.Admin)]
         [HttpPost]
         public async Task<IActionResult> CreateCategory([FromBody] CategoryRequest request)
         {
@@ -54,6 +58,7 @@ namespace Fun_Funding.Api.Controller
             };
         }
 
+        [Authorize(Roles = Role.Admin)]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateCategory([FromRoute] Guid id, [FromBody] CategoryRequest request)
         {
