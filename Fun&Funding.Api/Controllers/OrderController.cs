@@ -1,9 +1,7 @@
 ﻿using Fun_Funding.Application.IService;
-using Fun_Funding.Application.Services.EntityServices;
 using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.OrderDTO;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Fun_Funding.Api.Controllers
@@ -50,6 +48,14 @@ namespace Fun_Funding.Api.Controllers
         public async Task<IActionResult> GroupOrders([FromQuery] Guid id)
         {
             var result = await _orderService.GetOrdersGroupedByDate(id);
+            return Ok(result);
+        }
+
+        [Authorize]
+        [HttpGet("/api/order-details/{marketplaceProjectId}/purchases")]
+        public async Task<IActionResult> GetPurchases([FromRoute] Guid marketplaceProjectId)
+        {
+            var result = await _orderService.GetOrderDetailsByMarketplaceProjectId(marketplaceProjectId);
             return Ok(result);
         }
     }
