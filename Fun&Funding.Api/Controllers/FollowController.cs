@@ -29,7 +29,7 @@ namespace Fun_Funding.Api.Controllers
             return Ok(result);
         }
         [HttpGet("number-of-following")]
-        [Authorize(Roles = Role.Backer)]
+        [Authorize(Roles = Role.Backer + ", " + Role.GameOwner)]
         public async Task<IActionResult> getFollowingCount()
         {
             var result = await _followService.getFollowingCount();
@@ -39,7 +39,7 @@ namespace Fun_Funding.Api.Controllers
             }
             return Ok(result);
         }[HttpGet("number-of-funded-project-following")]
-        [Authorize(Roles = Role.Backer)]
+        [Authorize(Roles = Role.Backer + ", " + Role.GameOwner)]
         public async Task<IActionResult> getFundingFollowingCount()
         {
             var result = await _followService.getFundingFollowCount();
@@ -50,7 +50,7 @@ namespace Fun_Funding.Api.Controllers
             return Ok(result);
         }
         [HttpGet("number-of-follower")]
-        [Authorize(Roles = Role.Backer)]
+        [Authorize(Roles = Role.Backer + ", " + Role.GameOwner)]
         public async Task<IActionResult> getFollowersCount()
         {
             var result = await _followService.getFollowersCount();
