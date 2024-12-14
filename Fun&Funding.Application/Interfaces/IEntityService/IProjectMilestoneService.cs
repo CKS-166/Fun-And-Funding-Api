@@ -22,6 +22,9 @@ namespace Fun_Funding.Application.IService
              Guid? fundingProjectId,
              Guid? milestoneId);
         string CanCreateProjectMilestone(FundingProject project, int requestedMilestoneOrder, DateTime createdDate);
+        public Task<ResultDTO<List<ProjectMilestoneResponse>>> GetProjectMilestonesByProjectAndMilestone(
+            Guid? fundingProjectId,
+            Guid? milestoneId);
     }
 }
 

@@ -1,8 +1,5 @@
 ﻿using Fun_Funding.Application.IService;
-using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.FollowDTO;
-using Fun_Funding.Domain.Constrain;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,28 +19,6 @@ namespace Fun_Funding.Api.Controllers
         public async Task<IActionResult> GetListFollower(Guid id)
         {
             var result = await _followService.GetListFollower(id);
-            if (!result._isSuccess)
-            {
-                return BadRequest();
-            }
-            return Ok(result);
-        }
-        [HttpGet("number-of-following")]
-        [Authorize(Roles = Role.Backer)]
-        public async Task<IActionResult> getFollowingCount()
-        {
-            var result = await _followService.getFollowingCount();
-            if (!result._isSuccess)
-            {
-                return BadRequest();
-            }
-            return Ok(result);
-        }
-        [HttpGet("number-of-follower")]
-        [Authorize(Roles = Role.Backer)]
-        public async Task<IActionResult> getFollowersCount()
-        {
-            var result = await _followService.getFollowersCount();
             if (!result._isSuccess)
             {
                 return BadRequest();

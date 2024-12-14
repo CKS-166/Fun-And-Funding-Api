@@ -69,7 +69,7 @@ namespace Fun_Funding.Application.Services.EntityServices
             User exitUser = _mapper.Map<User>(user._data);
 
             var foundedProject = await _unitOfWork.FundingProjectRepository.GetByIdAsync(projectId);
-
+            
 
 
             if (exitUser is null)
@@ -119,7 +119,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                         return ResultDTO<Follow>.Success(response, "You just followed");
                     }
                 }
-
+                
             }
             catch (Exception ex)
             {
@@ -135,7 +135,7 @@ namespace Fun_Funding.Application.Services.EntityServices
             var foundUser = await _userService.GetUserInfoById(userId);
             User userFollowed = _mapper.Map<User>(foundUser._data);
 
-
+            
             if (exitUser is null)
             {
                 return ResultDTO<Follow>.Fail("user is not authenticated");
@@ -183,41 +183,11 @@ namespace Fun_Funding.Application.Services.EntityServices
                         return ResultDTO<Follow>.Success(response, "You just followed");
                     }
                 }
-
+                
             }
             catch (Exception ex)
             {
                 return ResultDTO<Follow>.Fail("Something went wrong!");
-            }
-        }
-
-        public async Task<ResultDTO<int>> getFollowersCount()
-        {
-            var user = await _userService.GetUserInfo();
-            User exitUser = _mapper.Map<User>(user._data);
-            try
-            {
-                var list = _unitOfWork.FollowRepository.GetList(x=>x.FollowerId == exitUser.Id);
-                return ResultDTO<int>.Success(list.Count, "Successful get number of follower");
-            }
-            catch (Exception ex)
-            {
-                return ResultDTO<int>.Fail(ex.Message);
-            }
-        }
-
-        public async Task<ResultDTO<int>> getFollowingCount()
-        {
-            var user = await _userService.GetUserInfo();
-            User exitUser = _mapper.Map<User>(user._data);
-            try
-            {
-                var list = _unitOfWork.FollowRepository.GetList(x => x.UserID == exitUser.Id);
-                return ResultDTO<int>.Success(list.Count, "Successful get number of following");
-            }
-            catch (Exception ex)
-            {
-                return ResultDTO<int>.Fail(ex.Message);
             }
         }
 

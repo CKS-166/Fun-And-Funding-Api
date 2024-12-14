@@ -75,7 +75,7 @@ namespace Fun_Funding.Infrastructure.Persistence.Repository
             int? pageSize = 10,
             CancellationToken cancellationToken = default)
         {
-            IQueryable<T> query = _entitySet.Where(e => EF.Property<bool>(e, "IsDeleted") == false);
+            IQueryable<T> query = _entitySet.AsNoTracking().Where(e => EF.Property<bool>(e, "IsDeleted") == false);
 
             if (filter != null) { query = query.Where(filter); }
 

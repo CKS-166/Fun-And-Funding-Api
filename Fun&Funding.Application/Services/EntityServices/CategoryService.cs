@@ -24,25 +24,17 @@ namespace Fun_Funding.Application.Services.EntityServices
         {
             try
             {
-                var validation = CheckDuplicateName(request.Name);
+                var category = _mapper.Map<Category>(request);
 
-                if (!validation)
-                {
-                    var category = _mapper.Map<Category>(request);
+                category.CreatedDate = DateTime.Now;
+                category.IsDeleted = false;
 
-                    category.CreatedDate = DateTime.Now;
-                    category.IsDeleted = false;
+                await _unitOfWork.CategoryRepository.AddAsync(category);
+                await _unitOfWork.CommitAsync();
 
-                    await _unitOfWork.CategoryRepository.AddAsync(category);
-                    await _unitOfWork.CommitAsync();
+                var response = _mapper.Map<CategoryResponse>(category);
 
-                    var response = _mapper.Map<CategoryResponse>(category);
-
-                    return new ResultDTO<CategoryResponse>(true, ["Create successfully."], response, (int)HttpStatusCode.Created);
-                }
-                else
-                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "Category Name cannot be duplicated.");
-
+                return new ResultDTO<CategoryResponse>(true, ["Create successfully."], response, (int)HttpStatusCode.Created);
             }
             catch (Exception ex)
             {
@@ -201,31 +193,24 @@ namespace Fun_Funding.Application.Services.EntityServices
         {
             try
             {
-                var validation = CheckDuplicateName(request.Name);
+                var category = await _unitOfWork.CategoryRepository.GetByIdAsync(id);
 
-                if (!validation)
+                if (category == null)
                 {
-                    var category = await _unitOfWork.CategoryRepository.GetByIdAsync(id);
-
-                    if (category == null)
-                    {
-                        throw new ExceptionError((int)HttpStatusCode.NotFound, "Category Not Found.");
-                    }
-                    else
-                    {
-                        _mapper.Map(request, category);
-
-                        _unitOfWork.CategoryRepository.Update(category);
-                        await _unitOfWork.CommitAsync();
-
-                        var response = _mapper.Map<CategoryResponse>(category);
-
-                        return new ResultDTO<CategoryResponse>(true, ["Update successfully."], response, (int)HttpStatusCode.OK);
-
-                    }
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "Category Not Found.");
                 }
                 else
-                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "Category Name cannot be duplicated.");
+                {
+                    _mapper.Map(request, category);
+
+                    _unitOfWork.CategoryRepository.Update(category);
+                    await _unitOfWork.CommitAsync();
+
+                    var response = _mapper.Map<CategoryResponse>(category);
+
+                    return new ResultDTO<CategoryResponse>(true, ["Update successfully."], response, (int)HttpStatusCode.OK);
+
+                }
             }
             catch (Exception ex)
             {
@@ -236,21 +221,6 @@ namespace Fun_Funding.Application.Services.EntityServices
 
                 throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
             }
-        }
-
-        private bool CheckDuplicateName(string name)
-        {
-            bool flag = false;
-            Expression<Func<Category, bool>> filter = c => c.Name.Equals(name, StringComparison.OrdinalIgnoreCase);
-
-            var categories = _unitOfWork.CategoryRepository.GetAllDeletedNoPaginationAsync(filter);
-
-            if (categories != null)
-            {
-                flag = true;
-            }
-
-            return flag;
         }
     }
 }

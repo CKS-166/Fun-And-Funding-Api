@@ -332,6 +332,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                         {
                             throw new ExceptionError((int)HttpStatusCode.BadRequest, "Mandatory requirements must be completed before submitting");
                         }
+                        await ChangeRequirementDone(projectMilestone.Id);
                     }
 
                 }
@@ -343,6 +344,11 @@ namespace Fun_Funding.Application.Services.EntityServices
                     {
                         TransferHalfMilestone(projectMilestone.Id, 2);
                     }
+                    if (projectMilestone.Milestone.MilestoneOrder == 4)
+                    {
+                        await ChangeProjectSuccessful(projectMilestone.FundingProjectId);
+                    }
+                    projectMilestone.EndDate = DateTime.Now;
                 }
                 else if (projectMilestone.Status == ProjectMilestoneStatus.Warning && warnStatusList.Contains(request.Status))
                 {
@@ -365,7 +371,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                             await ChangeProjectSuccessful(projectMilestone.FundingProjectId);
                         }
                         await TransferHalfMilestone(projectMilestone.Id, 2);
-
+                        projectMilestone.EndDate = DateTime.Now;
                     }
                 }
                 if (statusChanged)
@@ -683,7 +689,6 @@ namespace Fun_Funding.Application.Services.EntityServices
                 // Initialize the filter with a default condition that always evaluates to true.
                 Expression<Func<ProjectMilestone, bool>> filter = u => true;
 
-
                 // Apply status filter.
                 if (status != null)
                 {
@@ -763,6 +768,59 @@ namespace Fun_Funding.Application.Services.EntityServices
                 };
 
                 return ResultDTO<PaginatedResponse<ProjectMilestoneResponse>>.Success(response);
+
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
+
+        public async Task ChangeRequirementDone(Guid projectMilestoneId)
+        {
+            try
+            {
+                var projectMilestone = _unitOfWork.ProjectMilestoneRepository.GetQueryable()
+                .Include(pm => pm.ProjectMilestoneRequirements).FirstOrDefault(pm => pm.Id == projectMilestoneId);
+                if (projectMilestone == null)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "Project milestone is not found");
+                }
+                foreach (ProjectMilestoneRequirement req in projectMilestone.ProjectMilestoneRequirements)
+                {
+                    req.RequirementStatus = RequirementStatus.Done;
+                }
+                _unitOfWork.Commit();
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+                throw new Exception(ex.Message);
+            }
+
+
+        }
+
+        public async Task<ResultDTO<List<ProjectMilestoneResponse>>> GetProjectMilestonesByProjectAndMilestone(
+            Guid? fundingProjectId,
+            Guid? milestoneId)
+        {
+            try
+            {
+                var list = await _unitOfWork.ProjectMilestoneRepository.GetAllAsync(
+                filter: pm => pm.FundingProjectId == fundingProjectId && pm.MilestoneId == milestoneId,
+                 includeProperties: "Milestone.Requirements,ProjectMilestoneRequirements,ProjectMilestoneRequirements.RequirementFiles,ProjectMilestoneRequirements.Requirement"
+                );
+                var response = _mapper.Map<List<ProjectMilestoneResponse>>(list);
+                return ResultDTO<List<ProjectMilestoneResponse>>.Success(response);
 
             }
             catch (Exception ex)

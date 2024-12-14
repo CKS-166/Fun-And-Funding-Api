@@ -30,6 +30,7 @@ namespace Fun_Funding.Api
             {
                 options.Limits.MaxRequestBodySize = 500 * 1024 * 1024; // 500 MB
             });
+
             #region old_DI
             //builder.Services.AddAuthentication()
             //    .AddGoogle(options =>
