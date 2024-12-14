@@ -28,6 +28,12 @@ namespace Fun_Funding.Api.Controllers
 
         }
 
+        [HttpGet("number-of-marketplace-like")]
+        public async Task<IActionResult> GetMarketplaceLike()
+        {
+            var result = await _likeService.NumberOfMarketplaceLike();
+            return Ok(result);
+        } 
         [HttpGet("all")]
         public async Task<IActionResult> GetAll()
         {

@@ -38,6 +38,16 @@ namespace Fun_Funding.Api.Controllers
                 return BadRequest();
             }
             return Ok(result);
+        }[HttpGet("number-of-funded-project-following")]
+        [Authorize(Roles = Role.Backer)]
+        public async Task<IActionResult> getFundingFollowingCount()
+        {
+            var result = await _followService.getFundingFollowCount();
+            if (!result._isSuccess)
+            {
+                return BadRequest();
+            }
+            return Ok(result);
         }
         [HttpGet("number-of-follower")]
         [Authorize(Roles = Role.Backer)]
