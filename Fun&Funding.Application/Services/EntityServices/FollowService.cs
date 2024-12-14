@@ -191,33 +191,65 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
-        public async Task<ResultDTO<int>> getFollowersCount()
+        public async Task<ResultDTO<NumOfFollowResponse>> getFollowersCount()
         {
             var user = await _userService.GetUserInfo();
             User exitUser = _mapper.Map<User>(user._data);
             try
             {
-                var list = _unitOfWork.FollowRepository.GetList(x=>x.FollowerId == exitUser.Id);
-                return ResultDTO<int>.Success(list.Count, "Successful get number of follower");
+                var list = _unitOfWork.FollowRepository.GetList(x => x.FollowerId == exitUser.Id);
+                if (list is null)
+                {
+                    return ResultDTO<NumOfFollowResponse>.Fail("No follower found");
+                    
+                }
+                var response = new NumOfFollowResponse();
+                response.TotalFollow = list.Count;
+                response.Users = new List<ViewModel.UserDTO.UserInfoResponse>();
+                foreach (var item in list)
+                {
+                    var follower = await _userService.GetUserInfoById(item.UserID.Value);
+                    if (follower._data != null)
+                    {
+                        response.Users!.Add(follower._data);
+                    }
+                }
+                return ResultDTO<NumOfFollowResponse>.Success(response, "Successful get number of follower");
             }
             catch (Exception ex)
             {
-                return ResultDTO<int>.Fail(ex.Message);
+                return ResultDTO<NumOfFollowResponse>.Fail(ex.Message);
             }
         }
 
-        public async Task<ResultDTO<int>> getFollowingCount()
+        public async Task<ResultDTO<NumOfFollowResponse>> getFollowingCount()
         {
             var user = await _userService.GetUserInfo();
             User exitUser = _mapper.Map<User>(user._data);
             try
             {
                 var list = _unitOfWork.FollowRepository.GetList(x => x.UserID == exitUser.Id);
-                return ResultDTO<int>.Success(list.Count, "Successful get number of following");
+                if (list is null)
+                {
+                    return ResultDTO<NumOfFollowResponse>.Fail("No following found");
+                }
+                var response = new NumOfFollowResponse();
+                response.TotalFollow = list.Count;
+                response.Users = new List<ViewModel.UserDTO.UserInfoResponse>();
+                response.TotalFollow = list.Count;
+                foreach (var item in list)
+                {
+                    var follower = await _userService.GetUserInfoById(item.FollowerId);
+                    if (follower._data != null)
+                    {
+                        response.Users!.Add(follower._data);
+                    }
+                }
+                return ResultDTO<NumOfFollowResponse>.Success(response, "Successful get number of following");
             }
             catch (Exception ex)
             {
-                return ResultDTO<int>.Fail(ex.Message);
+                return ResultDTO<NumOfFollowResponse>.Fail(ex.Message);
             }
         }
 
