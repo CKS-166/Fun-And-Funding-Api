@@ -51,7 +51,6 @@ namespace Fun_Funding.Api.Controllers
             return Ok(result);
         }
 
-        [Authorize]
         [HttpGet("/api/order-details/{marketplaceProjectId}/purchases")]
         public async Task<IActionResult> GetPurchases([FromRoute] Guid marketplaceProjectId)
         {
