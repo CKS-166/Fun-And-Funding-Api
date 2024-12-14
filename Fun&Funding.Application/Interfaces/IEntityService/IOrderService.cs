@@ -1,4 +1,10 @@
-﻿using Fun_Funding.Application.ViewModel;
+﻿using Fun_Funding.Application.ViewModel.UserDTO;
+using Fun_Funding.Application.ViewModel;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using Fun_Funding.Application.ViewModel.OrderDTO;
 
 namespace Fun_Funding.Application.IService
@@ -10,6 +16,5 @@ namespace Fun_Funding.Application.IService
         Task<ResultDTO<PaginatedResponse<OrderInfoResponse>>> GetAllOrders(ListRequest request);
         Task<ResultDTO<OrderInfoResponse>> GetOrderById(Guid orderId);
         Task<ResultDTO<List<OrderSummary>>> GetOrdersGroupedByDate(Guid marketplaceProjectId);
-        Task<ResultDTO<IEnumerable<object>>> GetOrderDetailsByMarketplaceProjectId(Guid marketplaceProjectId);
     }
 }

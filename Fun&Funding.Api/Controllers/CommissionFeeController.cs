@@ -1,14 +1,11 @@
 ﻿using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.CommissionDTO;
-using Fun_Funding.Domain.Constrain;
 using Fun_Funding.Domain.Enum;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Fun_Funding.Api.Controllers
 {
-    [Authorize(Roles = Role.Admin)]
     [Route("api/commision-fees")]
     [ApiController]
     public class CommissionFeeController : ControllerBase

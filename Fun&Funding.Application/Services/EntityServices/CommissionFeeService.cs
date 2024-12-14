@@ -5,6 +5,7 @@ using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.CommissionDTO;
 using Fun_Funding.Domain.Entity;
 using Fun_Funding.Domain.Enum;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Net;
 
@@ -25,21 +26,14 @@ namespace Fun_Funding.Application.Services.EntityServices
         {
             try
             {
-                if (request.Rate < 0 || request.Rate > 1)
-                {
-                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "Invalid Rate");
-                }
-                else
-                {
-                    var commission = _mapper.Map<CommissionFee>(request);
-                    commission.CreatedDate = commission.UpdateDate = DateTime.Now;
-                    _unitOfWork.CommissionFeeRepository.Add(commission);
-                    await _unitOfWork.CommitAsync();
+                var commission = _mapper.Map<CommissionFee>(request);
+                commission.CreatedDate = commission.UpdateDate = DateTime.Now;
+                _unitOfWork.CommissionFeeRepository.Add(commission);
+                await _unitOfWork.CommitAsync();
 
-                    var response = _mapper.Map<CommissionFeeResponse>(commission);
+                var response = _mapper.Map<CommissionFeeResponse>(commission);
 
-                    return new ResultDTO<CommissionFeeResponse>(true, ["Create successfully."], response, (int)HttpStatusCode.Created);
-                }
+                return new ResultDTO<CommissionFeeResponse>(true, ["Create successfully."], response, (int)HttpStatusCode.Created);
             }
             catch (Exception ex)
             {
@@ -56,7 +50,10 @@ namespace Fun_Funding.Application.Services.EntityServices
         {
             try
             {
-                var commissionFee = _unitOfWork.CommissionFeeRepository.GetAppliedCommissionFeeByType(type);
+                var commissionFee = _unitOfWork.CommissionFeeRepository.GetQueryable()
+                                .Where(c => c.CommissionType == type)
+                                .OrderByDescending(c => c.UpdateDate)
+                                .FirstOrDefault();
 
                 if (commissionFee != null)
                 {
@@ -178,31 +175,24 @@ namespace Fun_Funding.Application.Services.EntityServices
         {
             try
             {
-                if (request.Rate < 0 || request.Rate > 1)
+                var commission = await _unitOfWork.CommissionFeeRepository.GetByIdAsync(id);
+
+                if (commission != null)
                 {
-                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "Invalid Rate");
+                    commission.Id = new Guid();
+                    commission.Rate = request.Rate;
+                    commission.UpdateDate = DateTime.Now;
+
+                    _unitOfWork.CommissionFeeRepository.Add(commission);
+                    await _unitOfWork.CommitAsync();
+
+                    var response = _mapper.Map<CommissionFeeResponse>(commission);
+
+                    return ResultDTO<CommissionFeeResponse>.Success(response);
                 }
                 else
                 {
-                    var commission = await _unitOfWork.CommissionFeeRepository.GetByIdAsync(id);
-
-                    if (commission != null)
-                    {
-                        commission.Id = new Guid();
-                        commission.Rate = request.Rate;
-                        commission.UpdateDate = DateTime.Now;
-
-                        _unitOfWork.CommissionFeeRepository.Add(commission);
-                        await _unitOfWork.CommitAsync();
-
-                        var response = _mapper.Map<CommissionFeeResponse>(commission);
-
-                        return ResultDTO<CommissionFeeResponse>.Success(response);
-                    }
-                    else
-                    {
-                        throw new ExceptionError((int)HttpStatusCode.NotFound, "Commission Fee not found.");
-                    }
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "Commission Fee not found.");
                 }
             }
             catch (Exception ex)

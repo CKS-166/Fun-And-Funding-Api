@@ -3,7 +3,6 @@ using Fun_Funding.Application.Interfaces.IEntityService;
 using Fun_Funding.Application.IRepository;
 using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel;
-using Fun_Funding.Application.ViewModel.FollowDTO;
 using Fun_Funding.Application.ViewModel.LikeDTO;
 using Fun_Funding.Domain.Entity;
 using Fun_Funding.Domain.Entity.NoSqlEntities;
@@ -22,15 +21,13 @@ namespace Fun_Funding.Application.Services.EntityServices
     public class LikeService : ILikeService
     {
         private readonly IUserService _userService;
-        private readonly IMarketplaceService _marketplaceService;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
         private readonly INotificationService _notificationService;
 
-        public LikeService(IUserService userService, IMarketplaceService marketplaceService, IMapper mapper, IUnitOfWork unitOfWork, INotificationService notificationService)
+        public LikeService(IUserService userService, IMapper mapper, IUnitOfWork unitOfWork, INotificationService notificationService)
         {
             _userService = userService;
-            _marketplaceService = marketplaceService;
             _mapper = mapper;
             _unitOfWork = unitOfWork;
             _notificationService = notificationService;
@@ -275,36 +272,6 @@ namespace Fun_Funding.Application.Services.EntityServices
             catch (Exception ex)
             {
                 throw new Exception(ex.Message, ex);
-            }
-        }
-
-        public async Task<ResultDTO<MarketplaceLikeNumbers>> NumberOfMarketplaceLike()
-        {
-            var user = await _userService.GetUserInfo();
-            if (user is null)
-            {
-                return ResultDTO<MarketplaceLikeNumbers>.Fail("No user found");
-            }
-            User exitUser = _mapper.Map<User>(user._data);
-            try
-            {
-                var list = _unitOfWork.LikeRepository.GetList(x=>x.UserId == exitUser.Id);
-                var response = new MarketplaceLikeNumbers();
-                response.LikeCount = list.Count;
-                response.marketplaceProjectResponses = new List<ViewModel.MarketplaceProjectDTO.MarketplaceProjectInfoResponse>();
-                foreach (var item in list) {
-                    var likeMarketplace = await _marketplaceService.GetMarketplaceProjectById(item.ProjectId);
-                    if (likeMarketplace._data != null)
-                    {
-                        response.marketplaceProjectResponses!.Add(likeMarketplace._data);
-                    }
-                }
-                return ResultDTO<MarketplaceLikeNumbers>.Success(response, "Successful get marketplace like");
-
-            }
-            catch (Exception ex)
-            {
-                return ResultDTO<MarketplaceLikeNumbers>.Fail(ex.Message);
             }
         }
     }

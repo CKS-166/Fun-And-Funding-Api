@@ -38,11 +38,11 @@ namespace Fun_Funding.Application.Services.EntityServices
                     throw new ExceptionError((int)HttpStatusCode.NotFound, "User not found");
                 }
                 
-                var sampleContract = _unitOfWork.CreatorContractRepository.GetQueryable().FirstOrDefault(sc => sc.ContractType == ContractType.Sample);
+                //var sampleContract = _unitOfWork.CreatorContractRepository.GetQueryable().FirstOrDefault(sc => sc.ContractType == ContractType.Sample);
                 var creatorContract = new CreatorContract
                 {
                     UserId = exitUser.Id,
-                    Policies = sampleContract.Policies,
+                    Policies = "",
                     ContractType = ContractType.CreatorPolicies
                 };
                 _unitOfWork.CreatorContractRepository.Create(creatorContract);

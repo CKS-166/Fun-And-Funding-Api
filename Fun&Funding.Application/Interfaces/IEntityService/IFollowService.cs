@@ -13,9 +13,6 @@ namespace Fun_Funding.Application.IService
     {
         Task<ResultDTO<Follow>> FollowUser(Guid userId);
         Task<ResultDTO<Follow>> FollowProject(Guid projectId);
-        Task<ResultDTO<NumOfFollowResponse>> getFollowingCount();
-        Task<ResultDTO<NumOfFollowResponse>> getFollowersCount();
-        Task<ResultDTO<FundingFollow>> getFundingFollowCount();
         Task<ResultDTO<List<Follow>>> GetListFollower(Guid UserId);
         Task<ResultDTO<Follow>> CheckUserFollow(Guid projectId);
     }
