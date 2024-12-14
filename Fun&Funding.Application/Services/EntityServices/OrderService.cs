@@ -1,29 +1,18 @@
 ﻿using AutoMapper;
-using Azure;
-using Azure.Core;
 using Fun_Funding.Application.ExceptionHandler;
 using Fun_Funding.Application.Interfaces.IEntityService;
 using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel;
-using Fun_Funding.Application.ViewModel.FundingProjectDTO;
 using Fun_Funding.Application.ViewModel.OrderDTO;
-using Fun_Funding.Application.ViewModel.PackageBackerDTO;
-using Fun_Funding.Application.ViewModel.UserDTO;
 using Fun_Funding.Domain.Entity;
 using Fun_Funding.Domain.Entity.NoSqlEntities;
 using Fun_Funding.Domain.Enum;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using NPOI.XWPF.UserModel;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Net;
 using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fun_Funding.Application.Services.EntityServices
 {
@@ -85,13 +74,14 @@ namespace Fun_Funding.Application.Services.EntityServices
                     throw new ExceptionError((int)HttpStatusCode.NotFound, "Wallet Not Found.");
 
                 decimal totalCost = 0;
-                if (createOrderRequest.CartItems.Count <= 0) {
+                if (createOrderRequest.CartItems.Count <= 0)
+                {
                     throw new ExceptionError((int)HttpStatusCode.BadRequest, "No Items in Cart");
                 }
                 foreach (var cartItem in createOrderRequest.CartItems)
                 {
                     var marketplaceProject = _unitOfWork.MarketplaceRepository.GetById(cartItem.MarketplaceProjectId);
-                    if(marketplaceProject == null)
+                    if (marketplaceProject == null)
                     {
                         throw new ExceptionError((int)HttpStatusCode.BadRequest, "Marketplace project not found.");
                     }
@@ -99,7 +89,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                     {
                         throw new ExceptionError((int)HttpStatusCode.BadRequest, "Game is not allowed to purchased");
                     }
-                    if(cartItem.Price < 0)
+                    if (cartItem.Price < 0)
                     {
                         throw new ExceptionError((int)HttpStatusCode.BadRequest, "Invalid game price");
                     }
@@ -324,7 +314,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                         .GetQueryable()
                         .Include(m => m.FundingProject)
                         .FirstOrDefaultAsync(m => m.Id == cartItem.MarketplaceProjectId);
-                    if(marketplaceProject != null)
+                    if (marketplaceProject != null)
                     {
                         recipientsId.Add(marketplaceProject.FundingProject.UserId);
                         // 2. initiate new Notification object
@@ -340,7 +330,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                         // 3. send noti
                         await _notificationService.SendNotification(notification, recipientsId);
                     }
-                    
+
                 }
 
 
@@ -402,21 +392,21 @@ namespace Fun_Funding.Application.Services.EntityServices
                        pageSize: request.PageSize,
                        includeProperties: "OrderDetails,OrderDetails.DigitalKey,OrderDetails.DigitalKey.MarketplaceProject,OrderDetails.ProjectCoupon,OrderDetails.DigitalKey.MarketplaceProject.MarketplaceFiles");
 
-                    var totalItems = _unitOfWork.OrderRepository.GetAll(filter).Count();
-                    var totalPages = (int)Math.Ceiling((double)totalItems / (int)request.PageSize);
-                    IEnumerable<OrderInfoResponse> orders = _mapper.Map<IEnumerable<OrderInfoResponse>>(list);
+                var totalItems = _unitOfWork.OrderRepository.GetAll(filter).Count();
+                var totalPages = (int)Math.Ceiling((double)totalItems / (int)request.PageSize);
+                IEnumerable<OrderInfoResponse> orders = _mapper.Map<IEnumerable<OrderInfoResponse>>(list);
 
-                    PaginatedResponse<OrderInfoResponse> response = new PaginatedResponse<OrderInfoResponse>
-                    {
-                        PageSize = request.PageSize.Value,
-                        PageIndex = request.PageIndex.Value,
-                        TotalItems = totalItems,
-                        TotalPages = totalPages,
-                        Items = orders
-                    };
+                PaginatedResponse<OrderInfoResponse> response = new PaginatedResponse<OrderInfoResponse>
+                {
+                    PageSize = request.PageSize.Value,
+                    PageIndex = request.PageIndex.Value,
+                    TotalItems = totalItems,
+                    TotalPages = totalPages,
+                    Items = orders
+                };
 
-                    return ResultDTO<PaginatedResponse<OrderInfoResponse>>.Success(response, "Orders found!");
-                
+                return ResultDTO<PaginatedResponse<OrderInfoResponse>>.Success(response, "Orders found!");
+
             }
             catch (Exception ex)
             {
@@ -463,12 +453,49 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
+        public async Task<ResultDTO<IEnumerable<object>>> GetOrderDetailsByMarketplaceProjectId(Guid marketplaceProjectId)
+        {
+            try
+            {
+                var orderDetails = await _unitOfWork.OrderDetailRepository
+                    .GetOrderDetailsByMarketplaceProjectId(marketplaceProjectId);
+
+                var response = orderDetails.Select(
+                    o => new
+                    {
+                        o.Id,
+                        o.UnitPrice,
+                        o.DigitalKeyID,
+                        o.CreatedDate,
+                        CouponKey = o.ProjectCoupon?.CouponKey ?? string.Empty,
+                        CouponName = o.ProjectCoupon?.CouponName ?? string.Empty,
+                        MarketplaceProjectId = o.DigitalKey.MarketplaceProject.Id,
+                        OrderId = o.OrderId,
+                        DigitalKeyStatus = o.DigitalKey.Status,
+                        UserId = o.Order.UserId,
+                        Name = o.Order.User?.UserName,
+                        Email = o.Order.User?.Email,
+                        Avatar = o.Order.User?.File?.URL ?? string.Empty
+                    }).ToList();
+
+                return ResultDTO<IEnumerable<object>>.Success(response);
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
+
         public async Task<ResultDTO<List<OrderSummary>>> GetOrdersGroupedByDate(Guid marketplaceProjectId)
         {
             try
             {
                 var ordersGroupedByDate = await _unitOfWork.OrderRepository.GetQueryable()
-                    .Include(o => o.OrderDetails).ThenInclude(od =>od.DigitalKey)
+                    .Include(o => o.OrderDetails).ThenInclude(od => od.DigitalKey)
                 .Where(o => o.OrderDetails.Any(od => od.DigitalKey.MarketplaceProject.Id == marketplaceProjectId))
                 .GroupBy(o => o.CreatedDate.Date)
                 .Select(g => new OrderSummary
@@ -480,11 +507,12 @@ namespace Fun_Funding.Application.Services.EntityServices
                 .ToListAsync();
 
                 return ResultDTO<List<OrderSummary>>.Success(ordersGroupedByDate);
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 throw new Exception(ex.Message);
             }
-            
+
         }
 
         public async Task<ResultDTO<PaginatedResponse<OrderInfoResponse>>> GetUserOrders(ListRequest request)
