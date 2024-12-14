@@ -90,7 +90,7 @@ namespace Fun_Funding.Api.Controllers
             return Ok(response);
         }
 
-        [HttpGet("backer-donation-projects")]
+        [HttpGet("backer-donations-project")]
         public async Task<IActionResult> GetBackerDonatedProjects([FromQuery] ListRequest request, string? categoryName, ProjectStatus? status, decimal? fromTarget, decimal? toTarget)
         {
             var response = await _fundingProjectService.GetBackerDonatedProjects(request, categoryName, status, fromTarget, toTarget);

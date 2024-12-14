@@ -40,7 +40,12 @@ namespace Fun_Funding.Api.Controllers
                 var res = await _projectMilestoneService.GetProjectMilestones(request, status, projectId, milestoneId);
                 return Ok(res);
         }
-
+        [HttpGet("milestones-disbursement")]
+        public async Task<IActionResult> GetMilestonesByProjectdAndMilestone(Guid? projectId, Guid? milestoneId)
+        {
+            var res = await _projectMilestoneService.GetProjectMilestonesByProjectAndMilestone(projectId, milestoneId);
+            return Ok(res);
+        }
         // api update status projectmilestone
         [HttpPut]
         public async Task<IActionResult> UpdateProjectMilestone([FromBody] ProjectMilestoneStatusUpdateRequest req)

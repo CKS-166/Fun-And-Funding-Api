@@ -2,7 +2,6 @@
 using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.FollowDTO;
-using Fun_Funding.Application.ViewModel.FundingProjectDTO;
 using Fun_Funding.Domain.Entity;
 using Fun_Funding.Domain.Entity.NoSqlEntities;
 using MongoDB.Driver;
@@ -17,14 +16,12 @@ namespace Fun_Funding.Application.Services.EntityServices
     public class FollowService : IFollowService
     {
         private readonly IUserService _userService;
-        private readonly IFundingProjectService _fundingProjectService;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
 
-        public FollowService(IUserService userService, IFundingProjectService fundingProjectService, IMapper mapper, IUnitOfWork unitOfWork)
+        public FollowService(IUserService userService, IMapper mapper, IUnitOfWork unitOfWork)
         {
             _userService = userService;
-            _fundingProjectService = fundingProjectService;
             _mapper = mapper;
             _unitOfWork = unitOfWork;
         }
@@ -72,7 +69,7 @@ namespace Fun_Funding.Application.Services.EntityServices
             User exitUser = _mapper.Map<User>(user._data);
 
             var foundedProject = await _unitOfWork.FundingProjectRepository.GetByIdAsync(projectId);
-
+            
 
 
             if (exitUser is null)
@@ -122,7 +119,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                         return ResultDTO<Follow>.Success(response, "You just followed");
                     }
                 }
-
+                
             }
             catch (Exception ex)
             {
@@ -138,7 +135,7 @@ namespace Fun_Funding.Application.Services.EntityServices
             var foundUser = await _userService.GetUserInfoById(userId);
             User userFollowed = _mapper.Map<User>(foundUser._data);
 
-
+            
             if (exitUser is null)
             {
                 return ResultDTO<Follow>.Fail("user is not authenticated");
@@ -186,117 +183,11 @@ namespace Fun_Funding.Application.Services.EntityServices
                         return ResultDTO<Follow>.Success(response, "You just followed");
                     }
                 }
-
+                
             }
             catch (Exception ex)
             {
                 return ResultDTO<Follow>.Fail("Something went wrong!");
-            }
-        }
-
-        public async Task<ResultDTO<NumOfFollowResponse>> getFollowersCount()
-        {
-            var user = await _userService.GetUserInfo();
-            if (user is null)
-            {
-                return ResultDTO<NumOfFollowResponse>.Fail("No user found");
-            }
-            User exitUser = _mapper.Map<User>(user._data);
-            try
-            {
-                var list = _unitOfWork.FollowRepository.GetList(x => x.FollowerId == exitUser.Id && x.FundingProjectId == null);
-                if (list is null)
-                {
-                    return ResultDTO<NumOfFollowResponse>.Fail("No follower found");
-
-                }
-                var response = new NumOfFollowResponse();
-                response.TotalFollow = list.Count;
-                response.Users = new List<ViewModel.UserDTO.UserInfoResponse>();
-                foreach (var item in list)
-                {
-                    var follower = await _userService.GetUserInfoById(item.UserID.Value);
-                    if (follower._data != null)
-                    {
-                        response.Users!.Add(follower._data);
-                    }
-                }
-                return ResultDTO<NumOfFollowResponse>.Success(response, "Successful get number of follower");
-            }
-            catch (Exception ex)
-            {
-                return ResultDTO<NumOfFollowResponse>.Fail(ex.Message);
-            }
-        }
-
-        public async Task<ResultDTO<NumOfFollowResponse>> getFollowingCount()
-        {
-            var user = await _userService.GetUserInfo();
-            if (user is null)
-            {
-                return ResultDTO<NumOfFollowResponse>.Fail("No user found");
-            }
-            User exitUser = _mapper.Map<User>(user._data);
-            try
-            {
-                var list = _unitOfWork.FollowRepository.GetList(x => x.UserID == exitUser.Id && x.FundingProjectId == null);
-                if (list is null)
-                {
-                    return ResultDTO<NumOfFollowResponse>.Fail("No following found");
-                }
-                var response = new NumOfFollowResponse();
-                response.TotalFollow = list.Count;
-                response.Users = new List<ViewModel.UserDTO.UserInfoResponse>();
-                response.TotalFollow = list.Count;
-                foreach (var item in list)
-                {
-                    var follower = await _userService.GetUserInfoById(item.FollowerId);
-                    if (follower._data != null)
-                    {
-                        response.Users!.Add(follower._data);
-                    }
-                }
-                return ResultDTO<NumOfFollowResponse>.Success(response, "Successful get number of following");
-            }
-            catch (Exception ex)
-            {
-                return ResultDTO<NumOfFollowResponse>.Fail(ex.Message);
-            }
-        }
-
-        public async Task<ResultDTO<FundingFollow>> getFundingFollowCount()
-        {
-            var user = await _userService.GetUserInfo();
-            if (user is null)
-            {
-                return ResultDTO<FundingFollow>.Fail("No user found");
-            }
-            User exitUser = _mapper.Map<User>(user._data);
-            try
-            {
-                var list = _unitOfWork.FollowRepository.GetList(x => x.UserID == exitUser.Id && x.FundingProjectId != null);
-                if (list is null)
-                {
-                    return ResultDTO<FundingFollow>.Fail("No following funding found");
-                }
-                var response = new FundingFollow();
-                response.FollowCount = list.Count;
-                response.fundingProjectResponses = new List<FundingProjectResponse>();
-                
-                foreach (var item in list)
-                {
-                    var follower = await _fundingProjectService.GetProjectById(item.FundingProjectId!.Value);
-                    if (follower._data != null)
-                    {
-                        response.fundingProjectResponses!.Add(follower._data);
-                    }
-                }
-                return ResultDTO<FundingFollow>.Success(response, "successful recieve funding follow data");
-
-            }
-            catch (Exception ex)
-            {
-               return ResultDTO<FundingFollow>.Fail(ex.Message);
             }
         }
 
