@@ -80,7 +80,7 @@ namespace Fun_Funding.Api.Controllers
             }
             return Ok(result);
         } 
-        [HttpPost("check-follow-project/{id}")]
+        [HttpGet("check-follow-project/{id}")]
         public async Task<IActionResult> CheckIsFollow(Guid id)
         {
             var result = await _followService.CheckUserFollow(id);
