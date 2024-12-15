@@ -43,6 +43,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                         if (project.Balance < project.Target)
                         {
                             project.Status = ProjectStatus.Failed;
+                            await RefundFundingBackers(project.Id);
                             statusChanged = true;
                         }else if (project.Balance >= project.Target)
                         {
@@ -160,6 +161,53 @@ namespace Fun_Funding.Application.Services.EntityServices
                 return null;
             }
             return project;
+        }
+
+        public async Task RefundFundingBackers(Guid id)
+        {
+            var packageBackers = await _unitOfWork.PackageBackerRepository.GetQueryable()
+                    .Include(pb => pb.User)
+                    .Where(pb => pb.Package.ProjectId == id)
+                    .ToListAsync();
+            var project = _unitOfWork.FundingProjectRepository.GetQueryable()
+                .Include(p => p.Wallet).
+                FirstOrDefault(p => p.Id == id);
+            decimal totalContribution = packageBackers.Sum(pb => pb.DonateAmount);
+            decimal refundableAmount = project.Wallet.Balance;
+
+            // Refund backers proportionally based on their contribution
+            foreach (var backer in packageBackers)
+            {
+                decimal backerContributionPercentage = backer.DonateAmount / totalContribution;
+                decimal backerRefundAmount = backerContributionPercentage * refundableAmount;
+
+                // Add the refund amount to the backer's wallet
+                var backerWallet = await _unitOfWork.WalletRepository.GetQueryable().FirstOrDefaultAsync(w => w.Backer.Id == backer.UserId);
+                if (backerWallet == null)
+                {
+                    backerWallet = new Wallet
+                    {
+                        Backer = backer.User,
+                        Balance = 0,
+                        BankAccountId = Guid.NewGuid() // Replace with actual logic for associating a bank account
+                    };
+                    await _unitOfWork.WalletRepository.AddAsync(backerWallet);
+                }
+
+                backerWallet.Balance += backerRefundAmount;
+
+                // Log the transaction
+                var transaction = new Transaction
+                {
+                    WalletId = backerWallet.Id,
+                    TotalAmount = backerRefundAmount,
+                    TransactionType = TransactionTypes.FundingRefund,
+                    CreatedDate = DateTime.UtcNow,
+                    Description = "Refund to backers",
+                    PackageId = backer.PackageId
+                };
+                await _unitOfWork.TransactionRepository.AddAsync(transaction);
+            }
         }
     }
 }
