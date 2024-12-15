@@ -465,10 +465,11 @@ namespace Fun_Funding.Application.Services.EntityServices
                     {
                         o.Id,
                         o.UnitPrice,
-                        o.DigitalKeyID,
+                        KeyString = o.DigitalKey.KeyString,
                         o.CreatedDate,
                         CouponKey = o.ProjectCoupon?.CouponKey ?? string.Empty,
                         CouponName = o.ProjectCoupon?.CouponName ?? string.Empty,
+                        DiscountRate = o.ProjectCoupon?.DiscountRate ?? 0,
                         MarketplaceProjectId = o.DigitalKey.MarketplaceProject.Id,
                         OrderId = o.OrderId,
                         DigitalKeyStatus = o.DigitalKey.Status,
@@ -529,6 +530,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 {
                     throw new ExceptionError((int)HttpStatusCode.NotFound, "User not found.");
                 }
+               
                 var userEmail = userEmailClaims.Value;
 
                 var user = await _unitOfWork.UserRepository.GetQueryable()
@@ -541,7 +543,6 @@ namespace Fun_Funding.Application.Services.EntityServices
                 {
                     throw new ExceptionError((int)HttpStatusCode.NotFound, "User not found.");
                 }
-
                 Expression<Func<Order, bool>> filter = o => o.UserId == user.Id;
                 Expression<Func<Order, object>> orderBy = u => u.CreatedDate;
 
