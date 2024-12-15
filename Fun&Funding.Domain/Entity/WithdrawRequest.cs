@@ -17,7 +17,7 @@ namespace Fun_Funding.Domain.Entity
         public bool IsFinished { get; set; }
         public TransactionTypes RequestType { get; set; }
         public WithdrawRequestStatus Status { get; set; }
-        public DateTime ExpiredDate { get; set; }
+        public DateTime ExpiredDate { get; set; }   
         public Guid? WalletId { get; set; }
         public Wallet? Wallet { get; set; }
     }

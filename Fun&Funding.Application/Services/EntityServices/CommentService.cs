@@ -243,7 +243,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                         Id = new Guid(),
                         Date = DateTime.Now,
                         Message = $"commented on project <b>{project.Name}</b>",
-                        NotificationType = NotificationType.FundingProjectInteraction,
+                        NotificationType = NotificationType.MarketplaceProjectInteraction,
                         Actor = new { user._data.Id, user._data.UserName, user._data.Avatar },
                         ObjectId = project.Id,
                     };

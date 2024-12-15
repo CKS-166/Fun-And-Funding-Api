@@ -14,5 +14,6 @@ namespace Fun_Funding.Domain.Enum
         MarketplaceProjectStatus,
         WithdrawRequestStatus,
         ProjectMilestoneStatus,
+        MarketplaceProjectInteraction
     }
 }
