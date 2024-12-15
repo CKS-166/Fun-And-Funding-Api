@@ -425,7 +425,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 var transaction = new Transaction
                 {
                     WalletId = projectMilestone.FundingProject.Wallet.Id,
-                    TotalAmount = commissionFee.Rate * balance,
+                    TotalAmount = -(commissionFee.Rate * balance),
                     TransactionType = TransactionTypes.CommissionFee,
                     CreatedDate = DateTime.UtcNow,
                     Description = "Charge Commission Fee",
@@ -528,9 +528,9 @@ namespace Fun_Funding.Application.Services.EntityServices
                     var transaction = new Transaction
                     {
                         WalletId = backerWallet.Id,
-                        TotalAmount = backerRefundAmount,
+                        TotalAmount = -backerRefundAmount,
                         TransactionType = TransactionTypes.FundingRefund,
-                        CreatedDate = DateTime.UtcNow,
+                        CreatedDate = DateTime.Now,
                         Description = "Refund to backers",
                         ProjectMilestoneId = projectMilestone.Id
                     };
@@ -629,7 +629,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                     var transaction = new Transaction
                     {
                         WalletId = projectMilestone.FundingProject.Wallet.Id,
-                        TotalAmount = transferMoney,
+                        TotalAmount = -transferMoney,
                         TransactionType = status == 1 ? TransactionTypes.MilestoneFirstHalf : TransactionTypes.MilestoneSecondHalf,
                         CreatedDate = DateTime.UtcNow,
                         Description = "Transfer money to milestone disbursement",
