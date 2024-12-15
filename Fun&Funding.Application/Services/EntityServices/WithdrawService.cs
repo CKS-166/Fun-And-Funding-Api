@@ -117,6 +117,11 @@ namespace Fun_Funding.Application.Services.EntityServices
                 request.IsFinished = true;
                 _unitOfWork.WithdrawRequestRepository.Update(request);
 
+                //transfer back to wallet 
+                var wallet = await _unitOfWork.WalletRepository.GetByIdAsync(request.WalletId);
+                wallet.Balance += request.Amount; 
+                _unitOfWork.WalletRepository.Update(wallet);
+
                 Transaction transaction = new Transaction
                 {
                     Id = new Guid(),
@@ -263,6 +268,8 @@ namespace Fun_Funding.Application.Services.EntityServices
             {
                 return ResultDTO<WithdrawResponse>.Fail("Your account balance must be higher than 10.000 VND to withdraw balance.", (int)HttpStatusCode.Forbidden);
             }
+            
+            _unitOfWork.WalletRepository.Update(marketplaceWallet);
             // Check exited Request
             var exitedRequest = _unitOfWork.WithdrawRequestRepository.GetQueryable()
                 .Where(x => x.WalletId.Equals(marketplaceWallet.Id))
@@ -291,6 +298,10 @@ namespace Fun_Funding.Application.Services.EntityServices
                     Status = WithdrawRequestStatus.Pending,
                 };
                 await _unitOfWork.WithdrawRequestRepository.AddAsync(withdrawRequest);
+
+                //update money in wallet marketplace 
+                marketplaceWallet.Balance = 0;
+
                 await _unitOfWork.CommitAsync();
                 WithdrawResponse response = _mapper.Map<WithdrawResponse>(withdrawRequest);
                 return ResultDTO<WithdrawResponse>.Success(response, "Your withdraw has been create, please wait for admin to review");
@@ -337,6 +348,9 @@ namespace Fun_Funding.Application.Services.EntityServices
                 {
                     return ResultDTO<string>.Fail("Not enough money to withdraw balance.", (int)HttpStatusCode.Forbidden);
                 }
+                wallet.Balance -= amount;
+                _unitOfWork.WalletRepository.Update(wallet);
+
                 WithdrawRequest withdrawRequest = new WithdrawRequest
                 {
                     Id = new Guid(),
