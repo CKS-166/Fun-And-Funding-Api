@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Fun_Funding.Api.Controllers
 {
-    //[Authorize(Roles = Role.Admin)]
+    
     [Route("api/commision-fees")]
     [ApiController]
     public class CommissionFeeController : ControllerBase
@@ -42,6 +42,7 @@ namespace Fun_Funding.Api.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = Role.Admin)]
         public async Task<IActionResult> CreateCommissionFee([FromBody] CommissionFeeAddRequest request)
         {
             var response = await _commissionFeeService.CreateCommissionFee(request);
@@ -52,6 +53,7 @@ namespace Fun_Funding.Api.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = Role.Admin)]
         public async Task<IActionResult> UpdateCommissionFee([FromRoute] Guid id, [FromBody] CommissionFeeUpdateRequest request)
         {
             var response = await _commissionFeeService.UpdateCommsisionFee(id, request);
