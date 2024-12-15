@@ -26,7 +26,10 @@ namespace Fun_Funding.Api
             // Add services to the container.
             builder.Services.AddInfrastructure(builder.Configuration);
             builder.Services.AddPresistence(builder.Configuration);
-
+            builder.WebHost.ConfigureKestrel(options =>
+            {
+                options.Limits.MaxRequestBodySize = 500 * 1024 * 1024; // 500 MB
+            });
             #region old_DI
             //builder.Services.AddAuthentication()
             //    .AddGoogle(options =>
