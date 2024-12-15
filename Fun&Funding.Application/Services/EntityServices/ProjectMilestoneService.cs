@@ -3,7 +3,6 @@ using Fun_Funding.Application.ExceptionHandler;
 using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.FundingProjectDTO;
-using Fun_Funding.Application.ViewModel.MilestoneDTO;
 using Fun_Funding.Application.ViewModel.PackageBackerDTO;
 using Fun_Funding.Application.ViewModel.ProjectMilestoneBackerDTO;
 using Fun_Funding.Application.ViewModel.ProjectMilestoneDTO;
@@ -133,9 +132,9 @@ namespace Fun_Funding.Application.Services.EntityServices
                     .GetQueryable()
                     .Include(pm => pm.Milestone)
                     .ThenInclude(pmr => pmr.Requirements)
-                    .Include(pm => pm.ProjectMilestoneRequirements) 
-                    .ThenInclude(pmr => pmr.Requirement) 
-                    .Include(pm => pm.ProjectMilestoneRequirements) 
+                    .Include(pm => pm.ProjectMilestoneRequirements)
+                    .ThenInclude(pmr => pmr.Requirement)
+                    .Include(pm => pm.ProjectMilestoneRequirements)
                     .ThenInclude(pmr => pmr.RequirementFiles)
                     .FirstOrDefault(pm => pm.Id == id);
                 if (projectMilestone == null)
@@ -253,7 +252,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                     .FirstOrDefaultAsync(pm => pm.Id == request.ProjectMilestoneId);
                 if (projectMilestone == null) return ResultDTO<string>.Fail("The requested project milestone is not found!");
 
-                var fundingProject =  _unitOfWork.FundingProjectRepository
+                var fundingProject = _unitOfWork.FundingProjectRepository
                     .GetQueryable()
                     .Include(p => p.Wallet)
                     .Include(p => p.ProjectMilestones)
@@ -296,7 +295,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                         throw new ExceptionError((int)HttpStatusCode.BadRequest, checkValidateMilstone);
                     }
                 }
-                
+
                 if (projectMilestone.Status == ProjectMilestoneStatus.Pending && pendingStatusList.Contains(request.Status))
                 {
                     if (projectMilestone.Milestone.MilestoneOrder == 1)
@@ -333,6 +332,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                         {
                             throw new ExceptionError((int)HttpStatusCode.BadRequest, "Mandatory requirements must be completed before submitting");
                         }
+                        await ChangeRequirementDone(projectMilestone.Id);
                     }
 
                 }
@@ -344,6 +344,11 @@ namespace Fun_Funding.Application.Services.EntityServices
                     {
                         TransferHalfMilestone(projectMilestone.Id, 2);
                     }
+                    if (projectMilestone.Milestone.MilestoneOrder == 4)
+                    {
+                        await ChangeProjectSuccessful(projectMilestone.FundingProjectId);
+                    }
+                    projectMilestone.EndDate = DateTime.Now;
                 }
                 else if (projectMilestone.Status == ProjectMilestoneStatus.Warning && warnStatusList.Contains(request.Status))
                 {
@@ -366,7 +371,8 @@ namespace Fun_Funding.Application.Services.EntityServices
                             await ChangeProjectSuccessful(projectMilestone.FundingProjectId);
                         }
                         await TransferHalfMilestone(projectMilestone.Id, 2);
-
+                        await ChangeRequirementDone(projectMilestone.Id);
+                        projectMilestone.EndDate = DateTime.Now;
                     }
                 }
                 if (statusChanged)
@@ -404,15 +410,16 @@ namespace Fun_Funding.Application.Services.EntityServices
                                 .OrderByDescending(c => c.UpdateDate)
                                 .FirstOrDefault() ?? throw new ExceptionError((int)HttpStatusCode.NotFound, "Commission fee not found");
                 var balance = projectMilestone.FundingProject.Wallet.Balance;
-                if (balance <= 0 )
+                if (balance <= 0)
                 {
                     throw new ExceptionError((int)HttpStatusCode.BadRequest, "Project balance cannot be 0 or negative");
-                }else if (balance < balance* (1 - commissionFee.Rate))
+                }
+                else if (balance < balance * (1 - commissionFee.Rate))
                 {
                     throw new ExceptionError((int)HttpStatusCode.BadRequest, "Project balance is not available for charging");
                 }
                 projectMilestone.FundingProject.Wallet.Balance *= (1 - commissionFee.Rate);
-                var systemWallet = await _unitOfWork.SystemWalletRepository.GetAsync(s => true) 
+                var systemWallet = await _unitOfWork.SystemWalletRepository.GetAsync(s => true)
                     ?? throw new ExceptionError((int)HttpStatusCode.NotFound, "System wallet not found");
                 var transaction = new Transaction
                 {
@@ -424,7 +431,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                     ProjectMilestoneId = projectMilestone.Id,
                     CommissionFeeId = commissionFee.Id,
                 };
-                
+
                 systemWallet.TotalAmount += commissionFee.Rate * balance;
                 _unitOfWork.TransactionRepository.Add(transaction);
                 _unitOfWork.Commit();
@@ -438,7 +445,7 @@ namespace Fun_Funding.Application.Services.EntityServices
 
                 throw new Exception(ex.Message);
             }
-        }  
+        }
         public async Task RefundBackersAsync(Guid projectMilestoneId)
         {
             try
@@ -550,10 +557,10 @@ namespace Fun_Funding.Application.Services.EntityServices
 
                 if (project == null)
                 {
-                    throw new ExceptionError((int)HttpStatusCode.BadRequest,"Project not found");
+                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "Project not found");
                 }
                 project.Status = ProjectStatus.Failed;
-                foreach(ProjectMilestone pm in project.ProjectMilestones)
+                foreach (ProjectMilestone pm in project.ProjectMilestones)
                 {
                     pm.Status = ProjectMilestoneStatus.Failed;
                 }
@@ -573,7 +580,7 @@ namespace Fun_Funding.Application.Services.EntityServices
         {
             try
             {
-                var projectMilestone =  _unitOfWork.ProjectMilestoneRepository.GetQueryable()
+                var projectMilestone = _unitOfWork.ProjectMilestoneRepository.GetQueryable()
                     .Include(pm => pm.ProjectMilestoneRequirements)
                     .ThenInclude(pmr => pmr.Requirement)
                     .FirstOrDefault(pm => pm.Id == projectMilestoneId);
@@ -610,7 +617,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                                .Where(c => c.CommissionType == CommissionType.FundingCommission)
                                .OrderByDescending(c => c.UpdateDate)
                                .FirstOrDefault();
-                var refundableAmount = (1- commissionFee.Rate) * projectMilestone.FundingProject.Balance;
+                var refundableAmount = (1 - commissionFee.Rate) * projectMilestone.FundingProject.Balance;
                 var transferMoney = (rate * 0.5m) * refundableAmount;
                 if (status == 1 || status == 2)
                 {
@@ -635,8 +642,8 @@ namespace Fun_Funding.Application.Services.EntityServices
                 {
                     throw new ExceptionError((int)HttpStatusCode.BadRequest, "Not support this mode");
                 }
-                
-                
+
+
             }
             catch (Exception ex)
             {
@@ -683,7 +690,6 @@ namespace Fun_Funding.Application.Services.EntityServices
             {
                 // Initialize the filter with a default condition that always evaluates to true.
                 Expression<Func<ProjectMilestone, bool>> filter = u => true;
-
 
                 // Apply status filter.
                 if (status != null)
@@ -763,28 +769,60 @@ namespace Fun_Funding.Application.Services.EntityServices
                     Items = responseItems
                 };
 
-                foreach (var item in responseItems)
+                return ResultDTO<PaginatedResponse<ProjectMilestoneResponse>>.Success(response);
+
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
                 {
-                    var fundingProjectIdForMilestone = item.FundingProject.Id;
-
-                    // Retrieve the latest milestone for the funding project.
-                    var latestMilestone = await _unitOfWork.ProjectMilestoneRepository.GetAllAsync(
-                        filter: pm => pm.FundingProjectId == fundingProjectIdForMilestone && pm.Milestone != null,
-                        includeProperties: "Milestone"
-                    );
-
-                    var orderedLatestMilestone = latestMilestone
-                        .OrderByDescending(pm => pm.Milestone.MilestoneOrder)
-                        .Select(pm => pm.Milestone)
-                        .FirstOrDefault();
-
-                    var milestoneRes = _mapper.Map<MilestoneResponse>(orderedLatestMilestone);
-
-                    item.LatestMilestone = milestoneRes;
+                    throw exceptionError;
                 }
 
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
 
-                return ResultDTO<PaginatedResponse<ProjectMilestoneResponse>>.Success(response);
+        public async Task ChangeRequirementDone(Guid projectMilestoneId)
+        {
+            try
+            {
+                var projectMilestone = _unitOfWork.ProjectMilestoneRepository.GetQueryable()
+                .Include(pm => pm.ProjectMilestoneRequirements).FirstOrDefault(pm => pm.Id == projectMilestoneId);
+                if (projectMilestone == null)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "Project milestone is not found");
+                }
+                foreach (ProjectMilestoneRequirement req in projectMilestone.ProjectMilestoneRequirements)
+                {
+                    req.RequirementStatus = RequirementStatus.Done;
+                }
+                _unitOfWork.Commit();
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+                throw new Exception(ex.Message);
+            }
+
+
+        }
+
+        public async Task<ResultDTO<List<ProjectMilestoneResponse>>> GetProjectMilestonesByProjectAndMilestone(
+            Guid? fundingProjectId,
+            Guid? milestoneId)
+        {
+            try
+            {
+                var list = await _unitOfWork.ProjectMilestoneRepository.GetAllAsync(
+                filter: pm => pm.FundingProjectId == fundingProjectId && pm.MilestoneId == milestoneId,
+                 includeProperties: "Milestone.Requirements,ProjectMilestoneRequirements,ProjectMilestoneRequirements.RequirementFiles,ProjectMilestoneRequirements.Requirement"
+                );
+                var response = _mapper.Map<List<ProjectMilestoneResponse>>(list);
+                return ResultDTO<List<ProjectMilestoneResponse>>.Success(response);
 
             }
             catch (Exception ex)
