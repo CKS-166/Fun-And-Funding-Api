@@ -68,7 +68,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                     await _signInManager.PasswordSignInAsync(getUser, loginDTO.Password, false, true);
                     var emailToken = await _userManager.GenerateTwoFactorTokenAsync(getUser, "Email");
                     await _emailService.SendEmailAsync(getUser.Email, "Welcome to Fun&Funding", emailToken, EmailType.Register);
-                    return ResultDTO<string>.Success($"OTP have been send to your email {getUser.Email}", "Successfull resgiter");
+                    return ResultDTO<string>.Fail("You must verify to login",403);
                 }
 
                 var userRole = await _userManager.GetRolesAsync(getUser);

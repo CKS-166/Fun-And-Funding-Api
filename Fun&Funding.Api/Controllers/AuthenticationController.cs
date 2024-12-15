@@ -32,6 +32,14 @@ namespace Fun_Funding.Api.Controllers
         public async Task<ActionResult<string>> login(LoginRequest loginDTO)
         {
             var result = await _authService.LoginAsync(loginDTO);
+            if (result._statusCode == 500)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, result);
+            }
+            if (result._statusCode == 403)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, result);
+            }
             return Ok(result);
         }
         [HttpPost("backer")]
