@@ -26,6 +26,7 @@ namespace Fun_Funding.Infrastructure.Persistence.Repository
                     .ThenInclude(o => o.MarketplaceProject)
                     .Include(o => o.ProjectCoupon)
                     .Where(o => o.DigitalKey.MarketplaceProject.Id == marketplaceProjectId)
+                    .OrderByDescending(o => o.CreatedDate)
                     .ToListAsync();
 
                 return orderDetails;

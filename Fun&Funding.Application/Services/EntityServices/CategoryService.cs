@@ -24,7 +24,7 @@ namespace Fun_Funding.Application.Services.EntityServices
         {
             try
             {
-                var validation = CheckDuplicateName(request.Name);
+                var validation = await CheckDuplicateName(request.Name);
 
                 if (!validation)
                 {
@@ -201,7 +201,7 @@ namespace Fun_Funding.Application.Services.EntityServices
         {
             try
             {
-                var validation = CheckDuplicateName(request.Name);
+                var validation = await CheckDuplicateName(request.Name);
 
                 if (!validation)
                 {
@@ -238,19 +238,14 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
-        private bool CheckDuplicateName(string name)
+        private async Task<bool> CheckDuplicateName(string name)
         {
-            bool flag = false;
-            Expression<Func<Category, bool>> filter = c => c.Name.Equals(name, StringComparison.OrdinalIgnoreCase);
+            var categories = await _unitOfWork.CategoryRepository.GetAllDeletedNoPaginationAsync(
+                c => c.Name.ToLower() == name.ToLower()
+            );
 
-            var categories = _unitOfWork.CategoryRepository.GetAllDeletedNoPaginationAsync(filter);
-
-            if (categories != null)
-            {
-                flag = true;
-            }
-
-            return flag;
+            return categories != null && categories.Any();
         }
+
     }
 }
