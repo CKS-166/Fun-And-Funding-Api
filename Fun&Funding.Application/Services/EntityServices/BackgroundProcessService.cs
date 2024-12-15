@@ -174,7 +174,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 FirstOrDefault(p => p.Id == id);
             decimal totalContribution = packageBackers.Sum(pb => pb.DonateAmount);
             decimal refundableAmount = project.Wallet.Balance;
-
+            project.Wallet.Balance = 0;
             // Refund backers proportionally based on their contribution
             foreach (var backer in packageBackers)
             {
