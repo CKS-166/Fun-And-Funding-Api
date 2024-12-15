@@ -7,7 +7,6 @@ using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.CategoryDTO;
 using Fun_Funding.Application.ViewModel.FundingFileDTO;
 using Fun_Funding.Application.ViewModel.FundingProjectDTO;
-using Fun_Funding.Application.ViewModel.PackageBackerDTO;
 using Fun_Funding.Application.ViewModel.PackageDTO;
 using Fun_Funding.Domain.Constrain;
 using Fun_Funding.Domain.Entity;
@@ -15,7 +14,6 @@ using Fun_Funding.Domain.Entity.NoSqlEntities;
 using Fun_Funding.Domain.Enum;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Org.BouncyCastle.Ocsp;
 using System.Linq.Expressions;
 using System.Net;
 using System.Security.Claims;
@@ -105,7 +103,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 {
                     throw new ExceptionError((int)HttpStatusCode.BadRequest, "Project must config its bank account for payment");
                 }
-                
+
                 //create project wallet
                 Wallet projectWallet = new Wallet
                 {
@@ -302,10 +300,10 @@ namespace Fun_Funding.Application.Services.EntityServices
                 {
                     existedBank.BankNumber = projectRequest.BankAccount.BankNumber;
                     existedBank.BankCode = projectRequest.BankAccount.BankCode;
-                    
+
                 }
                 _unitOfWork.BankAccountRepository.Update(existedBank);
-                
+
 
                 //update if have new files 
                 if (projectRequest.FundingFiles?.Count > 0)
@@ -698,7 +696,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                     .Include(p => p.User)
                     .Include(p => p.Packages)
                     .ThenInclude(pk => pk.PackageUsers)
-                    
+
                     .FirstOrDefault(p => p.Id == projectId);
                 if (_claimsPrincipal.IsInRole(Role.GameOwner))
                 {
@@ -711,16 +709,16 @@ namespace Fun_Funding.Application.Services.EntityServices
                         return ResultDTO<bool>.Success(true, "owner");
                     }
                 }
-                    bool userExistsInPackageUsers = project.Packages
-                   .Any(pkg => pkg.PackageUsers.Any(pu => pu.UserId == user.Id));
+                bool userExistsInPackageUsers = project.Packages
+               .Any(pkg => pkg.PackageUsers.Any(pu => pu.UserId == user.Id));
 
-                    if (!userExistsInPackageUsers)
-                    {
-                        return ResultDTO<bool>.Success(false, "not backer of this project");
-                    }
-                     return ResultDTO<bool>.Success(true, "backer of this project");
-                    
-                
+                if (!userExistsInPackageUsers)
+                {
+                    return ResultDTO<bool>.Success(false, "not backer of this project");
+                }
+                return ResultDTO<bool>.Success(true, "backer of this project");
+
+
             }
             catch (Exception ex)
             {
@@ -763,7 +761,8 @@ namespace Fun_Funding.Application.Services.EntityServices
             try
             {
                 var authorUser = _userService.GetUserInfo().Result;
-                if (authorUser is null) {
+                if (authorUser is null)
+                {
                     throw new ExceptionError((int)HttpStatusCode.NotFound, "Game Owner Not Found.");
                 }
                 User user = _mapper.Map<User>(authorUser._data);
@@ -983,6 +982,54 @@ namespace Fun_Funding.Application.Services.EntityServices
                     throw exceptionError;
                 }
                 throw ex;
+            }
+        }
+
+        public async Task DeleteFundingProject(Guid id)
+        {
+            try
+            {
+                var fundingProject = await _unitOfWork.FundingProjectRepository
+                    .GetQueryable()
+                    .Where(p => p.Id == id)
+                    .Include(p => p.Wallet)
+                    .ThenInclude(p => p.BankAccount)
+                    .Include(p => p.SourceFiles)
+                    .FirstOrDefaultAsync();
+
+                if (fundingProject == null)
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "Funding Project not found.");
+                else if (fundingProject.Status != ProjectStatus.Pending)
+                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "Funding Project cannot be deleted.");
+                else
+                {
+                    //remove related wallet
+                    var wallet = fundingProject.Wallet;
+
+                    if (wallet != null)
+                    {
+                        _unitOfWork.WalletRepository.Remove(wallet);
+
+                        //remove related bank account
+                        var bankAccount = fundingProject.Wallet?.BankAccount ?? null;
+
+                        if (bankAccount != null) _unitOfWork.BankAccountRepository.Remove(bankAccount);
+                    }
+
+                    fundingProject.Status = ProjectStatus.Deleted;
+                    _unitOfWork.FundingProjectRepository.Update(fundingProject);
+
+                    _unitOfWork.FundingProjectRepository.Remove(fundingProject);
+                    await _unitOfWork.CommitAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
             }
         }
     }

@@ -1,12 +1,11 @@
-﻿using Fun_Funding.Application.IService;
-using Fun_Funding.Application.ViewModel.FundingProjectDTO;
-using Fun_Funding.Application.ViewModel.FundingFileDTO;
+﻿using Fun_Funding.Application.Interfaces.IExternalServices;
+using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel;
-using Fun_Funding.Domain.Enum;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
+using Fun_Funding.Application.ViewModel.FundingProjectDTO;
 using Fun_Funding.Domain.Constrain;
-using Fun_Funding.Application.Interfaces.IExternalServices;
+using Fun_Funding.Domain.Enum;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Fun_Funding.Api.Controllers
 {
@@ -47,7 +46,7 @@ namespace Fun_Funding.Api.Controllers
         }
 
         [HttpPut]
-        [Authorize (Roles = Role.GameOwner)]
+        [Authorize(Roles = Role.GameOwner)]
         public async Task<IActionResult> UpdateProject([FromForm] FundingProjectUpdateRequest req)
         {
             var response = await _fundingProjectService.UpdateFundingProject(req);
@@ -64,7 +63,7 @@ namespace Fun_Funding.Api.Controllers
         [HttpPut("{id}/status")]
         public async Task<IActionResult> UpdateProjectStatus([FromRoute] Guid id, [FromQuery] ProjectStatus status)
         {
-            var response = await _fundingProjectService.UpdateFundingProjectStatus(id, status);           
+            var response = await _fundingProjectService.UpdateFundingProjectStatus(id, status);
             return Ok(response);
         }
 
@@ -95,6 +94,14 @@ namespace Fun_Funding.Api.Controllers
         {
             var response = await _fundingProjectService.GetBackerDonatedProjects(request, categoryName, status, fromTarget, toTarget);
             return Ok(response);
+        }
+
+        [Authorize(Roles = Role.GameOwner)]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteFundingProject([FromRoute] Guid id)
+        {
+            await _fundingProjectService.DeleteFundingProject(id);
+            return NoContent();
         }
     }
 }

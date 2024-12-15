@@ -1,12 +1,6 @@
 ﻿using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.FundingProjectDTO;
 using Fun_Funding.Domain.Enum;
-using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Fun_Funding.Application.IService
 {
@@ -23,5 +17,6 @@ namespace Fun_Funding.Application.IService
         Task<ResultDTO<List<FundingProjectResponse>>> GetTop3MostFundedOngoingFundingProject();
         Task<ResultDTO<PaginatedResponse<FundingProjectResponse>>> GetGameOwnerFundingProjects(ListRequest request, string? categoryName, ProjectStatus? status, decimal? fromTarget, decimal? toTarget);
         Task<ResultDTO<PaginatedResponse<FundingProjectResponse>>> GetBackerDonatedProjects(ListRequest request, string? categoryName, ProjectStatus? status, decimal? fromTarget, decimal? toTarget);
+        Task DeleteFundingProject(Guid id);
     }
 }
