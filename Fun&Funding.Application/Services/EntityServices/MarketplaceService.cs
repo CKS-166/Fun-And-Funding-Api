@@ -349,10 +349,11 @@ namespace Fun_Funding.Application.Services.EntityServices
                         if (bankAccount != null) _unitOfWork.BankAccountRepository.Remove(bankAccount);
                     }
 
+                    marketplaceProject.Status = ProjectStatus.Deleted;
+                    _unitOfWork.MarketplaceRepository.Update(marketplaceProject);
+
                     _unitOfWork.MarketplaceRepository.Remove(marketplaceProject);
                     await _unitOfWork.CommitAsync();
-
-                    await UpdateMarketplaceProjectStatus(id, ProjectStatus.Deleted);
                 }
             }
             catch (Exception ex)
@@ -563,7 +564,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                             Date = DateTime.Now,
                             Message = $"has updated status project <b>{marketplaceProject.Name}</b>",
                             NotificationType = NotificationType.MarketplaceProjectStatus,
-                            Actor = new { Id = new Guid(), UserName = "Admin", Avatar = ""},
+                            Actor = new { Id = new Guid(), UserName = "Admin", Avatar = "" },
                             ObjectId = marketplaceProject.Id,
                         };
 
