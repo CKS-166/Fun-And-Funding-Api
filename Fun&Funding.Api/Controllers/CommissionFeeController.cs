@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Fun_Funding.Api.Controllers
 {
-    [Authorize(Roles = Role.Admin)]
+    //[Authorize(Roles = Role.Admin)]
     [Route("api/commision-fees")]
     [ApiController]
     public class CommissionFeeController : ControllerBase

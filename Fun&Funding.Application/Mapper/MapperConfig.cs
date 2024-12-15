@@ -158,14 +158,14 @@ namespace Fun_Funding.Application.Mapper
                 .ForMember(des => des.Description, src => src.MapFrom(x => x.Milestone.Description))
                 .ForMember(des => des.FundingProject, src => src.MapFrom(x => x.FundingProject))
                 .ForMember(des => des.Milestone, src => src.MapFrom(x => x.Milestone))
-                .ForMember(
-                    des => des.LatestMilestone,
-                    src => src.MapFrom(x =>
-                        x.FundingProject.ProjectMilestones.OrderByDescending(m => m.Milestone.MilestoneOrder)
-                        .Select(pm => pm.Milestone)
-                        .FirstOrDefault()
-                    )
-                )
+                //.ForMember(
+                //    des => des.LatestMilestone,
+                //    src => src.MapFrom(x =>
+                //        x.FundingProject.ProjectMilestones.OrderByDescending(m => m.Milestone.MilestoneOrder)
+                //        .Select(pm => pm.Milestone)
+                //        .FirstOrDefault()
+                //    )
+                //)
                 .ForMember(
                     des => des.BackerAmount,
                     src => src.MapFrom(x =>

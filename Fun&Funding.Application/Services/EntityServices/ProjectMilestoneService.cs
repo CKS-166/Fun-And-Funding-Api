@@ -3,6 +3,7 @@ using Fun_Funding.Application.ExceptionHandler;
 using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.FundingProjectDTO;
+using Fun_Funding.Application.ViewModel.MilestoneDTO;
 using Fun_Funding.Application.ViewModel.PackageBackerDTO;
 using Fun_Funding.Application.ViewModel.ProjectMilestoneBackerDTO;
 using Fun_Funding.Application.ViewModel.ProjectMilestoneDTO;
@@ -761,6 +762,27 @@ namespace Fun_Funding.Application.Services.EntityServices
                     TotalPages = totalPages,
                     Items = responseItems
                 };
+
+                foreach (var item in responseItems)
+                {
+                    var fundingProjectIdForMilestone = item.FundingProject.Id;
+
+                    // Retrieve the latest milestone for the funding project.
+                    var latestMilestone = await _unitOfWork.ProjectMilestoneRepository.GetAllAsync(
+                        filter: pm => pm.FundingProjectId == fundingProjectIdForMilestone && pm.Milestone != null,
+                        includeProperties: "Milestone"
+                    );
+
+                    var orderedLatestMilestone = latestMilestone
+                        .OrderByDescending(pm => pm.Milestone.MilestoneOrder)
+                        .Select(pm => pm.Milestone)
+                        .FirstOrDefault();
+
+                    var milestoneRes = _mapper.Map<MilestoneResponse>(orderedLatestMilestone);
+
+                    item.LatestMilestone = milestoneRes;
+                }
+
 
                 return ResultDTO<PaginatedResponse<ProjectMilestoneResponse>>.Success(response);
 
