@@ -583,8 +583,6 @@ namespace Fun_Funding.Application.Services.EntityServices
                        pageSize: request.PageSize,
                        includeProperties: "OrderDetails,OrderDetails.DigitalKey,OrderDetails.DigitalKey.MarketplaceProject,OrderDetails.ProjectCoupon,OrderDetails.DigitalKey.MarketplaceProject.MarketplaceFiles");
 
-                if (list != null && list.Count() > 0)
-                {
                     var totalItems = _unitOfWork.OrderRepository.GetAll(filter).Count();
                     var totalPages = (int)Math.Ceiling((double)totalItems / (int)request.PageSize);
                     IEnumerable<OrderInfoResponse> orders = _mapper.Map<IEnumerable<OrderInfoResponse>>(list);
@@ -599,11 +597,8 @@ namespace Fun_Funding.Application.Services.EntityServices
                     };
 
                     return ResultDTO<PaginatedResponse<OrderInfoResponse>>.Success(response, "Orders found!");
-                }
-                else
-                {
-                    throw new ExceptionError((int)HttpStatusCode.NotFound, "Order Not Found.");
-                }
+                
+
             }
             catch (Exception ex)
             {
