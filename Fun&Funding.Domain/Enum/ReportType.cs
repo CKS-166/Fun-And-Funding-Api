@@ -11,6 +11,5 @@ namespace Fun_Funding.Domain.Enum
         User,
         FundingProject,
         MarketplaceProject
-
     }
 }

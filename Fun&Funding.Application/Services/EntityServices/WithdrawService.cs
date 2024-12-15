@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Azure;
 using Fun_Funding.Application.ExceptionHandler;
+using Fun_Funding.Application.Interfaces.IEntityService;
 using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.CommissionDTO;
@@ -23,6 +24,8 @@ namespace Fun_Funding.Application.Services.EntityServices
         private readonly ClaimsPrincipal _claimsPrincipal;
         private readonly IMapper _mapper;
         private readonly IUserService _userService;
+        private readonly ISystemWalletService _systemWalletService;
+        private readonly ICommissionFeeService _commissionFeeService;
         private readonly RoleManager<IdentityRole<Guid>> _roleManager;
 
         public WithdrawService(IUnitOfWork unitOfWork,
@@ -30,7 +33,9 @@ namespace Fun_Funding.Application.Services.EntityServices
             RoleManager<IdentityRole<Guid>> roleManager,
             IHttpContextAccessor httpContextAccessor,
             IMapper mapper,
-            IUserService userService)
+            IUserService userService,
+            ISystemWalletService systemWalletService,
+            ICommissionFeeService commissionFeeService)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
@@ -38,6 +43,8 @@ namespace Fun_Funding.Application.Services.EntityServices
             _claimsPrincipal = httpContextAccessor.HttpContext.User;
             _mapper = mapper;
             _userService = userService;
+            _systemWalletService = systemWalletService;
+            _commissionFeeService = commissionFeeService;
         }
 
         public async Task<ResultDTO<WithdrawRequest>> AdminApproveRequest(Guid id)
@@ -58,7 +65,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 return ResultDTO<WithdrawRequest>.Fail("request status is invalid");
             }
             //expired date
-            if (request.ExpiredDate < DateTime.UtcNow)
+            if (request.ExpiredDate < DateTime.Now)
             {
                 return ResultDTO<WithdrawRequest>.Fail("request is out of date");
             }
@@ -69,19 +76,54 @@ namespace Fun_Funding.Application.Services.EntityServices
                 request.IsFinished = true;
                 _unitOfWork.WithdrawRequestRepository.Update(request);
 
-                Transaction transaction = new Transaction
+                //get the create transaction (latest transaction)
+                var createdTransaction = _unitOfWork.TransactionRepository.GetQueryable()
+                        .Where(x => x.WalletId == request.WalletId)
+                        .OrderByDescending(x => x.CreatedDate)
+                        .FirstOrDefault();
+                if (createdTransaction is null)
                 {
-                    Id = new Guid(),
-                    TotalAmount = -request.Amount,
-                    Description = $"Admin just APPROVED withdraw request id: {request.Id} with amount: {request.Amount}",
-                    CreatedDate = DateTime.UtcNow,
-                    WalletId = request.WalletId,
-                    TransactionType = TransactionTypes.FundingWithdraw,
+                    return ResultDTO<WithdrawRequest>.Fail("no transaction is founded");
+                }
+                //change case
+                switch (request.RequestType)
+                {
+                    case TransactionTypes.WithdrawWalletMoney:
+                        Transaction walletTransaction = new Transaction
+                        {
+                            Id = new Guid(),
+                            TotalAmount = request.Amount,
+                            Description = $"Your withdraw wallet has been APPROVED with amount: {request.Amount}. Please check your bank balance account",
+                            CreatedDate = DateTime.Now,
+                            WalletId = request.WalletId,
+                            TransactionType = TransactionTypes.WithdrawWalletMoney,
+                            CommissionFee = createdTransaction.CommissionFee,
+                            CommissionFeeId = createdTransaction.CommissionFeeId,
+                            SystemWallet = createdTransaction.SystemWallet,
+                            SystemWalletId = createdTransaction.SystemWalletId,
 
-                };
-                await _unitOfWork.TransactionRepository.AddAsync(transaction);
+                        };
+                        await _unitOfWork.TransactionRepository.AddAsync(walletTransaction);
+                        break;
+                    case TransactionTypes.MarketplaceWithdraw:
+                        Transaction marketplaceTransaction = new Transaction
+                        {
+                            Id = new Guid(),
+                            TotalAmount = request.Amount,
+                            Description = $"Your withdraw marketplace has been APPROVED with amount: {request.Amount}. Please check your bank balance account",
+                            CreatedDate = DateTime.Now,
+                            WalletId = request.WalletId,
+                            TransactionType = TransactionTypes.MarketplaceWithdraw,
+                            CommissionFee = createdTransaction.CommissionFee,
+                            CommissionFeeId = createdTransaction.CommissionFeeId,
+                            SystemWallet = createdTransaction.SystemWallet,
+                            SystemWalletId = createdTransaction.SystemWalletId,
 
+                        };
+                        await _unitOfWork.TransactionRepository.AddAsync(marketplaceTransaction);
+                        break;
 
+                }
                 await _unitOfWork.CommitAsync();
                 return ResultDTO<WithdrawRequest>.Success(request, "Successfully approved this request");
 
@@ -106,12 +148,17 @@ namespace Fun_Funding.Application.Services.EntityServices
                 return ResultDTO<WithdrawRequest>.Fail("request status is invalid");
             }
             //expired date
-            if (request.ExpiredDate < DateTime.UtcNow)
+            if (request.ExpiredDate < DateTime.Now)
             {
                 return ResultDTO<WithdrawRequest>.Fail("request is out of date");
             }
             try
             {
+                //get the create transaction (latest transaction)
+                var createdTransaction = _unitOfWork.TransactionRepository.GetQueryable()
+                        .Where(x => x.WalletId == request.WalletId)
+                        .OrderByDescending(x => x.CreatedDate)
+                        .FirstOrDefault();
                 // change status
                 request.Status = WithdrawRequestStatus.Rejected;
                 request.IsFinished = true;
@@ -126,9 +173,15 @@ namespace Fun_Funding.Application.Services.EntityServices
                 {
                     Id = new Guid(),
                     TotalAmount = request.Amount,
-                    Description = $"Admin id: {admin._data.Id} just CANCEL withdraw id: {request.Id}",
-                    CreatedDate = DateTime.UtcNow,
-                    TransactionType = TransactionTypes.FundingWithdraw,
+                    Description = $"Your withdraw has just been CANCEL",
+                    CreatedDate = DateTime.Now,
+                    TransactionType = TransactionTypes.WithdrawRefund,
+                    Wallet = wallet,
+                    WalletId = request.WalletId,
+                    CommissionFee = createdTransaction.CommissionFee,
+                    CommissionFeeId = createdTransaction.CommissionFeeId,
+                    SystemWallet = createdTransaction.SystemWallet,
+                    SystemWalletId = createdTransaction.SystemWalletId,
                 };
                 await _unitOfWork.TransactionRepository.AddAsync(transaction);
 
@@ -161,7 +214,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 return ResultDTO<AdminResponse>.Fail("request status is invalid");
             }
             //expired date
-            if (request.ExpiredDate < DateTime.UtcNow)
+            if (request.ExpiredDate < DateTime.Now)
             {
                 return ResultDTO<AdminResponse>.Fail("request is out of date");
             }
@@ -290,8 +343,8 @@ namespace Fun_Funding.Application.Services.EntityServices
                 {
                     Id = new Guid(),
                     Amount = marketplaceWallet.Balance,
-                    CreatedDate = DateTime.UtcNow,
-                    ExpiredDate = DateTime.UtcNow.AddDays(7),
+                    CreatedDate = DateTime.Now,
+                    ExpiredDate = DateTime.Now.AddDays(7),
                     IsFinished = false,
                     WalletId = marketplaceWallet.Id,
                     RequestType = TransactionTypes.MarketplaceWithdraw,
@@ -299,9 +352,30 @@ namespace Fun_Funding.Application.Services.EntityServices
                 };
                 await _unitOfWork.WithdrawRequestRepository.AddAsync(withdrawRequest);
 
+                //get commissionFee 
+                var exitedCommisionDto = _commissionFeeService.GetAppliedCommissionFee(CommissionType.MarketplaceCommission)._data;
+                var exitedCommisionFee = await _unitOfWork.CommissionFeeRepository.GetByIdAsync(exitedCommisionDto.Id);
+                //get system wallet 
+                var walletDto = await _systemWalletService.GetSystemWallet();
+                Transaction transaction = new Transaction
+                {
+                    Id = new Guid(),
+                    TotalAmount = -marketplaceWallet.Balance,
+                    Description = $"You has just CREATE new marketplace withdraw. Please wait for admin to approved",
+                    CreatedDate = DateTime.Now,
+                    TransactionType = TransactionTypes.MarketplaceWithdraw,
+                    WalletId = marketplaceWallet.Id,
+                    Wallet = marketplaceWallet,
+                    CommissionFee = exitedCommisionFee,
+                    CommissionFeeId = exitedCommisionFee.Id,
+                    SystemWallet = walletDto._data,
+                    SystemWalletId = walletDto._data.Id,
+                };
+                await _unitOfWork.TransactionRepository.AddAsync(transaction);  
+
                 //update money in wallet marketplace 
                 marketplaceWallet.Balance = 0;
-
+                await _unitOfWork.TransactionRepository.AddAsync(transaction);
                 await _unitOfWork.CommitAsync();
                 WithdrawResponse response = _mapper.Map<WithdrawResponse>(withdrawRequest);
                 return ResultDTO<WithdrawResponse>.Success(response, "Your withdraw has been create, please wait for admin to review");
@@ -355,14 +429,30 @@ namespace Fun_Funding.Application.Services.EntityServices
                 {
                     Id = new Guid(),
                     Amount = amount,
-                    CreatedDate = DateTime.UtcNow,
-                    ExpiredDate = DateTime.UtcNow.AddDays(7),
+                    CreatedDate = DateTime.Now,
+                    ExpiredDate = DateTime.Now.AddDays(7),
                     IsFinished = false,
                     WalletId = wallet.Id,
                     RequestType = TransactionTypes.WithdrawWalletMoney,
                     Status = WithdrawRequestStatus.Pending,
                 };
                 await _unitOfWork.WithdrawRequestRepository.AddAsync(withdrawRequest);
+
+                //get system wallet 
+                var walletDto = await _systemWalletService.GetSystemWallet();
+                Transaction transaction = new Transaction
+                {
+                    Id = new Guid(),
+                    TotalAmount = -amount,
+                    Description = $"You has just CREATE new wallet withdraw. Please wait for admin to approved",
+                    CreatedDate = DateTime.Now,
+                    TransactionType = TransactionTypes.WithdrawWalletMoney,
+                    WalletId = wallet.Id,
+                    Wallet = wallet,
+                    SystemWallet = walletDto._data,
+                    SystemWalletId = walletDto._data.Id,
+                };
+                await _unitOfWork.TransactionRepository.AddAsync(transaction);
                 await _unitOfWork.CommitAsync();
                 return ResultDTO<string>.Success("", "Your withdraw has been create, please wait for admin to review");
             }
