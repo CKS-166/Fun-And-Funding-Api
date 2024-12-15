@@ -18,6 +18,7 @@ namespace Fun_Funding.Domain.Enum
         OrderPurchase,
         MarketplaceWithdraw,
         MilestoneFirstHalf,
-        MilestoneSecondHalf
+        MilestoneSecondHalf,
+        WithdrawRefund
     }
 }

@@ -24,5 +24,6 @@ namespace Fun_Funding.Application.IService
         );
 
         Task<ResultDTO<List<TransactionInfoResponse>>> GetAllTransactionsByProjectId(Guid? projectId );
+        
     }
 }

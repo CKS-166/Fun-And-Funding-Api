@@ -33,7 +33,8 @@ namespace Fun_Funding.Api.Controllers
             return Ok(result);
         }
         [HttpPost("marketplace/{marketplaceId}")]
-        public async Task<IActionResult> CreateRequest(Guid marketplaceId)
+        [Authorize(Roles = Role.GameOwner)]
+        public async Task<IActionResult> CreateMarketplaceRequest(Guid marketplaceId)
         {
             var result = await _withdrawService.CreateMarketplaceRequest(marketplaceId);
             return Ok(result);
