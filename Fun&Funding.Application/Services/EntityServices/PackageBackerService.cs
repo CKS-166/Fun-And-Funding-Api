@@ -108,7 +108,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 // add transaction
                 var description = $"Donation to package: {package.Name}";
                 await _transactionService.CreateTransactionAsync(
-                    totalAmount: packageBackerRequest.DonateAmount,
+                    totalAmount: -packageBackerRequest.DonateAmount,
                     description: description,
                     transactionType: TransactionTypes.PackageDonation,
                     packageId: packageBackerRequest.PackageId,
