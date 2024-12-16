@@ -86,7 +86,7 @@ namespace Fun_Funding.Api.Controllers
             return BadRequest(result);
         }
         [HttpGet("signin-google")]
-        public IActionResult SignInGoogle(string? registeredRole = null)
+        public IActionResult SignInGoogle(string? registeredRole = "Backer")
         {
             var redirectUrl = Url.Action(nameof(GoogleResponse), "Authentication");
             var properties = new AuthenticationProperties { RedirectUri = redirectUrl,
@@ -120,7 +120,17 @@ namespace Fun_Funding.Api.Controllers
 
             var loginResult = await _authService.LoginWithGoogle(email, fullName, avatarUrl, registeredRole);
 
-            return Ok(loginResult);
+            if (!loginResult._isSuccess)
+            {
+                var errorMessage = Uri.EscapeDataString(string.Join(", ", loginResult._message));
+                var redirectUrl = $"http://localhost:5173/home?error={errorMessage}";
+                return Redirect(redirectUrl);
+            }
+
+            // Redirect to frontend with token
+            var redirectSuccessUrl = $"http://localhost:5173/home?token={loginResult._data}";
+            return Redirect(redirectSuccessUrl);
+
         }
 
         [HttpGet("check-exist/{email}")]

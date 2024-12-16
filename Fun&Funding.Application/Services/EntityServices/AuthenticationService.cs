@@ -280,11 +280,12 @@ namespace Fun_Funding.Application.Services.EntityServices
 
         public async Task<ResultDTO<string>> LoginWithGoogle(string email, string fullName, string avatarUrl, string? registeredRole)
         {
-            //var user = await _unitOfWork.UserRepository.GetQueryable().FirstOrDefaultAsync(u => u.Email == email);
+            // Fetch the user by email
             var user = await _unitOfWork.UserRepository.GetAsync(x => x.Email == email);
 
             if (user == null)
             {
+                // If the user does not exist, create a new user
                 var userAvatar = new UserFile
                 {
                     Name = "User avatar",
@@ -303,23 +304,47 @@ namespace Fun_Funding.Application.Services.EntityServices
                     UserStatus = UserStatus.Active,
                     NormalizedEmail = email.ToUpper(),
                     TwoFactorEnabled = true,
+                    EmailConfirmed = true
                 };
 
-
-                var result = await _userManager.CreateAsync(user);
-                if (!result.Succeeded)
+                var createResult = await _userManager.CreateAsync(user);
+                if (!createResult.Succeeded)
                 {
-                    return ResultDTO<string>.Fail("Error creating new user with google!");
+                    return ResultDTO<string>.Fail("Error creating new user with Google!");
                 }
+
+                // Add Google login to the user
+                var googleLogin = new UserLoginInfo("Google", email, "Google");
+                var addLoginResult = await _userManager.AddLoginAsync(user, googleLogin);
+                if (!addLoginResult.Succeeded)
+                {
+                    return ResultDTO<string>.Fail("Error adding Google login to user!");
+                }
+
+                // Assign role to the new user
                 await _userManager.AddToRoleAsync(user, registeredRole);
             }
+            else
+            {
+                // Check if the user already has a Google login
+                var userLogins = await _userManager.GetLoginsAsync(user);
+                var hasGoogleLogin = userLogins.Any(login => login.LoginProvider == "Google");
 
+                if (!hasGoogleLogin)
+                {
+                    return ResultDTO<string>.Fail($"Account {email} already exists!");
+                }
+            }
+
+            // Fetch user roles
             var userRoles = await _userManager.GetRolesAsync(user);
 
+            // Generate a token for the user
             var token = _tokenGenerator.GenerateToken(user, userRoles);
 
-            return ResultDTO<string>.Success(token, "Login with google successfully!");
+            return ResultDTO<string>.Success(token, "Login with Google successfully!");
         }
+
 
         public async Task<ResultDTO<bool>> CheckUserExistByEmail(string email)
         {
