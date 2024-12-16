@@ -313,6 +313,27 @@ namespace Fun_Funding.Application.Services.EntityServices
                     return ResultDTO<string>.Fail("Error creating new user with Google!");
                 }
 
+                var bankAccount = new BankAccount
+                {
+                    Id = Guid.NewGuid(),
+                    BankCode = string.Empty,
+                    BankNumber = string.Empty,
+                    CreatedDate = DateTime.Now,
+                };
+
+                var wallet = new Wallet
+                {
+                    Id = Guid.NewGuid(),
+                    Balance = 0,
+                    Backer = user,
+                    BankAccountId = bankAccount.Id,
+                    CreatedDate = bankAccount.CreatedDate,
+                };
+
+                await _unitOfWork.BankAccountRepository.AddAsync(bankAccount);
+                await _unitOfWork.WalletRepository.AddAsync(wallet);
+                await _unitOfWork.CommitAsync();
+
                 // Add Google login to the user
                 var googleLogin = new UserLoginInfo("Google", email, "Google");
                 var addLoginResult = await _userManager.AddLoginAsync(user, googleLogin);
