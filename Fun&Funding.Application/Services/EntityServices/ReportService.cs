@@ -21,14 +21,16 @@ namespace Fun_Funding.Application.Services.EntityServices
     public class ReportService : IReportService
     {
         private readonly IUserService _userService;
+        private readonly IBackgroundProcessService _backgroundProcessService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IEmailService _emailService;
         private readonly IAzureService _azureService;
 
-        public ReportService(IUserService userService, IUnitOfWork unitOfWork, IMapper mapper, IEmailService emailService, IAzureService azureService)
+        public ReportService(IUserService userService,IBackgroundProcessService backgroundProcessService, IUnitOfWork unitOfWork, IMapper mapper, IEmailService emailService, IAzureService azureService)
         {
             _userService = userService;
+            _backgroundProcessService = backgroundProcessService;
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _emailService = emailService;
@@ -222,6 +224,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 case ReportType.FundingProject:
                     var exitedProject = await _unitOfWork.FundingProjectRepository.GetByIdAsync(exitedReport.ViolatorId);
                     exitedProject.Status = ProjectStatus.Reported;
+                    await _backgroundProcessService.RefundFundingBackers(exitedProject.Id);
                     await _unitOfWork.CommitAsync();
                     if (exitedProject is null)
                     {
