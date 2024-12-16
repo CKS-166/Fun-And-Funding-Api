@@ -224,9 +224,10 @@ namespace Fun_Funding.Application.Services.EntityServices
                             {
                                 Id = Guid.NewGuid(),
                                 TotalAmount = systemReceivedMoney,
-                                TransactionType = TransactionTypes.OrderPurchase,
+                                TransactionType = TransactionTypes.CommissionFee,
                                 Description = $"Receive commission money from game {_unitOfWork.MarketplaceRepository.GetById(cartItem.MarketplaceProjectId).Name} purchase",
                                 SystemWallet = systemWallet,
+                                WalletId = gameWallet.Id,
                                 OrderDetailId = orderDetail.Id,
                                 CommissionFee = await _unitOfWork.CommissionFeeRepository.GetByIdAsync(commissionFee.Id),
                                 CreatedDate = DateTime.Now,
@@ -271,8 +272,9 @@ namespace Fun_Funding.Application.Services.EntityServices
                             {
                                 Id = Guid.NewGuid(),
                                 TotalAmount = systemReceivedMoney,
-                                TransactionType = TransactionTypes.OrderPurchase,
+                                TransactionType = TransactionTypes.CommissionFee,
                                 SystemWallet = systemWallet,
+                                WalletId = gameWallet.Id,
                                 Description = $"Receive commission money from game {_unitOfWork.MarketplaceRepository.GetById(cartItem.MarketplaceProjectId).Name} purchase",
                                 OrderDetailId = orderDetail.Id,
                                 CommissionFee = await _unitOfWork.CommissionFeeRepository.GetByIdAsync(commissionFee.Id),
