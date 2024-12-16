@@ -39,7 +39,17 @@ namespace Fun_Funding.Application.IRepository
             int? pageIndex = null,
             int? pageSize = null,
             CancellationToken cancellationToken = default);
-        Task AddAsync(T entity, CancellationToken cancellationToken = default);
+
+        Task<IEnumerable<T>> GetAllCombinedFilterAsync(
+            List<Func<IQueryable<T>, IQueryable<T>>> filters = null,
+            Expression<Func<T, object>> orderBy = null,
+            bool isAscending = false,
+            string includeProperties = "",
+            int? pageIndex = 1,
+            int? pageSize = 10,
+            CancellationToken cancellationToken = default);
+        
+            Task AddAsync(T entity, CancellationToken cancellationToken = default);
         Task AddRangeAsync(IEnumerable<T> entities, CancellationToken cancellationToken = default);
         IQueryable<T> GetQueryable();
 
