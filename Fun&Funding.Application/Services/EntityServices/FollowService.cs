@@ -43,11 +43,12 @@ namespace Fun_Funding.Application.Services.EntityServices
 
 
                 // Check for like in funding project
-                var fundingLike = await _unitOfWork.FundingProjectRepository.GetByIdAsync(projectId);
-                if (fundingLike != null)
+                var fundingProject = await _unitOfWork.FundingProjectRepository.GetByIdAsync(projectId);
+                if (fundingProject != null)
                 {
-                    var isLike = _unitOfWork.FollowRepository.Get(x => x.FundingProjectId == fundingLike.Id && x.UserID == exitUser.Id);
-                    if (isLike != null) return ResultDTO<Follow>.Success(isLike, "user has like this funding project");
+                    var isLike = _unitOfWork.FollowRepository.Get(x => x.FundingProjectId == fundingProject.Id && x.UserID == exitUser.Id);
+                    if (isLike != null) 
+                        return ResultDTO<Follow>.Success(isLike, "user has like this funding project");
                 }
 
                 // Check for like in marketplace project

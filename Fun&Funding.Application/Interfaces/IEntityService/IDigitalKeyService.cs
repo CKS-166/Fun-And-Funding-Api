@@ -11,7 +11,7 @@ namespace Fun_Funding.Application.IService
     public interface IDigitalKeyService
     {
         string GenerateGameKey();
-        Task<ResultDTO<string>> VerifyDigitalKey(string key);
+        Task<ResultDTO<string>> VerifyDigitalKey(string key, string projectName);
         Task<ResultDTO<DigitalKeyInfoResponse>> GenerateTestKey(Guid marketplaceProjectId);
         Task<ResultDTO<DigitalKeyInfoResponse>> GetDigitalKeyById(Guid id);
         Task<ResultDTO<PaginatedResponse<DigitalKeyInfoResponse>>> GetAllDigitalKey(ListRequest request);

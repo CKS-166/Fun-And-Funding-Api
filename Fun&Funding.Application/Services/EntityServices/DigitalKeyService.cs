@@ -55,11 +55,17 @@ namespace Fun_Funding.Application.Services.EntityServices
             return key;
         }
 
-        public async Task<ResultDTO<string>> VerifyDigitalKey(string key)
+        public async Task<ResultDTO<string>> VerifyDigitalKey(string key, string projectName)
         {
             try
             {
-                DigitalKey digitalKey = _unitOfWork.DigitalKeyRepository.GetQueryable().Where(k => k.KeyString == key).SingleOrDefault();
+                MarketplaceProject marketplaceProject = _unitOfWork.MarketplaceRepository.GetQueryable()
+                .Where(p => p.Name == (projectName ?? string.Empty))
+                .SingleOrDefault();
+                if (marketplaceProject == null) {
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "Cannot find project name.");
+                }
+                DigitalKey digitalKey = _unitOfWork.DigitalKeyRepository.GetQueryable().Where(k => k.KeyString == key && k.MarketplaceProject.Id == marketplaceProject.Id).SingleOrDefault();
                 if (digitalKey != null)
                 {
                     if(digitalKey.Status != KeyStatus.ACTIVE)
@@ -74,7 +80,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 }
                 else
                 {
-                    throw new ExceptionError((int)HttpStatusCode.NotFound, "Game Key Not Found.");
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "Game Key Not Found For The Corresponding Project.");
                 }
             }
             catch (Exception ex)

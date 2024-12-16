@@ -84,10 +84,6 @@ namespace Fun_Funding.Api.Controllers
         public async Task<IActionResult> CheckIsFollow(Guid id)
         {
             var result = await _followService.CheckUserFollow(id);
-            if (!result._isSuccess)
-            {
-                return BadRequest();
-            }
             return Ok(result);
         }
     }
