@@ -33,9 +33,9 @@ namespace Fun_Funding.Api.Controllers
             return Ok(response);
         }
         [HttpPatch]
-        public async Task<IActionResult> VerifyDigitalKey(string key)
+        public async Task<IActionResult> VerifyDigitalKey(string key, string projectName)
         {
-            var response = await _digitalKeyService.VerifyDigitalKey(key);
+            var response = await _digitalKeyService.VerifyDigitalKey(key, projectName);
             return Ok(response);
         }
     }
