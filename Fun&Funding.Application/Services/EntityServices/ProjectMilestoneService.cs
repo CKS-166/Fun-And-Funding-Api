@@ -28,7 +28,7 @@ namespace Fun_Funding.Application.Services.EntityServices
     {
         private IUnitOfWork _unitOfWork;
         private IMapper _mapper;
-        private int maxExpireDay = 30;
+        private int maxExpireDay = 15;
         private int maxMilestoneExtend = 10;
         private ITransactionService _transactionService;
         private int lastMilestoneOrder = 4;
@@ -77,7 +77,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                     {
                         if ((present.Date - project.EndDate.Date).TotalDays > maxExpireDay)
                         {
-                            return ResultDTO<ProjectMilestoneResponse>.Fail("The milestone must begin within 30 days after the project's funding period ends.", 500);
+                            return ResultDTO<ProjectMilestoneResponse>.Fail("The milestone must begin within 15 days after the project's funding period ends.", 500);
                         }
                     }
                     else

@@ -19,5 +19,12 @@ namespace Fun_Funding.Api.Controllers
             var res = await _transactionService.GetAllTransactionsByProjectId(projectId);
             return Ok(res);
         }
+
+        [HttpGet("marketplace-transaction")]
+        public async Task<IActionResult> GeTransaction(Guid marketId)
+        {
+            var res =_transactionService.GetAllTransactionsByMarketId(marketId);
+            return Ok(res);
+        }
     }
 }
