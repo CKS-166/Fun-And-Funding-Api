@@ -114,5 +114,34 @@ namespace Fun_Funding.Application.Services.EntityServices
                 throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
             }
         }
+
+        public async Task<ResultDTO<IEnumerable<object>>> GetAllTransactionsByMarketId(Guid? projectId)
+        {
+            try
+            {
+                var marketProject = _unitOfWork.MarketplaceRepository.GetQueryable()
+                    .Include(m => m.Wallet).FirstOrDefault(w => w.Id == projectId);
+                var transactions = _unitOfWork.TransactionRepository.GetQueryable().
+                    Where(t => t.WalletId == marketProject.Wallet.Id).OrderByDescending(t => t.CreatedDate);
+                var response = transactions.Select(t => new
+                {
+                    t.TransactionType,
+                    t.CommissionFee,
+                    t.Description,
+                    t.TotalAmount,
+                    t.CreatedDate
+                }).ToList();
+                return ResultDTO<IEnumerable<object>>.Success(response);
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
+
     }
 }
