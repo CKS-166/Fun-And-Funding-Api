@@ -75,55 +75,6 @@ namespace Fun_Funding.Application.Services.EntityServices
                 request.Status = WithdrawRequestStatus.Approved;
                 request.IsFinished = true;
                 _unitOfWork.WithdrawRequestRepository.Update(request);
-
-                //get the create transaction (latest transaction)
-                var createdTransaction = _unitOfWork.TransactionRepository.GetQueryable()
-                        .Where(x => x.WalletId == request.WalletId)
-                        .OrderByDescending(x => x.CreatedDate)
-                        .FirstOrDefault();
-                if (createdTransaction is null)
-                {
-                    return ResultDTO<WithdrawRequest>.Fail("no transaction is founded");
-                }
-                //change case
-                switch (request.RequestType)
-                {
-                    case TransactionTypes.WithdrawWalletMoney:
-                        Transaction walletTransaction = new Transaction
-                        {
-                            Id = new Guid(),
-                            TotalAmount = request.Amount,
-                            Description = $"Your withdraw wallet has been APPROVED with amount: {request.Amount}. Please check your bank balance account",
-                            CreatedDate = DateTime.Now,
-                            WalletId = request.WalletId,
-                            TransactionType = TransactionTypes.WithdrawWalletMoney,
-                            CommissionFee = createdTransaction.CommissionFee,
-                            CommissionFeeId = createdTransaction.CommissionFeeId,
-                            SystemWallet = createdTransaction.SystemWallet,
-                            SystemWalletId = createdTransaction.SystemWalletId,
-
-                        };
-                        await _unitOfWork.TransactionRepository.AddAsync(walletTransaction);
-                        break;
-                    case TransactionTypes.MarketplaceWithdraw:
-                        Transaction marketplaceTransaction = new Transaction
-                        {
-                            Id = new Guid(),
-                            TotalAmount = request.Amount,
-                            Description = $"Your withdraw marketplace has been APPROVED with amount: {request.Amount}. Please check your bank balance account",
-                            CreatedDate = DateTime.Now,
-                            WalletId = request.WalletId,
-                            TransactionType = TransactionTypes.MarketplaceWithdraw,
-                            CommissionFee = createdTransaction.CommissionFee,
-                            CommissionFeeId = createdTransaction.CommissionFeeId,
-                            SystemWallet = createdTransaction.SystemWallet,
-                            SystemWalletId = createdTransaction.SystemWalletId,
-
-                        };
-                        await _unitOfWork.TransactionRepository.AddAsync(marketplaceTransaction);
-                        break;
-
-                }
                 await _unitOfWork.CommitAsync();
                 return ResultDTO<WithdrawRequest>.Success(request, "Successfully approved this request");
 
@@ -154,11 +105,6 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
             try
             {
-                //get the create transaction (latest transaction)
-                var createdTransaction = _unitOfWork.TransactionRepository.GetQueryable()
-                        .Where(x => x.WalletId == request.WalletId)
-                        .OrderByDescending(x => x.CreatedDate)
-                        .FirstOrDefault();
                 // change status
                 request.Status = WithdrawRequestStatus.Rejected;
                 request.IsFinished = true;
@@ -168,23 +114,6 @@ namespace Fun_Funding.Application.Services.EntityServices
                 var wallet = await _unitOfWork.WalletRepository.GetByIdAsync(request.WalletId);
                 wallet.Balance += request.Amount; 
                 _unitOfWork.WalletRepository.Update(wallet);
-
-                Transaction transaction = new Transaction
-                {
-                    Id = new Guid(),
-                    TotalAmount = request.Amount,
-                    Description = $"Your withdraw has just been CANCEL",
-                    CreatedDate = DateTime.Now,
-                    TransactionType = TransactionTypes.WithdrawRefund,
-                    Wallet = wallet,
-                    WalletId = request.WalletId,
-                    CommissionFee = createdTransaction.CommissionFee,
-                    CommissionFeeId = createdTransaction.CommissionFeeId,
-                    SystemWallet = createdTransaction.SystemWallet,
-                    SystemWalletId = createdTransaction.SystemWalletId,
-                };
-                await _unitOfWork.TransactionRepository.AddAsync(transaction);
-
 
                 await _unitOfWork.CommitAsync();
                 return ResultDTO<WithdrawRequest>.Success(request, "Successfully cancel this request");
