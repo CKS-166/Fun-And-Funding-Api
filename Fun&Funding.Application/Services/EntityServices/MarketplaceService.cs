@@ -721,7 +721,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<ResultDTO<List<MarketplaceProjectInfoResponse>>> GetTop3MostFundedOngoingMarketplaceProject()
+        public async Task<ResultDTO<List<MarketplaceProjectInfoResponse>>> GetTop3MostPurchasedOngoingMarketplaceProject()
         {
             try
             {
@@ -735,6 +735,36 @@ namespace Fun_Funding.Application.Services.EntityServices
                     .Where(mp => mp.Status == ProjectStatus.Processing)
                     .OrderByDescending(p => p.DigitalKeys.Count())
                     .Take(3)
+                    .ToListAsync();
+
+                List<MarketplaceProjectInfoResponse> result = _mapper.Map<List<MarketplaceProjectInfoResponse>>(projects);
+
+                return ResultDTO<List<MarketplaceProjectInfoResponse>>.Success(result, "Marketplace Project Found!");
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
+
+        public async Task<ResultDTO<List<MarketplaceProjectInfoResponse>>> GetTop4MostPurchasedOngoingMarketplaceProject()
+        {
+            try
+            {
+                var projects = await _unitOfWork.MarketplaceRepository.GetQueryable()
+                    .AsNoTracking()
+                    .Include(p => p.MarketplaceFiles)
+                    .Include(p => p.DigitalKeys)
+                    .Include(p => p.FundingProject.Categories)
+                    .Include(p => p.FundingProject)
+                        .ThenInclude(p => p.User)
+                    .Where(mp => mp.Status == ProjectStatus.Processing)
+                    .OrderByDescending(p => p.DigitalKeys.Count())
+                    .Take(4)
                     .ToListAsync();
 
                 List<MarketplaceProjectInfoResponse> result = _mapper.Map<List<MarketplaceProjectInfoResponse>>(projects);

@@ -521,14 +521,9 @@ namespace Fun_Funding.Application.Services.EntityServices
                     pageSize: request.PageSize ?? 10,
                     includeProperties: "Categories,Packages,SourceFiles,Packages.RewardItems,Wallet,User");
 
-                // If the list is empty
-                if (list == null || !list.Any())
-                {
-                    throw new ExceptionError((int)HttpStatusCode.NotFound, "Project Not Found.");
-                }
-
                 // Map the results
-                var totalItems = list.Count();
+                var totalItems = _unitOfWork.FundingProjectRepository.GetAllCombinedFilterAsync(filters: filters)
+                    .Result.ToList().Count();
                 var totalPages = (int)Math.Ceiling((double)totalItems / (request.PageSize ?? 10));
                 var projects = _mapper.Map<IEnumerable<FundingProjectResponse>>(list);
 

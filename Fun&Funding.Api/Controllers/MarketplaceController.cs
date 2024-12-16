@@ -70,9 +70,15 @@ namespace Fun_Funding.Api.Controllers
             return Ok(response);
         }
         [HttpGet("top3")]
-        public async Task<IActionResult> GetTop3MostFundedOngoingMarketplaceProject()
+        public async Task<IActionResult> GetTop3MostPurchasedOngoingMarketplaceProject()
         {
-            var response = await _marketplace.GetTop3MostFundedOngoingMarketplaceProject();
+            var response = await _marketplace.GetTop3MostPurchasedOngoingMarketplaceProject();
+            return Ok(response);
+        }
+        [HttpGet("top4")]
+        public async Task<IActionResult> GetTop4MostPurchasedOngoingMarketplaceProject()
+        {
+            var response = await _marketplace.GetTop4MostPurchasedOngoingMarketplaceProject();
             return Ok(response);
         }
         [HttpGet("number-of-projects")]
