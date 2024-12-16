@@ -19,6 +19,7 @@ namespace Fun_Funding.Domain.Enum
         MarketplaceWithdraw,
         MilestoneFirstHalf,
         MilestoneSecondHalf,
-        WithdrawRefund
+        WithdrawRefund,
+        WithdrawCancel
     }
 }

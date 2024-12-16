@@ -110,6 +110,27 @@ namespace Fun_Funding.Application.Services.EntityServices
                 request.IsFinished = true;
                 _unitOfWork.WithdrawRequestRepository.Update(request);
 
+                //get the create transaction (latest transaction)
+                var createdTransaction = _unitOfWork.TransactionRepository.GetQueryable()
+                        .Where(x => x.WalletId == request.WalletId)
+                        .OrderByDescending(x => x.CreatedDate)
+                        .FirstOrDefault();
+                Transaction transaction = new Transaction
+                {
+                    Id = new Guid(),
+                    TotalAmount = request.Amount,
+                    Description = $"Your withdraw has just been CANCEL",
+                    CreatedDate = DateTime.Now,
+                    TransactionType = TransactionTypes.WithdrawCancel,
+                    Wallet = request.Wallet,
+                    WalletId = request.WalletId,
+                    CommissionFee = createdTransaction.CommissionFee,
+                    CommissionFeeId = createdTransaction.CommissionFeeId,
+                    SystemWallet = createdTransaction.SystemWallet,
+                    SystemWalletId = createdTransaction.SystemWalletId,
+                };
+                await _unitOfWork.TransactionRepository.AddAsync(transaction);
+
                 //transfer back to wallet 
                 var wallet = await _unitOfWork.WalletRepository.GetByIdAsync(request.WalletId);
                 wallet.Balance += request.Amount; 
