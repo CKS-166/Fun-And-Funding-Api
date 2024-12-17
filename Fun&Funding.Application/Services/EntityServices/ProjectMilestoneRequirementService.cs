@@ -74,7 +74,8 @@ namespace Fun_Funding.Application.Services.EntityServices
                         ProjectMilestoneId = projectMilestone.Id,
                         Content = requestItem.Content,
                         RequirementId = requestItem.RequirementId,
-                        RequirementStatus = requestItem.RequirementStatus
+                        RequirementStatus = requestItem.RequirementStatus,
+                        CreatedDate = DateTime.Now
                     };
                     List<ProjectRequirementFile> files = new List<ProjectRequirementFile>();
                     if (requestItem.RequirementFiles?.Count > 0)
@@ -157,7 +158,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                         .GetQueryable().Include(pmr => pmr.RequirementFiles).FirstOrDefault(pmr => pmr.Id == requestItem.Id);
                     
                     req.Content = requestItem.Content;
-                    req.UpdateDate = requestItem.UpdateDate;
+                    req.UpdateDate = DateTime.Now;
                     req.RequirementStatus = requestItem.RequirementStatus;
                     if (requestItem.RequirementFiles != null)
                     {
@@ -201,7 +202,6 @@ namespace Fun_Funding.Application.Services.EntityServices
                         projectMilestone.Status = ProjectMilestoneStatus.Resubmitted;
                     }
                     _unitOfWork.Commit();
-
                     throw new ExceptionError((int)HttpStatusCode.BadRequest, "This milestone has already been expired");
                 }
                 _unitOfWork.Commit();
