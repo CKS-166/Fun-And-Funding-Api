@@ -249,5 +249,61 @@ namespace Fun_Funding.Application.Services.EntityServices
                 throw new Exception(ex.Message);
             }
         }
+
+        public async Task<ResultDTO<IEnumerable<object>>> GetBackerDonations(Guid fundingProjectId)
+        {
+            try
+            {
+                var authorUser = _userService.GetUserInfo().Result;
+                if(authorUser == null)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "User not found.");
+                }
+                User mapUser = _mapper.Map<User>(authorUser._data);
+
+                User user = _unitOfWork.UserRepository.GetById(mapUser.Id);
+                var listById = _unitOfWork.PackageBackerRepository.GetQueryable()
+                    .Include(x => x.Package)
+                        .ThenInclude(x => x.RewardItems)
+                    .Include(x => x.User)
+                    .Where(x => x.UserId == user.Id && x.Package.ProjectId == fundingProjectId)
+                    .ToList();
+                if (listById is null)
+                {
+                    return ResultDTO<IEnumerable<object>>.Fail("There are no donation found with this id");
+                }
+
+                var response = listById.Select(x => new
+                {
+                    UserId = x.UserId,
+                    UserName = x.User?.FullName ?? "Unknown User",
+                    CreateDate = x.CreatedDate,
+                    DonateAmount = x.DonateAmount,
+                    PackageId = x.PackageId,
+                    PackageUrl = x.Package?.Url ?? string.Empty,
+                    PackageName = x.Package?.Name ?? "Unknown Package",
+                    PackageDescription = x.Package?.Description ?? string.Empty,
+                    RewardItems = x.Package?.RewardItems != null
+                    ? x.Package.RewardItems.Select(reward => new
+                    {
+                        RewardId = reward.Id,
+                        ImageUrl = reward.ImageUrl,
+                        RewardName = reward.Name,
+                        Description = reward.Description,
+                        Quantity = reward.Quantity
+                    }).ToList()
+                    : null,
+                    Types = x.Package?.PackageTypes ?? null,
+                    ProjectId = x.Package?.ProjectId,
+                }).ToList();
+
+                return ResultDTO<IEnumerable<object>>.Success(response, "Get Donations Successfully");
+
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
     }
 }

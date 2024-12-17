@@ -65,5 +65,12 @@ namespace Fun_Funding.Api.Controllers
             var result = _packageBackerService.GetProjectBacker(projectId);
             return Ok(result);
         }
+
+        [HttpGet("donated-project")]
+        public async Task<IActionResult> GetBackersDonations([FromQuery] Guid projectId)
+        {
+            var result = await _packageBackerService.GetBackerDonations(projectId);
+            return Ok(result);
+        }
     }
 }
