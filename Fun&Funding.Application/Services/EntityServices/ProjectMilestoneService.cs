@@ -528,7 +528,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                     var transaction = new Transaction
                     {
                         WalletId = backerWallet.Id,
-                        TotalAmount = -backerRefundAmount,
+                        TotalAmount = backerRefundAmount,
                         TransactionType = TransactionTypes.FundingRefund,
                         CreatedDate = DateTime.Now,
                         Description = "Refund to backers",
