@@ -602,11 +602,6 @@ namespace Fun_Funding.Application.Services.EntityServices
                 {
                     errorMessages.Add("Name is required.");
                 }
-                List<MarketplaceProject> list = _unitOfWork.MarketplaceRepository.GetAll().ToList();
-                if (list.All(p => p.Name == request.Name))
-                {
-                    errorMessages.Add("Name cannot be duplicated.");
-                }
 
                 if (string.IsNullOrEmpty(request.Description))
                 {
@@ -642,6 +637,12 @@ namespace Fun_Funding.Application.Services.EntityServices
             if (request.MarketplaceFiles.Count <= 0)
             {
                 errorMessages.Add("Missing file(s).");
+            }
+
+            List<MarketplaceProject> list = _unitOfWork.MarketplaceRepository.GetAll().ToList();
+            if (list.All(p => p.Name == request.Name))
+            {
+                errorMessages.Add("Name cannot be duplicated.");
             }
 
             return errorMessages;
