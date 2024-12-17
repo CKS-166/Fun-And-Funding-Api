@@ -95,7 +95,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 }
                 ProjectMilestone projectMilestone = new ProjectMilestone
                 {
-                    EndDate = DateTime.UtcNow.AddDays(requestMilestone.Duration),
+                    EndDate = DateTime.Now.AddDays(requestMilestone.Duration),
                     Status = ProjectMilestoneStatus.Pending,
                     MilestoneId = request.MilestoneId,
                     FundingProjectId = project.Id,
@@ -427,7 +427,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                     WalletId = projectMilestone.FundingProject.Wallet.Id,
                     TotalAmount = -(commissionFee.Rate * balance),
                     TransactionType = TransactionTypes.CommissionFee,
-                    CreatedDate = DateTime.UtcNow,
+                    CreatedDate = DateTime.Now,
                     Description = "Charge Commission Fee",
                     ProjectMilestoneId = projectMilestone.Id,
                     CommissionFeeId = commissionFee.Id,
@@ -631,7 +631,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                         WalletId = projectMilestone.FundingProject.Wallet.Id,
                         TotalAmount = -transferMoney,
                         TransactionType = status == 1 ? TransactionTypes.MilestoneFirstHalf : TransactionTypes.MilestoneSecondHalf,
-                        CreatedDate = DateTime.UtcNow,
+                        CreatedDate = DateTime.Now,
                         Description = "Transfer money to milestone disbursement",
                         ProjectMilestoneId = projectMilestone.Id
                     };
