@@ -222,28 +222,26 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
-        public async Task<ResultDTO<List<ProjectBackerResponse>>> GetProjectBacker(Guid projectId)
+        public async Task<ResultDTO<IEnumerable<object>>> GetProjectBacker(Guid projectId)
         {
             try
             {
             var groupedResult = _unitOfWork.PackageBackerRepository.GetQueryable()
             .Include(pb => pb.User)
+
             .Where(pb => pb.Package.Project.Id == projectId)
-            .GroupBy(pb => new
+            .Select(g => new 
             {
-                UserId = pb.UserId,
-                Name = pb.User.FullName,
-                Avatar = pb.User.File.URL
+                g.User.UserName,
+                g.Package.Name,
+                g.User.Address,
+                g.User.Email,
+                g.DonateAmount,
+                g.CreatedDate
             })
-            .Select(g => new ProjectBackerResponse
-            {
-                Id = g.Key.UserId,
-                Name = g.Key.Name,
-                URL = g.Key.Avatar,
-                DonateAmount = g.Sum(pb => pb.DonateAmount)
-            })
+            .OrderByDescending(g => g.CreatedDate)
             .ToList();
-            return ResultDTO<List<ProjectBackerResponse>>.Success(groupedResult);
+            return ResultDTO< IEnumerable<object>>.Success(groupedResult);
 
 
             }
