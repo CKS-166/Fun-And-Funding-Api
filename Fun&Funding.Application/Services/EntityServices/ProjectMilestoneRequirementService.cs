@@ -158,6 +158,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                         .GetQueryable().Include(pmr => pmr.RequirementFiles).FirstOrDefault(pmr => pmr.Id == requestItem.Id);
                     
                     req.Content = requestItem.Content;
+                    req.CreatedDate = DateTime.Now;
                     req.UpdateDate = DateTime.Now;
                     req.RequirementStatus = requestItem.RequirementStatus;
                     if (requestItem.RequirementFiles != null)
