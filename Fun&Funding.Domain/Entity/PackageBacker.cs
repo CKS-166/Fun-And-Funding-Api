@@ -13,6 +13,8 @@ namespace Fun_Funding.Domain.Entity
         [Range(0, (double)decimal.MaxValue)]
         [Column(TypeName = "decimal(18, 2)")]
         public decimal DonateAmount { get; set; }
+
+        public List<EvidenceImage>? EvidenceImages { get; set; }
         [Required]
         public Guid PackageId { get; set; }
         public Package Package { get; set; }

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Fun_Funding.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class RemoveUnusedFields : Migration
+    public partial class Init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -117,6 +117,7 @@ namespace Fun_Funding.Infrastructure.Migrations
                     MilestoneOrder = table.Column<int>(type: "int", nullable: false),
                     DisbursementPercentage = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    MilestoneType = table.Column<int>(type: "int", nullable: false),
                     Version = table.Column<int>(type: "int", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
@@ -261,6 +262,7 @@ namespace Fun_Funding.Infrastructure.Migrations
                     Target = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Balance = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
+                    Note = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
@@ -817,6 +819,28 @@ namespace Fun_Funding.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "EvidenceImage",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Url = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    PackageBackerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EvidenceImage", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_EvidenceImage_PackageBacker_PackageBackerId",
+                        column: x => x.PackageBackerId,
+                        principalTable: "PackageBacker",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ProjectRequirementFiles",
                 columns: table => new
                 {
@@ -888,6 +912,11 @@ namespace Fun_Funding.Infrastructure.Migrations
                 name: "IX_DigitalKey_MarketplaceProjectId",
                 table: "DigitalKey",
                 column: "MarketplaceProjectId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_EvidenceImage_PackageBackerId",
+                table: "EvidenceImage",
+                column: "PackageBackerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_FundingFile_FundingProjectId",
@@ -1079,6 +1108,9 @@ namespace Fun_Funding.Infrastructure.Migrations
                 name: "CategoryFundingProject");
 
             migrationBuilder.DropTable(
+                name: "EvidenceImage");
+
+            migrationBuilder.DropTable(
                 name: "FundingFile");
 
             migrationBuilder.DropTable(
@@ -1086,9 +1118,6 @@ namespace Fun_Funding.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "OrderDetail");
-
-            migrationBuilder.DropTable(
-                name: "PackageBacker");
 
             migrationBuilder.DropTable(
                 name: "ProjectMilestoneBacker");
@@ -1115,6 +1144,9 @@ namespace Fun_Funding.Infrastructure.Migrations
                 name: "Category");
 
             migrationBuilder.DropTable(
+                name: "PackageBacker");
+
+            migrationBuilder.DropTable(
                 name: "DigitalKey");
 
             migrationBuilder.DropTable(
@@ -1127,9 +1159,6 @@ namespace Fun_Funding.Infrastructure.Migrations
                 name: "ProjectMilestoneRequirements");
 
             migrationBuilder.DropTable(
-                name: "Package");
-
-            migrationBuilder.DropTable(
                 name: "CommissionFee");
 
             migrationBuilder.DropTable(
@@ -1137,6 +1166,9 @@ namespace Fun_Funding.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "Wallet");
+
+            migrationBuilder.DropTable(
+                name: "Package");
 
             migrationBuilder.DropTable(
                 name: "ProjectMilestones");

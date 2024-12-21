@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fun_Funding.Infrastructure.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20241201141122_Remove-Unused-Fields")]
-    partial class RemoveUnusedFields
+    [Migration("20241221092204_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -156,6 +156,35 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.ToTable("DigitalKey");
                 });
 
+            modelBuilder.Entity("Fun_Funding.Domain.Entity.EvidenceImage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("PackageBackerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PackageBackerId");
+
+                    b.ToTable("EvidenceImage");
+                });
+
             modelBuilder.Entity("Fun_Funding.Domain.Entity.FundingFile", b =>
                 {
                     b.Property<Guid>("Id")
@@ -223,6 +252,9 @@ namespace Fun_Funding.Infrastructure.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Note")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("StartDate")
@@ -360,6 +392,9 @@ namespace Fun_Funding.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("MilestoneOrder")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MilestoneType")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("UpdateDate")
@@ -1253,6 +1288,17 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Navigation("MarketplaceProject");
                 });
 
+            modelBuilder.Entity("Fun_Funding.Domain.Entity.EvidenceImage", b =>
+                {
+                    b.HasOne("Fun_Funding.Domain.Entity.PackageBacker", "PackageBacker")
+                        .WithMany("EvidenceImages")
+                        .HasForeignKey("PackageBackerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PackageBacker");
+                });
+
             modelBuilder.Entity("Fun_Funding.Domain.Entity.FundingFile", b =>
                 {
                     b.HasOne("Fun_Funding.Domain.Entity.FundingProject", null)
@@ -1458,7 +1504,7 @@ namespace Fun_Funding.Infrastructure.Migrations
                         .WithMany("Transactions")
                         .HasForeignKey("CommissionFeeId");
 
-                    b.HasOne("Fun_Funding.Domain.Entity.ProjectMilestone", null)
+                    b.HasOne("Fun_Funding.Domain.Entity.ProjectMilestone", "ProjectMilestone")
                         .WithMany("Transactions")
                         .HasForeignKey("ProjectMilestoneId");
 
@@ -1471,6 +1517,8 @@ namespace Fun_Funding.Infrastructure.Migrations
                         .HasForeignKey("WalletId");
 
                     b.Navigation("CommissionFee");
+
+                    b.Navigation("ProjectMilestone");
 
                     b.Navigation("SystemWallet");
 
@@ -1624,6 +1672,11 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Navigation("PackageUsers");
 
                     b.Navigation("RewardItems");
+                });
+
+            modelBuilder.Entity("Fun_Funding.Domain.Entity.PackageBacker", b =>
+                {
+                    b.Navigation("EvidenceImages");
                 });
 
             modelBuilder.Entity("Fun_Funding.Domain.Entity.ProjectCoupon", b =>

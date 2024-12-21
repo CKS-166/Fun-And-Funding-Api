@@ -7,6 +7,7 @@ using Fun_Funding.Application.ViewModel.MilestoneDTO;
 using Fun_Funding.Application.ViewModel.RequirementDTO;
 using Fun_Funding.Domain.Constrain;
 using Fun_Funding.Domain.Entity;
+using Fun_Funding.Domain.Enum;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -100,11 +101,20 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
-        public async Task<ResultDTO<List<MilestoneResponse>>> GetListLastestMilestone(bool? status)
+        public async Task<ResultDTO<List<MilestoneResponse>>> GetListLastestMilestone(bool? status, MilestoneFilter filter)
         {
             try
             {
-                var latestGroupMilestones = _unitOfWork.MilestoneRepository.GetQueryable()
+                var milestoneQuery = _unitOfWork.MilestoneRepository.GetQueryable();
+                milestoneQuery = filter switch
+                {
+                    MilestoneFilter.Funding => milestoneQuery.Where(m => m.MilestoneType == MilestoneType.Funding),
+                    MilestoneFilter.Disbursement => milestoneQuery.Where(m => m.MilestoneType == MilestoneType.Disbursement),
+                    _ => milestoneQuery
+
+                }; 
+
+                var latestGroupMilestones = milestoneQuery
                     .Include(x => x.Requirements)
                     .GroupBy(milestone => milestone.MilestoneOrder)
                     .Select(group => group

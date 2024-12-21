@@ -1,4 +1,5 @@
 ﻿using Fun_Funding.Application.IService;
+using Fun_Funding.Domain.Enum;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,8 +16,8 @@ namespace Fun_Funding.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetTransByProjectId(Guid projectId) {
-            var res = await _transactionService.GetAllTransactionsByProjectId(projectId);
+        public async Task<IActionResult> GetTransByProjectId(Guid projectId, TransactionFilter filter = TransactionFilter.All) {
+            var res = await _transactionService.GetAllTransactionsByProjectId(projectId, filter);
             return Ok(res);
         }
 

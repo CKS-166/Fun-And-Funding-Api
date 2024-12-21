@@ -19,5 +19,10 @@ namespace Fun_Funding.Application.ViewModel.TransactionDTO
         public Guid? CommissionFeeId { get; set; }
 
         public Guid? ProjectMilestoneId { get; set; }
+        public string? MilestoneName { get; set; }
+        public decimal? DisbursementPercentage { get; set; }
+        public int MilestoneType { get; set; }
+
+        public decimal? CommissionFee { get; set; }
     }
 }
