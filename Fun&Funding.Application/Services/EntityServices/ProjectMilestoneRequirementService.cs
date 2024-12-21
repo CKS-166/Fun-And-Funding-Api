@@ -35,7 +35,7 @@ namespace Fun_Funding.Application.Services.EntityServices
             _milestoneService = milestoneService;
 
         }
-        public async Task<ResultDTO<ProjectMilestoneResponse>> CreateMilestoneRequirements(List<ProjectMilestoneRequirementRequest> request, string? issueLog )
+        public async Task<ResultDTO<ProjectMilestoneResponse>> CreateMilestoneRequirements(List<ProjectMilestoneRequirementRequest> request, string? issueLog, MilestoneType type )
         {
             try
             {
@@ -55,11 +55,15 @@ namespace Fun_Funding.Application.Services.EntityServices
                     FundingProject project = _unitOfWork.FundingProjectRepository
                     .GetQueryable().Include(p => p.ProjectMilestones)
                     .ThenInclude(pm => pm.Milestone).FirstOrDefault(p => p.Id == projectMilestone.FundingProjectId);
-                    var checkValidateMilstone = _projectMilestoneService.CanCreateProjectMilestone(project, projectMilestone.Milestone.MilestoneOrder, projectMilestone.CreatedDate);
-                    if (checkValidateMilstone != null)
+                    if (type == MilestoneType.Disbursement)
                     {
-                        throw new ExceptionError((int)HttpStatusCode.BadRequest, checkValidateMilstone);
+                        var checkValidateMilstone = _projectMilestoneService.CanCreateProjectMilestone(project, projectMilestone.Milestone.MilestoneOrder, projectMilestone.CreatedDate);
+                        if (checkValidateMilstone != null)
+                        {
+                            throw new ExceptionError((int)HttpStatusCode.BadRequest, checkValidateMilstone);
+                        }
                     }
+                    
                     if (projectMilestone.Status != ProjectMilestoneStatus.Processing)
                     {
                         throw new ExceptionError((int)HttpStatusCode.BadRequest, "Milestone for this project is not approved yet");
@@ -115,7 +119,7 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
-        public async Task<ResultDTO<string>> UpdateMilestoneRequirements(List<ProjectMilestoneRequirementUpdateRequest> request, string? issueLog)
+        public async Task<ResultDTO<string>> UpdateMilestoneRequirements(List<ProjectMilestoneRequirementUpdateRequest> request, string? issueLog, MilestoneType type)
         {
             try
             {
@@ -136,11 +140,15 @@ namespace Fun_Funding.Application.Services.EntityServices
                     FundingProject project = _unitOfWork.FundingProjectRepository
                     .GetQueryable().Include(p => p.ProjectMilestones)
                     .ThenInclude(pm => pm.Milestone).FirstOrDefault(p => p.Id == projectMilestone.FundingProjectId);
-                    var checkValidateMilstone = _projectMilestoneService.CanCreateProjectMilestone(project, projectMilestone.Milestone.MilestoneOrder, projectMilestone.CreatedDate);
-                    if (checkValidateMilstone != null)
+                    if (type == MilestoneType.Disbursement)
                     {
-                        throw new ExceptionError((int)HttpStatusCode.BadRequest, checkValidateMilstone);
+                        var checkValidateMilstone = _projectMilestoneService.CanCreateProjectMilestone(project, projectMilestone.Milestone.MilestoneOrder, projectMilestone.CreatedDate);
+                        if (checkValidateMilstone != null)
+                        {
+                            throw new ExceptionError((int)HttpStatusCode.BadRequest, checkValidateMilstone);
+                        }
                     }
+                   
                     if (projectMilestone.Status != ProjectMilestoneStatus.Processing && projectMilestone.Status != ProjectMilestoneStatus.Warning)
                     {
                         throw new ExceptionError((int)HttpStatusCode.BadRequest, "Milestone for this project is not approved yet");

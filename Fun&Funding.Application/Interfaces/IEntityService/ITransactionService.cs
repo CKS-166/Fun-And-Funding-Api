@@ -23,7 +23,7 @@ namespace Fun_Funding.Application.IService
             Guid? orderDetailId = null
         );
 
-        Task<ResultDTO<List<TransactionInfoResponse>>> GetAllTransactionsByProjectId(Guid? projectId );
+        Task<ResultDTO<List<TransactionInfoResponse>>> GetAllTransactionsByProjectId(Guid? projectId, TransactionFilter filter = TransactionFilter.All);
         Task<ResultDTO<IEnumerable<object>>> GetAllTransactionsByMarketId(Guid? projectId);
     }
 }

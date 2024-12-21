@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Fun_Funding.Application.ExceptionHandler;
 using Fun_Funding.Application.Interfaces.IEntityService;
+using Fun_Funding.Application.Interfaces.IExternalServices;
 using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.NotificationDTO;
@@ -8,6 +9,7 @@ using Fun_Funding.Application.ViewModel.PackageBackerDTO;
 using Fun_Funding.Domain.Entity;
 using Fun_Funding.Domain.Entity.NoSqlEntities;
 using Fun_Funding.Domain.Enum;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -25,14 +27,16 @@ namespace Fun_Funding.Application.Services.EntityServices
         private IMapper _mapper;
         private readonly IUserService _userService;
         private readonly INotificationService _notificationService;
+        private readonly IAzureService _azureService;
         public PackageBackerService(IUnitOfWork unitOfWork, ITransactionService transactionService, IUserService userService, IMapper mapper,
-            INotificationService notificationService)
+            INotificationService notificationService, IAzureService azureService)
         {
             _unitOfWork = unitOfWork;
             _transactionService = transactionService;
             _userService = userService;
             _mapper = mapper;
             _notificationService = notificationService;
+            _azureService = azureService;
         }
         public async Task<ResultDTO<PackageBackerResponse>> DonateFundingProject(PackageBackerRequest packageBackerRequest)
         {
@@ -186,6 +190,7 @@ namespace Fun_Funding.Application.Services.EntityServices
         public async Task<ResultDTO<List<PackageBackerGroupedResponse>>> GetGroupedPackageBackersAsync(Guid projectId)
         {
             var packageBackers =  _unitOfWork.PackageBackerRepository.GetQueryable()
+                .Include(x => x.EvidenceImages)
             .Where(pb => pb.Package.Project.Id == projectId) // Filter by project ID
             .GroupBy(pb => pb.CreatedDate.Date) // Group by CreatedDate (date only)
             .Select(group => new PackageBackerGroupedResponse
@@ -226,27 +231,38 @@ namespace Fun_Funding.Application.Services.EntityServices
         {
             try
             {
-            var groupedResult = _unitOfWork.PackageBackerRepository.GetQueryable()
-            .Include(pb => pb.User)
+                var groupedResult = await _unitOfWork.PackageBackerRepository.GetQueryable()
+                    .Include(pb => pb.User)
+                    .Include(pb => pb.Package)
+                        .ThenInclude(p => p.RewardItems)
+                    .Include(pb => pb.EvidenceImages)
+                    .Where(pb => pb.Package.Project.Id == projectId)
+                    .Select(pb => new
+                    {
+                        pb.User.UserName,
+                        pb.Id,
+                        pb.Package.Name,
+                        pb.User.Address,
+                        pb.User.Email,
+                        pb.DonateAmount,
+                        pb.CreatedDate,
+                        EvidenceImages =  pb.EvidenceImages.Select(ei => ei.Url).ToList() ,
+                        RewardItems = pb.Package.RewardItems.Select(ri => new 
+                        {
+                            ri.Name,
+                            ri.ImageUrl,
+                            ri.Description,
+                            ri.Quantity
+                        }).ToList()
+                    })
+                    .OrderByDescending(pb => pb.CreatedDate)
+                    .ToListAsync(); // Use async to avoid blocking
 
-            .Where(pb => pb.Package.Project.Id == projectId)
-            .Select(g => new 
-            {
-                g.User.UserName,
-                g.Package.Name,
-                g.User.Address,
-                g.User.Email,
-                g.DonateAmount,
-                g.CreatedDate
-            })
-            .OrderByDescending(g => g.CreatedDate)
-            .ToList();
-            return ResultDTO< IEnumerable<object>>.Success(groupedResult);
-
-
+                return ResultDTO<IEnumerable<object>>.Success(groupedResult);
             }
-            catch (Exception ex) {
-                throw new Exception(ex.Message);
+            catch (Exception ex)
+            {
+                throw new Exception($"Error fetching project backers: {ex.Message}");
             }
         }
 
@@ -299,6 +315,42 @@ namespace Fun_Funding.Application.Services.EntityServices
 
                 return ResultDTO<IEnumerable<object>>.Success(response, "Get Donations Successfully");
 
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        public async Task<ResultDTO<object>> UploadEvidence(Guid id, List<IFormFile> formFiles)
+        {
+            try
+            {
+                PackageBacker packageBacker = _unitOfWork.PackageBackerRepository.GetQueryable().
+                    Include(packageBacker => packageBacker.EvidenceImages).
+                    FirstOrDefault(p => p.Id == id);
+                if (packageBacker == null) {
+                    return ResultDTO<object>.Fail("No backers found");
+                }
+                foreach (var file in formFiles)
+                {
+                    var url = _azureService.UploadUrlSingleFiles(file);
+                    var evidenceImage = new EvidenceImage
+                    {
+                        Url = url.Result,
+                        CreatedDate = DateTime.Now
+                    };
+                    packageBacker.EvidenceImages.Add(evidenceImage);
+
+                }
+                
+                _unitOfWork.Commit();
+                var response = new
+                {
+                    packageBacker.Id,
+                    packageBacker.EvidenceImages,
+                };
+                return ResultDTO<object>.Success(response);
             }
             catch (Exception ex)
             {

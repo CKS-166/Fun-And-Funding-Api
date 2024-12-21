@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Fun_Funding.Application.ViewModel.RequirementDTO;
+using Fun_Funding.Domain.Enum;
 
 namespace Fun_Funding.Application.ViewModel.MilestoneDTO
 {
@@ -22,7 +23,7 @@ namespace Fun_Funding.Application.ViewModel.MilestoneDTO
         [Column(TypeName = "decimal(18, 2)")]
         public decimal DisbursementPercentage { get; set; }
         public DateTime UpdateDate { get; set; }
-
+        public MilestoneType MilestoneType { get; set; }
         public List<RequirementResponse> Requirements { get; set; }
     }
 }

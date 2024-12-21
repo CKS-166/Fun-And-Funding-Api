@@ -56,7 +56,7 @@ namespace Fun_Funding.Application.Services.EntityServices
 
         }
 
-        public async Task<ResultDTO<List<TransactionInfoResponse>>> GetAllTransactionsByProjectId(Guid? projectId)
+        public async Task<ResultDTO<List<TransactionInfoResponse>>> GetAllTransactionsByProjectId(Guid? projectId, TransactionFilter filter = TransactionFilter.All)
         {
             try
             {
@@ -66,8 +66,9 @@ namespace Fun_Funding.Application.Services.EntityServices
                 }
 
                 // Get all transactions related to the specific project ID
-                var transactions = await _unitOfWork.TransactionRepository.GetQueryable()
+                var transactions = filter == TransactionFilter.All ? await _unitOfWork.TransactionRepository.GetQueryable()
                     .Include(t => t.Wallet)
+                    .Include(t => t.ProjectMilestone.Milestone)
                     .Include(t => t.CommissionFee)
                     .Where(t =>
                         (t.PackageId != null &&
@@ -82,6 +83,17 @@ namespace Fun_Funding.Application.Services.EntityServices
                          _unitOfWork.WalletRepository.GetQueryable()
                              .Any(w => w.Id == t.WalletId && w.FundingProject.Id == projectId)) // Check Wallet related to the project
                     ).OrderByDescending(t => t.CreatedDate)
+                    .ToListAsync() : await _unitOfWork.TransactionRepository.GetQueryable()
+                    .Include(t => t.Wallet)
+                    .Include(t => t.ProjectMilestone.Milestone)
+                    .Include(t => t.CommissionFee)
+                    .Where(t =>
+                        
+                        (t.ProjectMilestoneId != null &&
+                         _unitOfWork.ProjectMilestoneRepository.GetQueryable()
+                             .Any(pm => pm.Id == t.ProjectMilestoneId && pm.FundingProjectId == projectId)) // Check Milestone related to the project
+                        )
+                    .OrderByDescending(t => t.CreatedDate)
                     .ToListAsync();
 
                 if (transactions == null || transactions.Count == 0)
@@ -100,7 +112,11 @@ namespace Fun_Funding.Application.Services.EntityServices
                     PackageId = transaction.PackageId,
                     OrderId = transaction.OrderId,
                     CommissionFeeId = transaction.CommissionFeeId,
-                    ProjectMilestoneId = transaction.ProjectMilestoneId
+                    ProjectMilestoneId = transaction.ProjectMilestoneId,
+                    MilestoneName = transaction.ProjectMilestone?.Milestone.MilestoneName,
+                    DisbursementPercentage = transaction.ProjectMilestone?.Milestone.DisbursementPercentage / 2,
+                    CommissionFee = transaction.CommissionFee?.Rate,
+
                 }).ToList();
 
                 return ResultDTO<List<TransactionInfoResponse>>.Success(response);

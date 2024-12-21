@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Fun_Funding.Domain.Enum;
 
 namespace Fun_Funding.Domain.Entity
 {
@@ -18,8 +19,9 @@ namespace Fun_Funding.Domain.Entity
         [Column(TypeName = "decimal(18, 2)")]
         public decimal DisbursementPercentage { get; set; }
         public DateTime UpdateDate { get; set; }
+        public MilestoneType? MilestoneType { get; set; }
         public int Version { get; set; }
-
+    
         public virtual ICollection<ProjectMilestone> ProjectMilestones { get; set; }   
         public virtual ICollection<Requirement> Requirements { get; set; }
     }

@@ -1,5 +1,6 @@
 ﻿using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel.ProjectMilestoneRequirementDTO;
+using Fun_Funding.Domain.Enum;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Fun_Funding.Api.Controllers
@@ -15,17 +16,17 @@ namespace Fun_Funding.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateMilestoneRequirements([FromForm] List<ProjectMilestoneRequirementRequest> request, string? issueLog)
+        public async Task<IActionResult> CreateMilestoneRequirements([FromForm] List<ProjectMilestoneRequirementRequest> request, string? issueLog, MilestoneType type)
         {
-            var result = await _projectMilestoneRequirementService.CreateMilestoneRequirements(request, issueLog);
+            var result = await _projectMilestoneRequirementService.CreateMilestoneRequirements(request, issueLog, type);
 
             return Ok(result);
         }
 
         [HttpPut]
-        public async Task<IActionResult> UpdateMilestoneRequirements([FromForm] List<ProjectMilestoneRequirementUpdateRequest> request, [FromForm] string? issueLog)
+        public async Task<IActionResult> UpdateMilestoneRequirements([FromForm] List<ProjectMilestoneRequirementUpdateRequest> request, [FromForm] string? issueLog,MilestoneType type)
         {
-            var result = await _projectMilestoneRequirementService.UpdateMilestoneRequirements(request,issueLog);
+            var result = await _projectMilestoneRequirementService.UpdateMilestoneRequirements(request,issueLog, type);
             return Ok(result);
         }
     }

@@ -606,6 +606,10 @@ namespace Fun_Funding.Application.Services.EntityServices
                     //change status from pending
                     if (project.Status == ProjectStatus.Pending && pendingChangelist.Contains(status))
                     {
+                        if(status == ProjectStatus.Approved)
+                        {
+                            await CreateInitFundingMilestone(project.Id);
+                        }
                         project.Status = status;
                         isChanged = true;
                     }
@@ -675,6 +679,50 @@ namespace Fun_Funding.Application.Services.EntityServices
                 {
                     throw new ExceptionHandler.ExceptionError((int)HttpStatusCode.NotFound, "Funding Project Not Found.");
                 }
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
+
+        public async Task CreateInitFundingMilestone(Guid projectId)
+        {
+            try
+            {
+                // Fetch all funding milestones from the database
+                var fundingMilestones = await _unitOfWork.MilestoneRepository.GetQueryable()
+                    .Where(m => m.MilestoneType == MilestoneType.Funding)
+                    .ToListAsync();
+
+                if (fundingMilestones == null || !fundingMilestones.Any())
+                {
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "No funding milestones found.");
+                }
+
+                // Create ProjectMilestone entries for each funding milestone
+                var projectMilestones = fundingMilestones.Select(fundingMilestone => new ProjectMilestone
+                {
+                    Id = Guid.NewGuid(),
+                    MilestoneId = fundingMilestone.Id,
+                    FundingProjectId = projectId,
+                    Title = fundingMilestone.MilestoneName,
+                    Introduction = fundingMilestone.Description,
+                    Status = ProjectMilestoneStatus.Processing,
+                    TotalAmount = null, // Initial total amount
+                    EndDate = DateTime.UtcNow.AddDays(fundingMilestone.Duration),
+                    IssueLog = null
+                }).ToList();
+
+                // Add project milestones to the database in a batch
+                await _unitOfWork.ProjectMilestoneRepository.AddRangeAsync(projectMilestones);
+
+                // Commit the transaction
+                await _unitOfWork.CommitAsync();
             }
             catch (Exception ex)
             {
