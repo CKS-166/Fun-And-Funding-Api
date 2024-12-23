@@ -25,6 +25,8 @@ namespace Fun_Funding.Application.IService
         public Task<ResultDTO<List<ProjectMilestoneResponse>>> GetProjectMilestonesByProjectAndMilestone(
             Guid? fundingProjectId,
             Guid? milestoneId);
+
+        Task<ResultDTO<object>> WithdrawMilestoneProcessing(Guid id);
     }
 }
 

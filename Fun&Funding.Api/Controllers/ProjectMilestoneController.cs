@@ -64,6 +64,12 @@ namespace Fun_Funding.Api.Controllers
             return Ok(res);
         }
 
+        [HttpPost("withdraw-process")]
+        public async Task<IActionResult> WithdrawMilestone(Guid id)
+        {
+            var result = _projectMilestoneService.WithdrawMilestoneProcessing(id);
+            return Ok(result);
+        }
 
     }
 }

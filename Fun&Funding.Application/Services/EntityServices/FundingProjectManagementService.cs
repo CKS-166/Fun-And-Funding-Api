@@ -703,6 +703,13 @@ namespace Fun_Funding.Application.Services.EntityServices
                 {
                     throw new ExceptionError((int)HttpStatusCode.NotFound, "No funding milestones found.");
                 }
+                var project = _unitOfWork.FundingProjectRepository.GetQueryable().
+                    Select(p => new
+                    {
+                        p.Id,
+                        p.CreatedDate,
+                        p.EndDate
+                    }).FirstOrDefault(p => p.Id == projectId);
 
                 // Create ProjectMilestone entries for each funding milestone
                 var projectMilestones = fundingMilestones.Select(fundingMilestone => new ProjectMilestone
@@ -714,7 +721,8 @@ namespace Fun_Funding.Application.Services.EntityServices
                     Introduction = fundingMilestone.Description,
                     Status = ProjectMilestoneStatus.Processing,
                     TotalAmount = null, // Initial total amount
-                    EndDate = DateTime.UtcNow.AddDays(fundingMilestone.Duration),
+                    CreatedDate = project.CreatedDate,
+                    EndDate = project.EndDate,
                     IssueLog = null
                 }).ToList();
 
