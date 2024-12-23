@@ -857,5 +857,49 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
+        public async Task<ResultDTO<object>> WithdrawMilestoneProcessing(Guid id)
+        {
+            try
+            {
+                var projectMilestone = _unitOfWork.ProjectMilestoneRepository.GetQueryable()
+                    .Include(pm => pm.FundingProject.Wallet)
+                    .Include(pm => pm.Milestone)
+                    .FirstOrDefault(pm => pm.Id == id);
+                if (projectMilestone == null)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "This milestone not found");
+                }
+                if (projectMilestone.Milestone.MilestoneType != MilestoneType.Funding)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "Withdraw must be requested for funding process");
+                }
+                if (projectMilestone.FundingProject.Status != ProjectStatus.Processing)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "Withdraw must be requested while project is processing");
+                }
+                var transferAmount = (projectMilestone.FundingProject.Balance * (projectMilestone.Milestone.DisbursementPercentage / 2));
+                var withdrawRequest = new WithdrawRequest
+                {
+                    Amount = transferAmount,
+                    WalletId = projectMilestone.FundingProject.Wallet.Id,
+                    Status = WithdrawRequestStatus.Pending,
+                    CreatedDate = DateTime.Now
+                };
+                _unitOfWork.WithdrawRequestRepository.Add(withdrawRequest);
+                projectMilestone.FundingProject.Wallet.Balance -= transferAmount;
+                _unitOfWork.Commit();
+
+                return ResultDTO<object>.Success(projectMilestone);
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
     }
 }
