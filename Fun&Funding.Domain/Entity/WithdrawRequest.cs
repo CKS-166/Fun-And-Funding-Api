@@ -20,5 +20,7 @@ namespace Fun_Funding.Domain.Entity
         public DateTime ExpiredDate { get; set; }   
         public Guid? WalletId { get; set; }
         public Wallet? Wallet { get; set; }
+
+        public string? Note { get; set; }
     }
 }

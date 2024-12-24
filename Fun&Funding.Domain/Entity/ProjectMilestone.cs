@@ -26,5 +26,7 @@ namespace Fun_Funding.Domain.Entity
         public virtual ICollection<Transaction> Transactions { get; set; }
         public virtual ICollection<ProjectMilestoneBacker> ProjectMilestoneBackers { get; set; }
         public virtual ICollection<ProjectMilestoneRequirement> ProjectMilestoneRequirements { get; set; }
+
+        public string? Note { get; set; }
     }
 }
