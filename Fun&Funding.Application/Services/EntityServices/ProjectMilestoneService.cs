@@ -883,7 +883,8 @@ namespace Fun_Funding.Application.Services.EntityServices
                     Amount = transferAmount,
                     WalletId = projectMilestone.FundingProject.Wallet.Id,
                     Status = WithdrawRequestStatus.Pending,
-                    CreatedDate = DateTime.Now
+                    CreatedDate = DateTime.Now,
+                    ExpiredDate = DateTime.Now.AddDays(7)
                 };
                 _unitOfWork.WithdrawRequestRepository.Add(withdrawRequest);
                 projectMilestone.FundingProject.Wallet.Balance -= transferAmount;
