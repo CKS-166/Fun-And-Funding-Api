@@ -79,5 +79,12 @@ namespace Fun_Funding.Api.Controllers
             var result = await _packageBackerService.UploadEvidence(id, files);
             return Ok(result);
         }
+
+        [HttpGet("project-backers-contact")]
+        public async Task<IActionResult> GetBackersContact([FromQuery] Guid projectId)
+        {
+            var result = await _packageBackerService.GetGroupDonators(projectId);
+            return Ok(result);
+        }
     }
 }
