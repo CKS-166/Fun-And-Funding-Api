@@ -22,5 +22,6 @@ namespace Fun_Funding.Application.IService
         Task<ResultDTO<IEnumerable<object>>> GetBackerDonations(Guid fundingProjectId);
 
         Task<ResultDTO<object>> UploadEvidence(Guid id, List<IFormFile> formFiles);
+        Task<ResultDTO<IEnumerable<object>>> GetGroupDonators(Guid projectId);
     }
 }

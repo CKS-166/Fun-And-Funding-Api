@@ -877,7 +877,11 @@ namespace Fun_Funding.Application.Services.EntityServices
                 {
                     throw new ExceptionError((int)HttpStatusCode.BadRequest, "Withdraw must be requested while project is processing");
                 }
-                var transferAmount = (projectMilestone.FundingProject.Balance * (projectMilestone.Milestone.DisbursementPercentage / 2));
+                if (projectMilestone.FundingProject.Balance < (projectMilestone.Milestone.DisbursementPercentage * projectMilestone.FundingProject.Target))
+                {
+                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "Donation progress has not reached the requirement");
+                }
+                var transferAmount = (projectMilestone.FundingProject.Target * (projectMilestone.Milestone.DisbursementPercentage / 2));
                 var withdrawRequest = new WithdrawRequest
                 {
                     Amount = transferAmount,
