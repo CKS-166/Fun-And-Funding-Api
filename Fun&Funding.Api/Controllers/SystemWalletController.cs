@@ -1,6 +1,6 @@
 ﻿using Fun_Funding.Application.Interfaces.IEntityService;
-using Fun_Funding.Application.ViewModel;
-using Microsoft.AspNetCore.Http;
+using Fun_Funding.Domain.Constrain;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Fun_Funding.Api.Controllers
@@ -33,6 +33,38 @@ namespace Fun_Funding.Api.Controllers
         public async Task<IActionResult> GetWallet()
         {
             var res = _systemWalletService.GetSystemWallet();
+            return Ok(res);
+        }
+
+        [Authorize(Roles = Role.Admin)]
+        [HttpGet("/api/dashboard/metrics")]
+        public async Task<IActionResult> GetDashboardMetrics()
+        {
+            var res = await _systemWalletService.GetDashboardMetrics();
+            return Ok(res);
+        }
+
+        [Authorize(Roles = Role.Admin)]
+        [HttpGet("/api/dashboard/users")]
+        public async Task<IActionResult> GetDashboardUsers()
+        {
+            var res = await _systemWalletService.GetDashboardUsers();
+            return Ok(res);
+        }
+
+        [Authorize(Roles = Role.Admin)]
+        [HttpGet("/api/dashboard/funding-projects")]
+        public async Task<IActionResult> GetDashboardFundingProjects()
+        {
+            var res = await _systemWalletService.GetDashboardFundingProjects();
+            return Ok(res);
+        }
+
+        [Authorize(Roles = Role.Admin)]
+        [HttpGet("/api/dashboard/marketplace-projects")]
+        public async Task<IActionResult> GetDashboardMarketplaceProjects()
+        {
+            var res = await _systemWalletService.GetDashboardMarketplaceProjects();
             return Ok(res);
         }
     }
