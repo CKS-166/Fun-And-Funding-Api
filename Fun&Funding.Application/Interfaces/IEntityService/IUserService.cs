@@ -1,10 +1,5 @@
-﻿using Fun_Funding.Application.ViewModel.UserDTO;
-using Fun_Funding.Application.ViewModel;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Fun_Funding.Application.ViewModel;
+using Fun_Funding.Application.ViewModel.UserDTO;
 using Fun_Funding.Domain.Entity;
 
 namespace Fun_Funding.Application.IService
@@ -24,5 +19,6 @@ namespace Fun_Funding.Application.IService
         Task<ResultDTO<decimal>> CountPlatformUsers();
         Task<ResultDTO<string>> GetUserRole(Guid id);
         Task<ResultDTO<UserInfoResponse>> CreateUser(UserCreateRequest request);
+        Task<List<User>> GetUsersByRoleAsync(string roleName);
     }
 }

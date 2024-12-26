@@ -1,27 +1,18 @@
 ﻿using AutoMapper;
+using Fun_Funding.Application.ExceptionHandler;
+using Fun_Funding.Application.Interfaces.IExternalServices;
 using Fun_Funding.Application.IService;
-using Fun_Funding.Application.ViewModel.UserDTO;
 using Fun_Funding.Application.ViewModel;
+using Fun_Funding.Application.ViewModel.UserDTO;
+using Fun_Funding.Domain.Constrain;
 using Fun_Funding.Domain.Entity;
+using Fun_Funding.Domain.Enum;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
-using Fun_Funding.Application.ExceptionHandler;
-using System.Net;
-using Fun_Funding.Domain.Enum;
-using Fun_Funding.Application.ViewModel.CategoryDTO;
 using System.Linq.Expressions;
-using Fun_Funding.Application.ViewModel.FundingProjectDTO;
-using Fun_Funding.Domain.Constrain;
-using Fun_Funding.Application.Interfaces.IExternalServices;
-using Fun_Funding.Application.Services.ExternalServices;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Net;
+using System.Security.Claims;
 
 namespace Fun_Funding.Application.Services.EntityServices
 {
@@ -149,7 +140,7 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
-        private async Task<List<User>> GetUsersByRoleAsync(string roleName)
+        public async Task<List<User>> GetUsersByRoleAsync(string roleName)
         {
             try
             {
@@ -662,7 +653,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                     EmailConfirmed = true,
                 };
 
-                if(request.File != null)
+                if (request.File != null)
                 {
                     if (request.File.URL != null && request.File.URL.Length > 0)
                     {
