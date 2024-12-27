@@ -75,5 +75,13 @@ namespace Fun_Funding.Api.Controllers
             var res = await _systemWalletService.GetDashboardMilestones();
             return Ok(res);
         }
+
+        [Authorize(Roles = Role.Admin)]
+        [HttpGet("/api/dashboard/categories")]
+        public async Task<IActionResult> GetDashboardCategories()
+        {
+            var res = await _systemWalletService.GetDashboardCategories();
+            return Ok(res);
+        }
     }
 }

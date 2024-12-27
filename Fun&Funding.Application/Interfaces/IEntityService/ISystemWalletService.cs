@@ -13,5 +13,6 @@ namespace Fun_Funding.Application.Interfaces.IEntityService
         Task<ResultDTO<object>> GetDashboardFundingProjects();
         Task<ResultDTO<object>> GetDashboardMarketplaceProjects();
         Task<ResultDTO<object>> GetDashboardMilestones();
+        Task<ResultDTO<object>> GetDashboardCategories();
     }
 }
