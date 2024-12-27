@@ -144,9 +144,46 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
-        public Task<ResultDTO<object>> GetDashboardMilestones()
+        public async Task<ResultDTO<object>> GetDashboardMilestones()
         {
-            throw new NotImplementedException();
+            try
+            {
+                var milestoneOrders = await _unitOfWork.MilestoneRepository
+                    .GetQueryable()
+                    .AsNoTracking()
+                    .GroupBy(m => m.MilestoneOrder)
+                    .Select(m => m.Key)
+                    .ToListAsync();
+
+                var response = new List<object>();
+
+                foreach (var order in milestoneOrders)
+                {
+                    Expression<Func<ProjectMilestone, bool>> filter = p => p.Milestone.MilestoneOrder == order;
+
+                    var projectMilestones = await _unitOfWork.ProjectMilestoneRepository
+                        .GetQueryable()
+                        .AsNoTracking()
+                        .Where(filter)
+                        .ToListAsync();
+
+                    response.Add(new
+                    {
+                        MilestoneOrder = order,
+                        Count = projectMilestones.Count()
+                    });
+                }
+
+                return ResultDTO<object>.Success(response);
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
         }
 
         public async Task<ResultDTO<object>> GetDashboardUsers()
