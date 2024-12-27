@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Fun_Funding.Infrastructure.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20241221092204_Init")]
-    partial class Init
+    [Migration("20241227134736_Migrations")]
+    partial class Migrations
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -348,6 +348,9 @@ namespace Fun_Funding.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18, 2)");
 
@@ -394,7 +397,7 @@ namespace Fun_Funding.Infrastructure.Migrations
                     b.Property<int>("MilestoneOrder")
                         .HasColumnType("int");
 
-                    b.Property<int>("MilestoneType")
+                    b.Property<int?>("MilestoneType")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("UpdateDate")
@@ -623,6 +626,9 @@ namespace Fun_Funding.Infrastructure.Migrations
 
                     b.Property<Guid>("MilestoneId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -1114,6 +1120,9 @@ namespace Fun_Funding.Infrastructure.Migrations
 
                     b.Property<bool>("IsFinished")
                         .HasColumnType("bit");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("RequestType")
                         .HasColumnType("int");

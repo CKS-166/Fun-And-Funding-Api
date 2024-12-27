@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Fun_Funding.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class Init : Migration
+    public partial class Migrations : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -117,7 +117,7 @@ namespace Fun_Funding.Infrastructure.Migrations
                     MilestoneOrder = table.Column<int>(type: "int", nullable: false),
                     DisbursementPercentage = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     UpdateDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    MilestoneType = table.Column<int>(type: "int", nullable: false),
+                    MilestoneType = table.Column<int>(type: "int", nullable: true),
                     Version = table.Column<int>(type: "int", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
@@ -406,6 +406,7 @@ namespace Fun_Funding.Infrastructure.Migrations
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Note = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     FundingProjectId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -464,6 +465,7 @@ namespace Fun_Funding.Infrastructure.Migrations
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Introduction = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
+                    Note = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
@@ -804,6 +806,7 @@ namespace Fun_Funding.Infrastructure.Migrations
                     Status = table.Column<int>(type: "int", nullable: false),
                     ExpiredDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     WalletId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Note = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),
                     DeletedAt = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)

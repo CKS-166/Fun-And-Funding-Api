@@ -40,6 +40,45 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
+        public async Task<ResultDTO<object>> GetDashboardCategories()
+        {
+            try
+            {
+                var categories = await _unitOfWork.CategoryRepository.GetAllAsync();
+
+                var totalProjects = _unitOfWork.FundingProjectRepository.GetAll().Count();
+
+                var response = new List<object>();
+
+                foreach (var category in categories)
+                {
+                    var fundingProjects = await _unitOfWork.FundingProjectRepository
+                        .GetQueryable()
+                        .AsNoTracking()
+                        .Include(p => p.Categories)
+                        .Where(p => p.Categories.Any(pc => pc.Name.Equals(category.Name)))
+                        .ToListAsync();
+
+                    response.Add(new
+                    {
+                        CategoryName = category.Name,
+                        PercentageUsed = ((double)fundingProjects.Count / totalProjects) * 100,
+                        ProjectCount = fundingProjects.Count
+                    });
+                }
+
+                return ResultDTO<object>.Success(response);
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
+
         public async Task<ResultDTO<object>> GetDashboardFundingProjects()
         {
             try
