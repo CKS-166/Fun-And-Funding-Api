@@ -1,7 +1,9 @@
-﻿using Fun_Funding.Application.ExceptionHandler;
+﻿using AutoMapper;
+using Fun_Funding.Application.ExceptionHandler;
 using Fun_Funding.Application.Interfaces.IEntityService;
 using Fun_Funding.Application.IService;
 using Fun_Funding.Application.ViewModel;
+using Fun_Funding.Application.ViewModel.TransactionDTO;
 using Fun_Funding.Domain.Entity;
 using Fun_Funding.Domain.Enum;
 using Microsoft.EntityFrameworkCore;
@@ -14,10 +16,12 @@ namespace Fun_Funding.Application.Services.EntityServices
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IUserService _userService;
-        public SystemWalletService(IUnitOfWork unitOfWork, IUserService userService)
+        private readonly IMapper _mapper;
+        public SystemWalletService(IUnitOfWork unitOfWork, IUserService userService, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
             _userService = userService;
+            _mapper = mapper;
         }
 
         public async Task<ResultDTO<SystemWallet>> CreateWallet()
@@ -214,6 +218,46 @@ namespace Fun_Funding.Application.Services.EntityServices
                 }
 
                 return ResultDTO<object>.Success(response);
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
+
+        public async Task<ResultDTO<PaginatedResponse<TransactionInfoResponse>>> GetDashboardTransactions(ListRequest request)
+        {
+            try
+            {
+                Expression<Func<Transaction, bool>> filter = null;
+                Expression<Func<Transaction, object>> orderBy = t => t.CreatedDate;
+
+                var list = await _unitOfWork.TransactionRepository.GetAllAsync(
+                    filter: filter,
+                    orderBy: orderBy,
+                    isAscending: request.IsAscending.Value,
+                    pageIndex: request.PageIndex,
+                    pageSize: request.PageSize);
+
+                var totalItems = _unitOfWork.TransactionRepository.GetAll().Count();
+                var totalPages = (int)Math.Ceiling((double)totalItems / (int)request.PageSize);
+
+                IEnumerable<TransactionInfoResponse> transactions = _mapper.Map<IEnumerable<TransactionInfoResponse>>(list);
+
+                PaginatedResponse<TransactionInfoResponse> response = new PaginatedResponse<TransactionInfoResponse>
+                {
+                    PageSize = request.PageSize.Value,
+                    PageIndex = request.PageIndex.Value,
+                    TotalItems = totalItems,
+                    TotalPages = totalPages,
+                    Items = transactions
+                };
+
+                return ResultDTO<PaginatedResponse<TransactionInfoResponse>>.Success(response);
             }
             catch (Exception ex)
             {
