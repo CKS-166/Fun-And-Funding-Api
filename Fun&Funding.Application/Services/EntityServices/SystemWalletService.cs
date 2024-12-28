@@ -71,6 +71,10 @@ namespace Fun_Funding.Application.Services.EntityServices
                     });
                 }
 
+                response = response
+                    .OrderByDescending(r => (double?)r.GetType().GetProperty("PercentageUsed")?.GetValue(r) ?? 0)
+                    .ToList();
+
                 return ResultDTO<object>.Success(response);
             }
             catch (Exception ex)
