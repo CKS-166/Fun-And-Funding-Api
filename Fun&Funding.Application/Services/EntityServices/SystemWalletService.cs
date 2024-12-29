@@ -168,9 +168,16 @@ namespace Fun_Funding.Application.Services.EntityServices
         {
             try
             {
-                var users = await _unitOfWork.UserRepository.GetQueryable().AsNoTracking().ToListAsync();
-                var fundingProjects = await _unitOfWork.FundingProjectRepository.GetAllAsync();
-                var marketplaceProjects = await _unitOfWork.MarketplaceRepository.GetAllAsync();
+                var firstDayOfMonth = new DateTime(DateTime.Now.Year, DateTime.UtcNow.Month, 1);
+
+                var filterFunding = new List<Func<IQueryable<FundingProject>, IQueryable<FundingProject>>>();
+                filterFunding.Add(query => query.Where(c => c.CreatedDate >= firstDayOfMonth));
+                var filterMarketplace = new List<Func<IQueryable<MarketplaceProject>, IQueryable<MarketplaceProject>>>();
+                filterMarketplace.Add(query => query.Where(c => c.CreatedDate >= firstDayOfMonth));
+
+                var users = await _unitOfWork.UserRepository.GetQueryable().Where(u => u.CreatedDate >= firstDayOfMonth).AsNoTracking().ToListAsync();
+                var fundingProjects = await _unitOfWork.FundingProjectRepository.GetAllCombinedFilterAsync(filterFunding);
+                var marketplaceProjects = await _unitOfWork.MarketplaceRepository.GetAllCombinedFilterAsync(filterMarketplace);
 
                 var response = new
                 {
