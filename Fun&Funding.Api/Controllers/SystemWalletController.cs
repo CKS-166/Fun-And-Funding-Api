@@ -88,9 +88,9 @@ namespace Fun_Funding.Api.Controllers
 
         [Authorize(Roles = Role.Admin)]
         [HttpGet("/api/dashboard/transactions")]
-        public async Task<IActionResult> GetDashboardTransactions([FromQuery] ListRequest request, [FromQuery] TransactionTypes? type)
+        public async Task<IActionResult> GetDashboardTransactions([FromQuery] ListRequest request, [FromQuery] List<TransactionTypes>? types)
         {
-            var res = await _systemWalletService.GetDashboardTransactions(request, type);
+            var res = await _systemWalletService.GetDashboardTransactions(request, types);
             return Ok(res);
         }
     }

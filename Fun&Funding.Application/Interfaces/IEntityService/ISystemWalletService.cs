@@ -16,6 +16,7 @@ namespace Fun_Funding.Application.Interfaces.IEntityService
         Task<ResultDTO<object>> GetDashboardMarketplaceProjects();
         Task<ResultDTO<object>> GetDashboardMilestones();
         Task<ResultDTO<object>> GetDashboardCategories();
-        Task<ResultDTO<PaginatedResponse<TransactionInfoResponse>>> GetDashboardTransactions(ListRequest request, TransactionTypes? transactionType);
+        Task<ResultDTO<PaginatedResponse<TransactionInfoResponse>>>
+            GetDashboardTransactions(ListRequest request, List<TransactionTypes>? transactionType);
     }
 }

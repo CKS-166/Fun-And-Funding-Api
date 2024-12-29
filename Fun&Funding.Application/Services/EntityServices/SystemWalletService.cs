@@ -241,7 +241,7 @@ namespace Fun_Funding.Application.Services.EntityServices
         }
 
         public async Task<ResultDTO<PaginatedResponse<TransactionInfoResponse>>> GetDashboardTransactions
-            (ListRequest request, TransactionTypes? transactionType)
+            (ListRequest request, List<TransactionTypes>? transactionTypes)
         {
             try
             {
@@ -258,10 +258,10 @@ namespace Fun_Funding.Application.Services.EntityServices
                 }
 
                 // transaction type filter
-                if (transactionType.HasValue)
+                if (transactionTypes != null && transactionTypes.Any())
                 {
                     var typeFilter = (Expression<Func<Transaction, bool>>)(t =>
-                        t.TransactionType == transactionType.Value);
+                        transactionTypes.Contains(t.TransactionType)); // Match any type in the list
                     filter = CombineFilters(filter, typeFilter);
                 }
 
