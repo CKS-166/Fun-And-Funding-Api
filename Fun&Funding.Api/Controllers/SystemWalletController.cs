@@ -93,5 +93,13 @@ namespace Fun_Funding.Api.Controllers
             var res = await _systemWalletService.GetDashboardTransactions(request, types);
             return Ok(res);
         }
+
+        [Authorize(Roles = Role.Admin)]
+        [HttpGet("/api/dashboard/income")]
+        public IActionResult GetDashboardIncome()
+        {
+            var res = _systemWalletService.GetDashboardIncome();
+            return Ok(res);
+        }
     }
 }
