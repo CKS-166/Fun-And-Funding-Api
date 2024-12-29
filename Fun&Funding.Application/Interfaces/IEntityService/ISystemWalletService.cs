@@ -18,5 +18,6 @@ namespace Fun_Funding.Application.Interfaces.IEntityService
         Task<ResultDTO<object>> GetDashboardCategories();
         Task<ResultDTO<PaginatedResponse<TransactionInfoResponse>>>
             GetDashboardTransactions(ListRequest request, List<TransactionTypes>? transactionType);
+        ResultDTO<object> GetDashboardIncome();
     }
 }

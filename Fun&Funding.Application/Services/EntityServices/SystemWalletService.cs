@@ -127,6 +127,57 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
+        public ResultDTO<object> GetDashboardIncome()
+        {
+            try
+            {
+                DateTime today = DateTime.Now.Date;
+                DateTime startDate = today.AddMonths(-1);
+
+                // all dates in the range
+                var allDates = Enumerable.Range(0, (today - startDate).Days + 1)
+                                         .Select(offset => startDate.AddDays(offset)) // each date
+                                         .ToList();
+
+                Expression<Func<Transaction, bool>> filter = t =>
+                t.CreatedDate.Date >= startDate && t.CreatedDate.Date <= today
+                && t.TransactionType == TransactionTypes.CommissionFee;
+
+                var transactions = _unitOfWork.TransactionRepository.GetAll(filter);
+
+                var transactionSummary = transactions
+                    .GroupBy(t => t.CreatedDate.Date)
+                    .Select(t => new
+                    {
+                        Date = t.Key,
+                        TotalAmount = t.Sum(t => t.TotalAmount)
+                    });
+
+                var response = allDates.GroupJoin(
+                    transactionSummary,
+                    date => date,                       // key from all dates
+                    summary => summary.Date,            // key from transactions summary
+                    (date, summaries) => new
+                    {
+                        Date = date,
+                        TotalAmount = summaries.Any()   // no transactions -> set 0
+                            ? summaries.Sum(s => s.TotalAmount) : 0
+                    })
+                    .OrderBy(t => t.Date)
+                    .ToList();
+
+                return ResultDTO<object>.Success(response);
+            }
+            catch (Exception ex)
+            {
+                if (ex is ExceptionError exceptionError)
+                {
+                    throw exceptionError;
+                }
+                throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
+            }
+        }
+
         public async Task<ResultDTO<object>> GetDashboardMarketplaceProjects()
         {
             try
@@ -143,7 +194,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 {
                     Expression<Func<MarketplaceProject, bool>> filter = p => p.Status == status;
 
-                    var marketplaceProjects = await _unitOfWork.MarketplaceRepository.GetAllAsync(filter);
+                    var marketplaceProjects = await _unitOfWork.MarketplaceRepository.GetAllDeletedNoPaginationAsync(filter);
 
                     response.Add(new
                     {
