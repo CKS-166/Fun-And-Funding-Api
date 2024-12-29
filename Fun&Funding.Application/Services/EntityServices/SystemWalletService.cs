@@ -240,12 +240,30 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
-        public async Task<ResultDTO<PaginatedResponse<TransactionInfoResponse>>> GetDashboardTransactions(ListRequest request)
+        public async Task<ResultDTO<PaginatedResponse<TransactionInfoResponse>>> GetDashboardTransactions
+            (ListRequest request, TransactionTypes? transactionType)
         {
             try
             {
-                Expression<Func<Transaction, bool>> filter = null;
+                //default filter
+                Expression<Func<Transaction, bool>> filter = t => true;
                 Expression<Func<Transaction, object>> orderBy = t => t.CreatedDate;
+
+                // search value filter
+                if (!string.IsNullOrEmpty(request.SearchValue))
+                {
+                    var searchFilter = (Expression<Func<Transaction, bool>>)(t =>
+                        t.Description.ToLower().Contains(request.SearchValue.ToLower()));
+                    filter = CombineFilters(filter, searchFilter);
+                }
+
+                // transaction type filter
+                if (transactionType.HasValue)
+                {
+                    var typeFilter = (Expression<Func<Transaction, bool>>)(t =>
+                        t.TransactionType == transactionType.Value);
+                    filter = CombineFilters(filter, typeFilter);
+                }
 
                 var list = await _unitOfWork.TransactionRepository.GetAllAsync(
                     filter: filter,
@@ -254,7 +272,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                     pageIndex: request.PageIndex,
                     pageSize: request.PageSize);
 
-                var totalItems = _unitOfWork.TransactionRepository.GetAll().Count();
+                var totalItems = _unitOfWork.TransactionRepository.GetAll(filter).Count();
                 var totalPages = (int)Math.Ceiling((double)totalItems / (int)request.PageSize);
 
                 IEnumerable<TransactionInfoResponse> transactions = _mapper.Map<IEnumerable<TransactionInfoResponse>>(list);
@@ -342,6 +360,15 @@ namespace Fun_Funding.Application.Services.EntityServices
                 }
                 throw new ExceptionError((int)HttpStatusCode.InternalServerError, ex.Message);
             }
+        }
+
+        private Expression<Func<T, bool>> CombineFilters<T>(Expression<Func<T, bool>> expr1, Expression<Func<T, bool>> expr2)
+        {
+            var parameter = Expression.Parameter(typeof(T));
+            var combined = Expression.AndAlso(
+                Expression.Invoke(expr1, parameter),
+                Expression.Invoke(expr2, parameter));
+            return Expression.Lambda<Func<T, bool>>(combined, parameter);
         }
     }
 }

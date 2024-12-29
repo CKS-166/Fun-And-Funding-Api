@@ -1,6 +1,7 @@
 ﻿using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Application.ViewModel.TransactionDTO;
 using Fun_Funding.Domain.Entity;
+using Fun_Funding.Domain.Enum;
 
 namespace Fun_Funding.Application.Interfaces.IEntityService
 {
@@ -15,6 +16,6 @@ namespace Fun_Funding.Application.Interfaces.IEntityService
         Task<ResultDTO<object>> GetDashboardMarketplaceProjects();
         Task<ResultDTO<object>> GetDashboardMilestones();
         Task<ResultDTO<object>> GetDashboardCategories();
-        Task<ResultDTO<PaginatedResponse<TransactionInfoResponse>>> GetDashboardTransactions(ListRequest request);
+        Task<ResultDTO<PaginatedResponse<TransactionInfoResponse>>> GetDashboardTransactions(ListRequest request, TransactionTypes? transactionType);
     }
 }
