@@ -1,6 +1,7 @@
 ﻿using Fun_Funding.Application.Interfaces.IEntityService;
 using Fun_Funding.Application.ViewModel;
 using Fun_Funding.Domain.Constrain;
+using Fun_Funding.Domain.Enum;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -87,9 +88,9 @@ namespace Fun_Funding.Api.Controllers
 
         [Authorize(Roles = Role.Admin)]
         [HttpGet("/api/dashboard/transactions")]
-        public async Task<IActionResult> GetDashboardTransactions([FromQuery] ListRequest request)
+        public async Task<IActionResult> GetDashboardTransactions([FromQuery] ListRequest request, [FromQuery] TransactionTypes? type)
         {
-            var res = await _systemWalletService.GetDashboardTransactions(request);
+            var res = await _systemWalletService.GetDashboardTransactions(request, type);
             return Ok(res);
         }
     }
