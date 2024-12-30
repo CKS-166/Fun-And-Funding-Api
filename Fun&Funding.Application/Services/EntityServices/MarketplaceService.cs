@@ -183,15 +183,16 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
-        public async Task<ResultDTO<PaginatedResponse<MarketplaceProjectInfoResponse>>> GetAllMarketplaceProject(ListRequest request, Guid? categoryId, decimal? FromPrice, decimal? ToPrice)
+        public async Task<ResultDTO<PaginatedResponse<MarketplaceProjectInfoResponse>>> GetAllMarketplaceProject
+            (ListRequest request, List<Guid>? categoryIds, List<ProjectStatus>? statusList, decimal? fromPrice, decimal? toPrice)
         {
 
             try
             {
-                Expression<Func<MarketplaceProject, bool>> filter = null;
+                var filters = new List<Func<IQueryable<MarketplaceProject>, IQueryable<MarketplaceProject>>>();
                 Expression<Func<MarketplaceProject, object>> orderBy = c => c.CreatedDate;
 
-                if (!string.IsNullOrEmpty(request.OrderBy))
+                /*if (!string.IsNullOrEmpty(request.OrderBy))
                 {
                     switch (request.OrderBy.ToLower())
                     {
@@ -206,33 +207,52 @@ namespace Fun_Funding.Application.Services.EntityServices
                         default:
                             break;
                     }
-                }
-                if (categoryId is not null)
+                }*/
+
+                //category filter
+                if (categoryIds != null && categoryIds.Any())
                 {
-                    filter = c => c.FundingProject.Categories.Any(category => category.Id == categoryId);
+                    filters.Add(query => query.Where(c => c.FundingProject.Categories.Any(category => categoryIds.Contains(category.Id))));
                 }
+
+                //search
                 if (!string.IsNullOrEmpty(request.SearchValue))
                 {
-                    filter = c => c.Name.ToLower().Contains(request.SearchValue.ToLower());
+                    string searchLower = request.SearchValue.ToLower();
+                    filters.Add(query => query.Where(u => u.Name != null && u.Name.ToLower().Contains(searchLower)));
                 }
-                if (FromPrice != null || ToPrice != null)
+
+                // statuses filter
+                if (statusList != null && statusList.Any())
                 {
-                    filter = c =>
-                        (FromPrice == null || c.Price >= FromPrice) &&
-                        (ToPrice == null || c.Price <= ToPrice);
+                    filters.Add(query => query.Where(c => statusList.Contains(c.Status)));
                 }
 
+                // price filter
+                if (fromPrice.HasValue)
+                {
+                    filters.Add(query => query.Where(c => c.Price >= fromPrice.Value));
+                }
 
-                var list = await _unitOfWork.MarketplaceRepository.GetAllAsync(
-                   filter: filter,
+                if (toPrice.HasValue)
+                {
+                    filters.Add(query => query.Where(c => c.Price <= toPrice.Value));
+                }
+
+                var list = await _unitOfWork.MarketplaceRepository.GetAllCombinedFilterAsync(
+                   filters: filters,
                    orderBy: orderBy,
                    isAscending: request.IsAscending.Value,
                    includeProperties: "MarketplaceFiles,FundingProject.User,FundingProject.Categories,Wallet,Wallet.BankAccount",
                    pageIndex: request.PageIndex,
                    pageSize: request.PageSize);
 
-                var totalItems = _unitOfWork.MarketplaceRepository.GetAll(filter).Count();
+                var totalItems = _unitOfWork.MarketplaceRepository
+                    .GetAllCombinedFilterAsync(filters: filters)
+                    .Result.ToList().Count();
+
                 var totalPages = (int)Math.Ceiling((double)totalItems / (int)request.PageSize);
+
                 IEnumerable<MarketplaceProjectInfoResponse> marketplaceProjects =
                     _mapper.Map<IEnumerable<MarketplaceProjectInfoResponse>>(list);
 
