@@ -839,7 +839,8 @@ namespace Fun_Funding.Application.Services.EntityServices
             try
             {
                 var list = await _unitOfWork.ProjectMilestoneRepository.GetAllAsync(
-                filter: pm => pm.FundingProjectId == fundingProjectId && pm.MilestoneId == milestoneId,
+                filter: pm => (!fundingProjectId.HasValue || pm.FundingProjectId == fundingProjectId.Value) &&
+           (!milestoneId.HasValue || pm.MilestoneId == milestoneId.Value),
                  includeProperties: "Milestone.Requirements,ProjectMilestoneRequirements,ProjectMilestoneRequirements.RequirementFiles,ProjectMilestoneRequirements.Requirement"
                 );
                 var response = _mapper.Map<List<ProjectMilestoneResponse>>(list);
@@ -869,6 +870,14 @@ namespace Fun_Funding.Application.Services.EntityServices
                 {
                     throw new ExceptionError((int)HttpStatusCode.NotFound, "This milestone not found");
                 }
+                var walletId = projectMilestone.FundingProject.Wallet.Id;
+                var withdrawTrans = _unitOfWork.TransactionRepository.GetQueryable()
+                    .FirstOrDefault(t => t.WalletId == walletId && t.TransactionType == TransactionTypes.WithdrawFundingMilestone);
+                if (withdrawTrans != null)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "This project has been withdrawed in funding process");
+                }
+               
                 if (projectMilestone.Milestone.MilestoneType != MilestoneType.Funding)
                 {
                     throw new ExceptionError((int)HttpStatusCode.BadRequest, "Withdraw must be requested for funding process");
@@ -890,7 +899,16 @@ namespace Fun_Funding.Application.Services.EntityServices
                     CreatedDate = DateTime.Now,
                     ExpiredDate = DateTime.Now.AddDays(7)
                 };
+                var transaction = new Transaction
+                {
+                    TotalAmount = transferAmount,
+                    WalletId = projectMilestone.FundingProject.Wallet.Id,
+                    TransactionType = TransactionTypes.WithdrawFundingMilestone,
+                    CreatedDate = DateTime.Now,
+                    Description = "Withdraw money in funding process of" + projectMilestone.FundingProject.Name
+                };
                 _unitOfWork.WithdrawRequestRepository.Add(withdrawRequest);
+                _unitOfWork.TransactionRepository.Add(transaction);
                 projectMilestone.FundingProject.Wallet.Balance -= transferAmount;
                 _unitOfWork.Commit();
 

@@ -43,5 +43,7 @@ namespace Fun_Funding.Application.ViewModel.FundingProjectDTO
         public UserInfoResponse User { get; set; }
 
         public List<CategoryResponse> Categories { get; set; }
+
+        public bool HasBeenWithdrawed { get; set; }
     }
 }
