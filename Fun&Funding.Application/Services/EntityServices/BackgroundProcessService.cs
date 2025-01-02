@@ -54,7 +54,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                     // If admin has already approved project and start date reach today's date
                     else if (project.Status == ProjectStatus.Approved)
                     {
-                        if (project.StartDate >= present)
+                        if (project.StartDate.Date == present.Date)
                         {
                             project.Status = ProjectStatus.Processing;
                             statusChanged = true;

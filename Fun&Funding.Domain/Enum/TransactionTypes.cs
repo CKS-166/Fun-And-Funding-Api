@@ -21,6 +21,6 @@ namespace Fun_Funding.Domain.Enum
         MilestoneSecondHalf,
         WithdrawRefund,
         WithdrawCancel,
-        WithdrawMilestone
+        WithdrawFundingMilestone
     }
 }

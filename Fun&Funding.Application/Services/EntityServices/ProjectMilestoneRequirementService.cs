@@ -63,6 +63,14 @@ namespace Fun_Funding.Application.Services.EntityServices
                             throw new ExceptionError((int)HttpStatusCode.BadRequest, checkValidateMilstone);
                         }
                     }
+
+                    if (type == MilestoneType.Funding)
+                    {
+                        if (projectMilestone.FundingProject.Status != ProjectStatus.Approved && projectMilestone.FundingProject.Status != ProjectStatus.Processing)
+                        {
+                            throw new ExceptionError((int)HttpStatusCode.BadRequest, "Project is not in valid status");
+                        }
+                    }
                     
                     if (projectMilestone.Status != ProjectMilestoneStatus.Processing)
                     {
@@ -79,7 +87,8 @@ namespace Fun_Funding.Application.Services.EntityServices
                         Content = requestItem.Content,
                         RequirementId = requestItem.RequirementId,
                         RequirementStatus = requestItem.RequirementStatus,
-                        CreatedDate = DateTime.Now
+                        CreatedDate = DateTime.Now,
+                        UpdateDate = DateTime.Now
                     };
                     List<ProjectRequirementFile> files = new List<ProjectRequirementFile>();
                     if (requestItem.RequirementFiles?.Count > 0)
@@ -147,12 +156,13 @@ namespace Fun_Funding.Application.Services.EntityServices
                         {
                             throw new ExceptionError((int)HttpStatusCode.BadRequest, checkValidateMilstone);
                         }
+                        if (projectMilestone.Status != ProjectMilestoneStatus.Processing && projectMilestone.Status != ProjectMilestoneStatus.Warning)
+                        {
+                            throw new ExceptionError((int)HttpStatusCode.BadRequest, "Milestone for this project is not approved yet");
+                        }
                     }
-                   
-                    if (projectMilestone.Status != ProjectMilestoneStatus.Processing && projectMilestone.Status != ProjectMilestoneStatus.Warning)
-                    {
-                        throw new ExceptionError((int)HttpStatusCode.BadRequest, "Milestone for this project is not approved yet");
-                    }
+                    
+                    
                 }
                 if (issueLog != null)
                 {

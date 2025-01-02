@@ -65,9 +65,9 @@ namespace Fun_Funding.Api.Controllers
         }
 
         [HttpPost("withdraw-process")]
-        public async Task<IActionResult> WithdrawMilestone(Guid id)
+        public async Task<IActionResult> WithdrawMilestone(Guid projectMilestoneId)
         {
-            var result = _projectMilestoneService.WithdrawMilestoneProcessing(id);
+            var result = await _projectMilestoneService.WithdrawMilestoneProcessing(projectMilestoneId);
             return Ok(result);
         }
 

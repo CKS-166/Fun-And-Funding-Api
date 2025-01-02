@@ -233,11 +233,14 @@ namespace Fun_Funding.Application.Services.EntityServices
                     .Include(p => p.Categories)
                     .AsSplitQuery()
                     .FirstOrDefault(p => p.Id == id);
+                var transaction = _unitOfWork.TransactionRepository.GetQueryable()
+                    .FirstOrDefault(t => t.WalletId == project.Wallet.Id && t.TransactionType == TransactionTypes.WithdrawFundingMilestone);
                 if (project is null)
                 {
                     return ResultDTO<FundingProjectResponse>.Fail("Project not found", 404);
                 }
                 FundingProjectResponse result = _mapper.Map<FundingProjectResponse>(project);
+                result.HasBeenWithdrawed = transaction != null ? true : false;
                 return ResultDTO<FundingProjectResponse>.Success(result);
             }
             catch (Exception ex)
