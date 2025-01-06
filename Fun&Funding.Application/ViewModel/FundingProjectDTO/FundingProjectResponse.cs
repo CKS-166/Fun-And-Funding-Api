@@ -1,17 +1,11 @@
-﻿using Fun_Funding.Application.ViewModel.BankAccountDTO;
+﻿using Fun_Funding.Application.ViewModel.CategoryDTO;
 using Fun_Funding.Application.ViewModel.FundingFileDTO;
 using Fun_Funding.Application.ViewModel.PackageDTO;
-using Fun_Funding.Domain.Enum;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Fun_Funding.Application.ViewModel.UserDTO;
-using Fun_Funding.Application.ViewModel.CategoryDTO;
 using Fun_Funding.Application.ViewModel.WalletDTO;
+using Fun_Funding.Domain.Enum;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Fun_Funding.Application.ViewModel.FundingProjectDTO
 {
@@ -31,7 +25,7 @@ namespace Fun_Funding.Application.ViewModel.FundingProjectDTO
         public decimal Balance { get; set; }
         public ProjectStatus Status { get; set; }
 
-        public WalletFundingResponse Wallet {  get; set; }
+        public WalletFundingResponse Wallet { get; set; }
         //public virtual ICollection<Category> Categories { get; set; }
         public virtual ICollection<PackageResponse> Packages { get; set; }
         //public IFormFile ThumbnailFile { get; set; }
@@ -45,5 +39,6 @@ namespace Fun_Funding.Application.ViewModel.FundingProjectDTO
         public List<CategoryResponse> Categories { get; set; }
 
         public bool HasBeenWithdrawed { get; set; }
+        public string? Note { get; set; }
     }
 }

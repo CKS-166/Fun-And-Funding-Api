@@ -549,7 +549,7 @@ namespace Fun_Funding.Application.Services.EntityServices
         }
 
 
-        public async Task<ResultDTO<FundingProjectResponse>> UpdateFundingProjectStatus(Guid id, ProjectStatus status)
+        public async Task<ResultDTO<FundingProjectResponse>> UpdateFundingProjectStatus(Guid id, ProjectStatus status, string? note)
         {
             try
             {
@@ -609,11 +609,12 @@ namespace Fun_Funding.Application.Services.EntityServices
                     //change status from pending
                     if (project.Status == ProjectStatus.Pending && pendingChangelist.Contains(status))
                     {
-                        if(status == ProjectStatus.Approved)
+                        if (status == ProjectStatus.Approved)
                         {
                             await CreateInitFundingMilestone(project.Id);
                         }
                         project.Status = status;
+                        project.Note = note;
                         isChanged = true;
                     }
                     //change status from approved

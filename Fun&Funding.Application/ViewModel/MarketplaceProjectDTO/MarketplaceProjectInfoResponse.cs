@@ -23,5 +23,6 @@ namespace Fun_Funding.Application.ViewModel.MarketplaceProjectDTO
         public ProjectStatus Status { get; set; }
         public required WalletFundingResponse Wallet { get; set; }
         public DateTime CreatedDate { get; set; }
+        public string? Note { get; set; }
     }
 }
