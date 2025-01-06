@@ -12,7 +12,7 @@ namespace Fun_Funding.Application.IService
 {
     public interface IProjectMilestoneRequirementService
     {
-        Task<ResultDTO<ProjectMilestoneResponse>> CreateMilestoneRequirements(List<ProjectMilestoneRequirementRequest> request, string? issueLog, MilestoneType type);
-        Task<ResultDTO<string>> UpdateMilestoneRequirements(List<ProjectMilestoneRequirementUpdateRequest> request, string? issueLog, MilestoneType type);
+        Task<ResultDTO<ProjectMilestoneResponse>> CreateMilestoneRequirements(List<ProjectMilestoneRequirementRequest> request, string? issueLog);
+        Task<ResultDTO<string>> UpdateMilestoneRequirements(List<ProjectMilestoneRequirementUpdateRequest> request, string? issueLog);
     }
 }

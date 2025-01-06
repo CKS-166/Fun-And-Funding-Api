@@ -35,7 +35,7 @@ namespace Fun_Funding.Application.Services.EntityServices
             _milestoneService = milestoneService;
 
         }
-        public async Task<ResultDTO<ProjectMilestoneResponse>> CreateMilestoneRequirements(List<ProjectMilestoneRequirementRequest> request, string? issueLog, MilestoneType type )
+        public async Task<ResultDTO<ProjectMilestoneResponse>> CreateMilestoneRequirements(List<ProjectMilestoneRequirementRequest> request, string? issueLog )
         {
             try
             {
@@ -55,7 +55,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                     FundingProject project = _unitOfWork.FundingProjectRepository
                     .GetQueryable().Include(p => p.ProjectMilestones)
                     .ThenInclude(pm => pm.Milestone).FirstOrDefault(p => p.Id == projectMilestone.FundingProjectId);
-                    if (type == MilestoneType.Disbursement)
+                    if (projectMilestone.Milestone.MilestoneType == MilestoneType.Disbursement)
                     {
                         var checkValidateMilstone = _projectMilestoneService.CanCreateProjectMilestone(project, projectMilestone.Milestone.MilestoneOrder, projectMilestone.CreatedDate);
                         if (checkValidateMilstone != null)
@@ -64,7 +64,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                         }
                     }
 
-                    if (type == MilestoneType.Funding)
+                    if (projectMilestone.Milestone.MilestoneType == MilestoneType.Funding)
                     {
                         if (projectMilestone.FundingProject.Status != ProjectStatus.Approved && projectMilestone.FundingProject.Status != ProjectStatus.Processing)
                         {
@@ -128,7 +128,7 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
-        public async Task<ResultDTO<string>> UpdateMilestoneRequirements(List<ProjectMilestoneRequirementUpdateRequest> request, string? issueLog, MilestoneType type)
+        public async Task<ResultDTO<string>> UpdateMilestoneRequirements(List<ProjectMilestoneRequirementUpdateRequest> request, string? issueLog)
         {
             try
             {
@@ -149,7 +149,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                     FundingProject project = _unitOfWork.FundingProjectRepository
                     .GetQueryable().Include(p => p.ProjectMilestones)
                     .ThenInclude(pm => pm.Milestone).FirstOrDefault(p => p.Id == projectMilestone.FundingProjectId);
-                    if (type == MilestoneType.Disbursement)
+                    if (projectMilestone.Milestone.MilestoneType == MilestoneType.Disbursement)
                     {
                         var checkValidateMilstone = _projectMilestoneService.CanCreateProjectMilestone(project, projectMilestone.Milestone.MilestoneOrder, projectMilestone.CreatedDate);
                         if (checkValidateMilstone != null)
