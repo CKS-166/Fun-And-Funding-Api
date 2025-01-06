@@ -14,7 +14,7 @@ namespace Fun_Funding.Application.IService
         Task<ResultDTO<MarketplaceProjectInfoResponse>>
             UpdateMarketplaceProject(Guid id, MarketplaceProjectUpdateRequest request, bool? isDeleted = null);
         Task<ResultDTO<MarketplaceProjectInfoResponse>>
-            UpdateMarketplaceProjectStatus(Guid id, ProjectStatus status);
+            UpdateMarketplaceProjectStatus(Guid id, ProjectStatus status, string? note);
         Task<ResultDTO<List<MarketplaceProjectInfoResponse>>> GetTop3MostPurchasedOngoingMarketplaceProject();
         Task<ResultDTO<List<MarketplaceProjectInfoResponse>>> GetTop4MostPurchasedOngoingMarketplaceProject();
         Task<ResultDTO<decimal>> CountPlatformProjects();

@@ -508,7 +508,8 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
-        public async Task<ResultDTO<MarketplaceProjectInfoResponse>> UpdateMarketplaceProjectStatus(Guid id, ProjectStatus status)
+        public async Task<ResultDTO<MarketplaceProjectInfoResponse>> UpdateMarketplaceProjectStatus
+            (Guid id, ProjectStatus status, string? note)
         {
             try
             {
@@ -550,6 +551,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                     if (marketplaceProject.Status == ProjectStatus.Pending && pendingChangelist.Contains(status))
                     {
                         marketplaceProject.Status = status;
+                        marketplaceProject.Note = note;
                         isChanged = true;
                     }
                     //change status from rejected

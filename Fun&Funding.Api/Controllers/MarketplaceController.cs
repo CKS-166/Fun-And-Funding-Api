@@ -67,9 +67,9 @@ namespace Fun_Funding.Api.Controllers
         [HttpPatch("{id}/status")]
         [Authorize(Roles = Role.Admin)]
         public async Task<IActionResult> UpdateMarketplaceProjectStatus([FromRoute] Guid id,
-            [FromQuery] ProjectStatus status)
+            [FromQuery] ProjectStatus status, [FromBody] string? note)
         {
-            var response = await _marketplace.UpdateMarketplaceProjectStatus(id, status);
+            var response = await _marketplace.UpdateMarketplaceProjectStatus(id, status, note);
             return Ok(response);
         }
         [HttpGet("top3")]

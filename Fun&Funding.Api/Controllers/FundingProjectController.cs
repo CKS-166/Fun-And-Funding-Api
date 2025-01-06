@@ -66,9 +66,9 @@ namespace Fun_Funding.Api.Controllers
         }
 
         [HttpPut("{id}/status")]
-        public async Task<IActionResult> UpdateProjectStatus([FromRoute] Guid id, [FromQuery] ProjectStatus status)
+        public async Task<IActionResult> UpdateProjectStatus([FromRoute] Guid id, [FromQuery] ProjectStatus status, [FromBody] string? note)
         {
-            var response = await _fundingProjectService.UpdateFundingProjectStatus(id, status);
+            var response = await _fundingProjectService.UpdateFundingProjectStatus(id, status, note);
             return Ok(response);
         }
 
