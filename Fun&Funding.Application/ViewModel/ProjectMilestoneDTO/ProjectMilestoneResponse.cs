@@ -21,6 +21,7 @@ namespace Fun_Funding.Application.ViewModel.ProjectMilestoneDTO
         public ProjectMilestoneStatus Status { get; set; }
         public Guid MilestoneId { get; set; }
         public Guid FundingProjectId { get; set; }
+        public ProjectStatus? ProjectStatus;
         public string? IssueLog { get; set; }
         public string? Title { get; set; }
         public string? Introduction { get; set; }

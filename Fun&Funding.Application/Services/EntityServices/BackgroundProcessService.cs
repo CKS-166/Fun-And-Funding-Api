@@ -29,6 +29,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 // Rewrite the query to avoid unsupported operations.
                 List<FundingProject> projects = _unitOfWork.FundingProjectRepository
                     .GetQueryable()
+                    .Include(p => p.ProjectMilestones)
                     .Where(p => (p.Status == ProjectStatus.Approved ||
                         p.Status == ProjectStatus.Pending ||
                         p.Status == ProjectStatus.Processing) && p.IsDeleted == false)
@@ -38,7 +39,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 {
                     bool statusChanged = false;
                     // If project stil present and end date has already pass
-                    if (project.Status == ProjectStatus.Processing && project.EndDate <= present)
+                    if (project.Status == ProjectStatus.Processing && project.EndDate.Date <= present.Date)
                     {
                         if (project.Balance < project.Target)
                         {
@@ -48,6 +49,15 @@ namespace Fun_Funding.Application.Services.EntityServices
                         }else if (project.Balance >= project.Target)
                         {
                             project.Status = ProjectStatus.FundedSuccessful;
+                            if (project.ProjectMilestones != null)
+                            {
+                                foreach (var pm in project.ProjectMilestones)
+                                {
+                                    pm.Status = ProjectMilestoneStatus.Completed;
+                                }
+                            }
+                           
+                            statusChanged = true;
                         }
                        
                     }
@@ -87,9 +97,9 @@ namespace Fun_Funding.Application.Services.EntityServices
                 var projectMilestones = _unitOfWork.ProjectMilestoneRepository
                     .GetQueryable()
                     .Include(pm => pm.Milestone)
-                    .Where(p => p.Status == ProjectMilestoneStatus.Pending
+                    .Where(p => (p.Status == ProjectMilestoneStatus.Pending
                     || p.Status == ProjectMilestoneStatus.Processing
-                    || p.Status == ProjectMilestoneStatus.Warning).ToList();
+                    || p.Status == ProjectMilestoneStatus.Warning) && p.Milestone.MilestoneType == MilestoneType.Disbursement).ToList();
                 foreach (var projectMilestone in projectMilestones)
                 {
                     bool statusChanged = false;
