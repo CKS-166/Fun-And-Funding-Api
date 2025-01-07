@@ -235,12 +235,25 @@ namespace Fun_Funding.Application.Services.EntityServices
                     .FirstOrDefault(p => p.Id == id);
                 var transaction = _unitOfWork.TransactionRepository.GetQueryable()
                     .FirstOrDefault(t => t.WalletId == project.Wallet.Id && t.TransactionType == TransactionTypes.WithdrawFundingMilestone);
+                var cancelTransaction = _unitOfWork.TransactionRepository.GetQueryable()
+                    .FirstOrDefault(t => t.WalletId == project.Wallet.Id && t.TransactionType == TransactionTypes.WithdrawCancel);
                 if (project is null)
                 {
                     return ResultDTO<FundingProjectResponse>.Fail("Project not found", 404);
                 }
                 FundingProjectResponse result = _mapper.Map<FundingProjectResponse>(project);
-                result.HasBeenWithdrawed = transaction != null ? true : false;
+                if (transaction != null)
+                {
+                    result.HasBeenWithdrawed = true;
+                }
+                else
+                {
+                    result.HasBeenWithdrawed = false;
+                }
+                if (cancelTransaction != null)
+                {
+                    result.HasBeenWithdrawed = false;
+                }
                 return ResultDTO<FundingProjectResponse>.Success(result);
             }
             catch (Exception ex)

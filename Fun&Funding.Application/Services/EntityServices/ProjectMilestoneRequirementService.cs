@@ -149,6 +149,10 @@ namespace Fun_Funding.Application.Services.EntityServices
                     FundingProject project = _unitOfWork.FundingProjectRepository
                     .GetQueryable().Include(p => p.ProjectMilestones)
                     .ThenInclude(pm => pm.Milestone).FirstOrDefault(p => p.Id == projectMilestone.FundingProjectId);
+                    if (project.Status == ProjectStatus.Failed)
+                    {
+                        throw new ExceptionError((int)HttpStatusCode.BadRequest,"Project is failed");
+                    }
                     if (projectMilestone.Milestone.MilestoneType == MilestoneType.Disbursement)
                     {
                         var checkValidateMilstone = _projectMilestoneService.CanCreateProjectMilestone(project, projectMilestone.Milestone.MilestoneOrder, projectMilestone.CreatedDate);

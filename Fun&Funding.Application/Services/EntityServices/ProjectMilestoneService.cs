@@ -160,6 +160,7 @@ namespace Fun_Funding.Application.Services.EntityServices
         {
             // Get all the project milestones ordered by MilestoneOrder
             var projectMilestones = project.ProjectMilestones
+                //.Where(pm => pm.Milestone.MilestoneType == MilestoneType.Disbursement)
                 .OrderBy(pm => pm.Milestone.MilestoneOrder)
                 .ToList();
             if (projectMilestones != null || projectMilestones.Count != 0)
@@ -788,6 +789,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                     var milestoneRes = _mapper.Map<MilestoneResponse>(orderedLatestMilestone);
 
                     item.LatestMilestone = milestoneRes;
+                    item.ProjectStatus = item.FundingProject.Status;
                 }
 
                 return ResultDTO<PaginatedResponse<ProjectMilestoneResponse>>.Success(response);
