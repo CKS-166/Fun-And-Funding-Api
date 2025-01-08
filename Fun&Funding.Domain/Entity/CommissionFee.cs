@@ -17,7 +17,6 @@ namespace Fun_Funding.Domain.Entity
         public CommissionType CommissionType { get; set; }
         public string Version { get; set; }
         public DateTime UpdateDate { get; set; }
-
         public virtual ICollection<Transaction>? Transactions { get; set; }
 
     }

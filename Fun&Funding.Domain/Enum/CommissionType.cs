@@ -9,6 +9,6 @@ namespace Fun_Funding.Domain.Enum
     public enum CommissionType
     {
         FundingCommission,
-        MarketingCommission
+        MarketplaceCommission
     }
 }

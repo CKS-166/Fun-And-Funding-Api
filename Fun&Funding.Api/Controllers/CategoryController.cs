@@ -1,53 +1,69 @@
-﻿using Fun_Funding.Domain.Entity;
-using Fun_Funding.Infrastructure.Database;
-using Microsoft.AspNetCore.Http;
+﻿using Fun_Funding.Application.IService;
+using Fun_Funding.Application.ViewModel;
+using Fun_Funding.Application.ViewModel.CategoryDTO;
+using Fun_Funding.Domain.Constrain;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Fun_Funding.Api.Controller
 {
-    [Route("api/catagories")]
+    [Route("api/categories")]
     [ApiController]
     public class CategoryController : ControllerBase
     {
-        private readonly MyDbContext dbContext;
+        private readonly ICategoryService _categoryService;
 
-        public CategoryController(MyDbContext dbContext)
+        public CategoryController(ICategoryService categoryService)
         {
-            this.dbContext = dbContext;
+            _categoryService = categoryService;
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetCategories([FromQuery] ListRequest request)
+        {
+            var response = await _categoryService.GetCategories(request);
+            return Ok(response);
+        }
+
+        [HttpGet("all")]
+        public async Task<IActionResult> GetAllCategories()
+        {
+            var response = await _categoryService.GetAllCategories();
+            return Ok(response);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetCategoryById([FromRoute] Guid id)
+        {
+            var response = await _categoryService.GetCategoryById(id);
+            return Ok(response);
+        }
+
+        [Authorize(Roles = Role.Admin)]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCategory([FromRoute] Guid id)
+        {
+            var response = await _categoryService.DeleteCategory(id);
+            return NoContent();
+        }
+
+        [Authorize(Roles = Role.Admin)]
         [HttpPost]
-        public IActionResult Create()
+        public async Task<IActionResult> CreateCategory([FromBody] CategoryRequest request)
         {
-            var category = new Category
+            var response = await _categoryService.CreateCategory(request);
+            return new ObjectResult(response)
             {
-                Id = Guid.NewGuid(),
-                CreatedDate = DateTime.Now,
-                Name = "FigureWibuLo",
-
+                StatusCode = response._statusCode
             };
-
-            dbContext.Add(category);
-            dbContext.SaveChanges();
-
-            return Ok(category);
         }
-        [HttpDelete]
-        public IActionResult Delete()
+
+        [Authorize(Roles = Role.Admin)]
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateCategory([FromRoute] Guid id, [FromBody] CategoryRequest request)
         {
-            var nCate = dbContext.Category.FirstOrDefault(x => x.Name.Equals("FigureWibuLo"));
-
-            if (nCate == null)
-            {
-                return NotFound("Category not found");
-            }
-
-            // Trigger the soft delete by calling Remove
-            dbContext.Remove(nCate); // This will be intercepted by the SoftDeleteInterceptor
-            dbContext.SaveChanges(); // Interceptor will change the state to Modified and set IsDeleted
-
-            return Ok(nCate);
+            var response = await _categoryService.UpdateCategory(id, request);
+            return Ok(response);
         }
-
-
     }
 }

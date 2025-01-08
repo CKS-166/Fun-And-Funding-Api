@@ -8,7 +8,8 @@ namespace Fun_Funding.Domain.Enum
 {
     public enum KeyStatus
     {
-        ACTIVE, 
+        NOTSET,
+        ACTIVE,
         EXPIRED
     }
 }

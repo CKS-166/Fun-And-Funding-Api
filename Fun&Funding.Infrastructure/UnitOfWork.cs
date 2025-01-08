@@ -1,38 +1,56 @@
 ﻿using Fun_Funding.Application;
+using Fun_Funding.Application.Interfaces.IRepository;
 using Fun_Funding.Application.IRepository;
-using Fun_Funding.Infrastructure.Database;
-using Fun_Funding.Infrastructure.Repository;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Fun_Funding.Infrastructure.Persistence.Database;
+using Fun_Funding.Infrastructure.Persistence.Repository;
 
 namespace Fun_Funding.Infrastructure
 {
     public class UnitOfWork : IUnitOfWork
     {
         private readonly MyDbContext _dbContext;
+        private readonly MongoDBContext _mongoDBContext;
 
         // Repositories
+        private ILikeRepository _likeRepository;
+        private IFeedbackRepository _feedbackRepository;
+        private ICommentRepository _commentRepository;
+        private IFollowRepository _followRepository;
+        private IReportRepository _reportRepository;
+        private IChatRepository _chatRepository;
         private IBankAccountRepository _bankAccountRepository;
         private ICategoryRepository _categoryRepository;
         private IOrderDetailRepository _orderDetailRepository;
         private IOrderRepository _orderRepository;
         private IPackageBackerRepository _packageBackerRepository;
         private IPackageRepository _packageRepository;
-        private IProjectRepository _projectRepository;
+        private IFundingProjectRepository _fundingProjectRepository;
         private IRewardItemRepository _rewardItemRepository;
         private ISourceFileRepository _sourceFileRepository;
         private ISystemWalletRepository _systemWalletRepository;
         private ITransactionRepository _transactionRepository;
         private IUserRepository _userRepository;
+        private IUserFileRepository _userFileRepository;
         private IWalletRepository _walletRepository;
         private IWithdrawRequestRepository _withdrawRequestRepository;
-
-        public UnitOfWork(MyDbContext dbContext)
+        private ICommissionFeeRepository _commissionFeeRepository;
+        private IMarketplaceRepository _marketplaceRepository;
+        private IProjectCouponRepository _projectCouponRepository;
+        private IMilestoneRepository _milestoneRepository;
+        private IProjectMilestoneBackerRepository _projectMilestoneBackerRepository;
+        private IProjectMilestoneRepository _projectMilestoneRepository;
+        private IRequirementRepository _requirementRepository;
+        private IProjectMilestoneRequirementRepository _projectMilestoneRequirementRepository;
+        private IProjectRequirementFileRepository _projectRequirementFileRepository;
+        private ICreatorContractRepository _creatorContractRepository;
+        private IDigitalKeyRepository _digitalKeyRepository;
+        private ICartRepository _cartRepository;
+        private INotificationRepository _notificationRepository;
+        private IMarketplaceFileRepository _marketplaceFileRepository;
+        public UnitOfWork(MyDbContext dbContext, MongoDBContext mongoDBContext)
         {
             _dbContext = dbContext;
+            _mongoDBContext = mongoDBContext;
         }
 
         // Repository properties
@@ -84,11 +102,11 @@ namespace Fun_Funding.Infrastructure
             }
         }
 
-        public IProjectRepository ProjectRepository
+        public IFundingProjectRepository FundingProjectRepository
         {
             get
             {
-                return _projectRepository = _projectRepository ?? new ProjectRepository(_dbContext);
+                return _fundingProjectRepository = _fundingProjectRepository ?? new FundingProjectRepository(_dbContext);
             }
         }
 
@@ -132,6 +150,14 @@ namespace Fun_Funding.Infrastructure
             }
         }
 
+        public IUserFileRepository UserFileRepository
+        {
+            get
+            {
+                return _userFileRepository = _userFileRepository ?? new UserFileRepository(_dbContext);
+            }
+        }
+
         public IWalletRepository WalletRepository
         {
             get
@@ -147,6 +173,86 @@ namespace Fun_Funding.Infrastructure
                 return _withdrawRequestRepository = _withdrawRequestRepository ?? new WithdrawRequestRepository(_dbContext);
             }
         }
+
+        public ICommissionFeeRepository CommissionFeeRepository
+        {
+            get
+            {
+                return _commissionFeeRepository = _commissionFeeRepository ?? new CommissionFeeRepository(_dbContext);
+            }
+        }
+
+        public ILikeRepository LikeRepository
+        {
+            get
+            {
+                return _likeRepository = _likeRepository ?? new LikeRepository(_mongoDBContext);
+            }
+        }
+
+        public ICommentRepository CommentRepository
+        {
+            get
+            {
+                return _commentRepository = _commentRepository ?? new CommentRepository(_mongoDBContext);
+            }
+        }
+
+        public IDigitalKeyRepository DigitalKeyRepository
+        {
+            get
+            {
+                return _digitalKeyRepository = _digitalKeyRepository ?? new DigitalKeyRepository(_dbContext);
+            }
+        }
+
+        public IProjectCouponRepository ProjectCouponRepository =>
+       _projectCouponRepository ??= new ProjectCouponRepository(_dbContext);
+
+        public IMilestoneRepository MilestoneRepository =>
+            _milestoneRepository ??= new MilestoneRepository(_dbContext);
+
+        public IProjectMilestoneRepository ProjectMilestoneRepository =>
+            _projectMilestoneRepository ??= new ProjectMilestoneRepository(_dbContext);
+
+        public IRequirementRepository RequirementRepository =>
+            _requirementRepository ??= new RequirementRepository(_dbContext);
+
+        public IProjectMilestoneRequirementRepository ProjectMilestoneRequirementRepository =>
+            _projectMilestoneRequirementRepository ??= new ProjectMilestoneRequirementRepository(_dbContext);
+
+        public IProjectRequirementFileRepository ProjectRequirementFileRepository =>
+            _projectRequirementFileRepository ??= new ProjectRequirementFileRepository(_dbContext);
+
+        public IProjectMilestoneBackerRepository ProjectMilestoneBackerRepository =>
+            _projectMilestoneBackerRepository ??= new ProjectMilestoneBackerRepository(_dbContext);
+
+        public IFollowRepository FollowRepository =>
+            _followRepository ??= new FollowRepository(_mongoDBContext);
+
+        public IReportRepository ReportRepository =>
+            _reportRepository ??= new ReportRepository(_mongoDBContext);
+
+        public IChatRepository ChatRepository =>
+            _chatRepository ??= new ChatRepository(_mongoDBContext);
+
+        public IMarketplaceRepository MarketplaceRepository =>
+            _marketplaceRepository ??= new MarketplaceRepository(_dbContext);
+
+        public ICreatorContractRepository CreatorContractRepository =>
+            _creatorContractRepository ??= new CreatorContractRepository(_mongoDBContext);
+
+        public ICartRepository CartRepository =>
+            _cartRepository ??= new CartRepository(_mongoDBContext);
+
+        public IMarketplaceFileRepository MarketplaceFileRepository =>
+            _marketplaceFileRepository ??= new MarketplaceFileRepository(_dbContext);
+
+        public INotificationRepository NotificationRepository =>
+            _notificationRepository ??= new NotificationRepository(_mongoDBContext);
+
+        public IFeedbackRepository FeedbackRepository => 
+            _feedbackRepository ??= new FeedbackRepository(_mongoDBContext);
 
         // Commit and rollback methods
         public void Commit()

@@ -17,13 +17,16 @@ namespace Fun_Funding.Domain.Entity
         public decimal TotalAmount { get; set; }
         public TransactionTypes TransactionType { get; set; }
 
-        public Guid PackageId { get; set; }
-        public Guid OrderId { get; set; }
-        public Guid WalletId { get; set; }
-        public Wallet Wallet { get; set; }
+        public Guid? PackageId { get; set; }
+        public Guid? OrderId { get; set; }
+        public Guid? OrderDetailId { get; set; }
+        public Guid? ProjectMilestoneId { get; set; }
+        public ProjectMilestone? ProjectMilestone { get; set; }
+        public Guid? WalletId { get; set; }
+        public Wallet? Wallet { get; set; }
         public Guid? SystemWalletId { get; set; }
         public SystemWallet? SystemWallet { get; set; }
         public Guid? CommissionFeeId { get; set; }
-        public CommissionFee? CommissionFees { get; set; }
+        public CommissionFee? CommissionFee { get; set; }
     }
 }

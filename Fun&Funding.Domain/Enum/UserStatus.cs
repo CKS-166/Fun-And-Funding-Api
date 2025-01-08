@@ -8,7 +8,7 @@ namespace Fun_Funding.Domain.Enum
 {
     public enum UserStatus
     {
-        Active,
-        Inactive
+        Inactive,
+        Active
     }
 }
