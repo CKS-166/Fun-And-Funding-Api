@@ -85,7 +85,7 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
         }
 
-        public async Task<ResultDTO<WithdrawRequest>> AdminCancelRequest(Guid id)
+        public async Task<ResultDTO<WithdrawRequest>> AdminCancelRequest(Guid id, string? note)
         {
             var admin = await _userService.GetUserInfo();
             var request = await _unitOfWork.WithdrawRequestRepository.GetByIdAsync(id);
@@ -108,6 +108,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 // change status
                 request.Status = WithdrawRequestStatus.Rejected;
                 request.IsFinished = true;
+                request.Note = note;
                 _unitOfWork.WithdrawRequestRepository.Update(request);
 
                 //get the create transaction (latest transaction)

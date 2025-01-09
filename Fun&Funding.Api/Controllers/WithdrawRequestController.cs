@@ -54,9 +54,9 @@ namespace Fun_Funding.Api.Controllers
             return Ok(result);
         }
         [HttpPatch("{id}/cancel")]
-        public async Task<IActionResult> CancelRequest(Guid id)
+        public async Task<IActionResult> CancelRequest(Guid id, string? note)
         {
-            var result = await _withdrawService.AdminCancelRequest(id);
+            var result = await _withdrawService.AdminCancelRequest(id, note);
             return Ok(result);
         }
         [HttpPost("wallet-request")]
