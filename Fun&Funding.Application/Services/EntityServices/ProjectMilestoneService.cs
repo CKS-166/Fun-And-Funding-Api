@@ -300,7 +300,7 @@ namespace Fun_Funding.Application.Services.EntityServices
 
                 if (projectMilestone.Status == ProjectMilestoneStatus.Pending && pendingStatusList.Contains(request.Status))
                 {
-                    if (projectMilestone.Milestone.MilestoneOrder == 1)
+                    if (projectMilestone.Milestone.MilestoneOrder == 3)
                     {
                         await ChargeCommissionFee(projectMilestone.Id);
                     }
