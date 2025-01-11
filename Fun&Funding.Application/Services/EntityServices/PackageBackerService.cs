@@ -237,7 +237,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                     .Include(pb => pb.Package)
                         .ThenInclude(p => p.RewardItems)
                     .Include(pb => pb.EvidenceImages)
-                    .Where(pb => pb.Package.Project.Id == projectId)
+                    .Where(pb => pb.Package.Project.Id == projectId && pb.Package.PackageTypes == PackageType.FixedPackage)
                     .Select(pb => new
                     {
                         pb.User.UserName,
