@@ -300,7 +300,7 @@ namespace Fun_Funding.Application.Services.EntityServices
 
                 if (projectMilestone.Status == ProjectMilestoneStatus.Pending && pendingStatusList.Contains(request.Status))
                 {
-                    if (projectMilestone.Milestone.MilestoneOrder == 1)
+                    if (projectMilestone.Milestone.MilestoneOrder == 3)
                     {
                         await ChargeCommissionFee(projectMilestone.Id);
                     }
@@ -614,19 +614,40 @@ namespace Fun_Funding.Application.Services.EntityServices
                     .Include(pm => pm.Milestone)
                     .Include(pm => pm.FundingProject.Wallet)
                     .FirstOrDefault(pm => pm.Id == projectMilestoneId);
+
+                if (projectMilestone == null)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.NotFound, "Project milestone not found.");
+                }
+
                 var rate = projectMilestone.Milestone.DisbursementPercentage;
                 var commissionFee = _unitOfWork.CommissionFeeRepository.GetQueryable()
-                               .Where(c => c.CommissionType == CommissionType.FundingCommission)
-                               .OrderByDescending(c => c.UpdateDate)
-                               .FirstOrDefault();
-                var refundableAmount = (1 - commissionFee.Rate) * projectMilestone.FundingProject.Balance;
+                    .Where(c => c.CommissionType == CommissionType.FundingCommission)
+                    .OrderByDescending(c => c.UpdateDate)
+                    .FirstOrDefault();
+
+                var walletId = projectMilestone.FundingProject.Wallet.Id;
+                var withdrawTrans = _unitOfWork.TransactionRepository.GetQueryable()
+                    .FirstOrDefault(t => t.WalletId == walletId && t.TransactionType == TransactionTypes.WithdrawFundingMilestone);
+
+                // Total Donations
+                var totalDonations = projectMilestone.FundingProject.Balance + (withdrawTrans?.TotalAmount ?? 0);
+
+                // Refundable Amount
+                var refundableAmount = (1 - commissionFee.Rate) * totalDonations;
+
+                // Calculate Transfer Money
                 var transferMoney = (rate * 0.5m) * refundableAmount;
+
+                // Check Wallet Balance
+                if (projectMilestone.FundingProject.Wallet.Balance < transferMoney)
+                {
+                    throw new ExceptionError((int)HttpStatusCode.BadRequest, "Wallet is not enough for transferring money");
+                }
+
+                // Create Transaction
                 if (status == 1 || status == 2)
                 {
-                    if (projectMilestone.FundingProject.Wallet.Balance < transferMoney)
-                    {
-                        throw new ExceptionError((int)HttpStatusCode.BadRequest, "Wallet is not enough for transferring money");
-                    }
                     var transaction = new Transaction
                     {
                         WalletId = projectMilestone.FundingProject.Wallet.Id,
@@ -636,7 +657,11 @@ namespace Fun_Funding.Application.Services.EntityServices
                         Description = "Transfer money to milestone disbursement",
                         ProjectMilestoneId = projectMilestone.Id
                     };
+
+                    // Deduct Wallet Balance
                     projectMilestone.FundingProject.Wallet.Balance -= transferMoney;
+
+                    // Save Transaction
                     _unitOfWork.TransactionRepository.Add(transaction);
                     _unitOfWork.Commit();
                 }
@@ -644,8 +669,6 @@ namespace Fun_Funding.Application.Services.EntityServices
                 {
                     throw new ExceptionError((int)HttpStatusCode.BadRequest, "Not support this mode");
                 }
-
-
             }
             catch (Exception ex)
             {
@@ -903,7 +926,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 };
                 var transaction = new Transaction
                 {
-                    TotalAmount = transferAmount,
+                    TotalAmount = -transferAmount,
                     WalletId = projectMilestone.FundingProject.Wallet.Id,
                     TransactionType = TransactionTypes.WithdrawFundingMilestone,
                     CreatedDate = DateTime.Now,

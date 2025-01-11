@@ -16,7 +16,7 @@ namespace Fun_Funding.Application.IService
         public Task<ResultDTO<WithdrawRequest>> GetWithdrawRequestById(Guid Id);
         public Task<ResultDTO<WithdrawResponse>>CreateMarketplaceRequest(Guid MarketplaceId);
         public Task<ResultDTO<AdminResponse>> AdminProcessingRequest(Guid id);
-        public Task<ResultDTO<WithdrawRequest>> AdminCancelRequest(Guid id);
+        public Task<ResultDTO<WithdrawRequest>> AdminCancelRequest(Guid id, string? note);
         public Task<ResultDTO<WithdrawRequest>> AdminApproveRequest(Guid id);
         Task<ResultDTO<string>> WalletWithdrawRequest(decimal amount);
     }

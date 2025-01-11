@@ -662,7 +662,7 @@ namespace Fun_Funding.Application.Services.EntityServices
             }
 
             List<MarketplaceProject> list = _unitOfWork.MarketplaceRepository.GetAll().ToList();
-            if (list.All(p => p.Name == request.Name))
+            if (list.Any(p => p.Name == request.Name))
             {
                 errorMessages.Add("Name cannot be duplicated.");
             }

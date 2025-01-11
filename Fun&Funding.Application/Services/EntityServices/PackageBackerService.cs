@@ -15,6 +15,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -236,7 +237,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                     .Include(pb => pb.Package)
                         .ThenInclude(p => p.RewardItems)
                     .Include(pb => pb.EvidenceImages)
-                    .Where(pb => pb.Package.Project.Id == projectId)
+                    .Where(pb => pb.Package.Project.Id == projectId && pb.Package.PackageTypes == PackageType.FixedPackage)
                     .Select(pb => new
                     {
                         pb.User.UserName,
@@ -281,6 +282,7 @@ namespace Fun_Funding.Application.Services.EntityServices
                 var listById = _unitOfWork.PackageBackerRepository.GetQueryable()
                     .Include(x => x.Package)
                         .ThenInclude(x => x.RewardItems)
+                    .Include(x => x.EvidenceImages)
                     .Include(x => x.User)
                     .Where(x => x.UserId == user.Id && x.Package.ProjectId == fundingProjectId)
                     .ToList();
@@ -309,6 +311,11 @@ namespace Fun_Funding.Application.Services.EntityServices
                         Quantity = reward.Quantity
                     }).ToList()
                     : null,
+                    EvidenceImages = x.EvidenceImages != null
+                    ? x.EvidenceImages.Select(evidence => new
+                    {
+                        Url = evidence.Url,
+                    }).ToList() : null,
                     Types = x.Package?.PackageTypes ?? null,
                     ProjectId = x.Package?.ProjectId,
                 }).ToList();
